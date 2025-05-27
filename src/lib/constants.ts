@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   backgroundAnimation: 'gradientFlow',
   mouseTrailEffectEnabled: false,
   showCoachMarks: true,
+  customSoundscapeUrls: {}, // Added default for custom URLs
 };
 
 // Note: 'name' properties are now translation keys
@@ -23,7 +24,15 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volumeAdjustment: -6 } },
   { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volumeAdjustment: -6 } },
   { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volumeAdjustment: -6 } },
-  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volumeAdjustment: -18 } },
+  { 
+    id: 'gentleRain', 
+    nameKey: 'soundscapes.gentleRain', 
+    type: 'noise', 
+    params: { 
+      type: 'pink', 
+      volumeAdjustment: -18, 
+    } 
+  },
   { 
     id: 'oceanWaves', 
     nameKey: 'soundscapes.oceanWaves', 
@@ -112,7 +121,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     }
   },
   {
-    id: 'lofiBeatSynth', // Renamed to avoid confusion with URL based
+    id: 'lofiBeatSynth',
     nameKey: 'soundscapes.lofiBeatSynth',
     type: 'patternLoop',
     params: {
@@ -150,7 +159,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     }
   },
   {
-    id: 'classicalExcerptSynth', // Renamed
+    id: 'classicalExcerptSynth', 
     nameKey: 'soundscapes.classicalExcerptSynth',
     type: 'patternLoop',
     params: {
@@ -178,7 +187,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     }
   },
   {
-    id: 'dreamyLullabySynth', // Renamed
+    id: 'dreamyLullabySynth', 
     nameKey: 'soundscapes.dreamyLullabySynth',
     type: 'patternLoop',
     params: {
@@ -224,13 +233,12 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
       }
     }
   },
-  // New URL-based soundscapes
   {
     id: 'lofiVibesUrl',
     nameKey: 'soundscapes.lofiVibesUrl',
     type: 'url',
     params: {
-      audioSrc: '/sounds/placeholder_lofi.mp3', // Replace with actual URL
+      audioSrc: '/sounds/placeholder_lofi.mp3', // User can override this in settings
       volumeAdjustment: 0,
     }
   },
@@ -239,7 +247,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     nameKey: 'soundscapes.smoothJazzUrl',
     type: 'url',
     params: {
-      audioSrc: '/sounds/placeholder_jazz.mp3', // Replace with actual URL
+      audioSrc: '/sounds/placeholder_jazz.mp3', // User can override this in settings
       volumeAdjustment: 0,
     }
   },
@@ -248,7 +256,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     nameKey: 'soundscapes.playfulTuneUrl',
     type: 'url',
     params: {
-      audioSrc: '/sounds/placeholder_child.mp3', // Replace with actual URL
+      audioSrc: '/sounds/placeholder_child.mp3', // User can override this in settings
       volumeAdjustment: 0,
     }
   },

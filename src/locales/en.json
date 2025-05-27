@@ -86,7 +86,11 @@
     "selectSoundscapePlaceholder": "Select soundscape",
     "volume": "Volume: {{percentage}}%",
     "backgroundAnimation": "Background Animation",
-    "selectAnimationPlaceholder": "Select animation"
+    "selectAnimationPlaceholder": "Select animation",
+    "customSoundscapeUrlsTitle": "Custom Soundscape URLs",
+    "customSoundscapeUrlsDescription": "For soundscapes ending with '(URL)', you can provide your own direct audio stream link (e.g., MP3 from a trusted source). Ensure links are publicly accessible.",
+    "urlLabelSuffix": "URL",
+    "customUrlPlaceholder": "Paste direct audio URL for {{soundscapeName}}"
   },
   "userGuideDialog": {
     "title": "RS Timer User Guide",
@@ -102,7 +106,7 @@
       },
       "customization": {
         "title": "Customization (Settings)",
-        "content": "Click the gear icon in the header to open Settings. You can customize:\\n* Timer Durations: Set custom lengths for Work, Short Break, and Long Break intervals.\\n* Long Break Interval: Define how many work sessions occur before a long break.\\n* Auto-start: Enable/disable automatic starting of breaks and Pomodoros.\\n* Notifications: Toggle browser notifications for interval ends.\\n* Soundscapes & Animations: Choose different ambient sounds for work/break periods, and select visual background effects. Adjust master volume.\\n* Mouse Trail Effect: Enable or disable a particle effect that follows your mouse.\\n* Initial Guide: Toggle the helpful guided tour that appears on first visit."
+        "content": "Click the gear icon in the header to open Settings. You can customize:\\n* Timer Durations: Set custom lengths for Work, Short Break, and Long Break intervals.\\n* Long Break Interval: Define how many work sessions occur before a long break.\\n* Auto-start: Enable/disable automatic starting of breaks and Pomodoros.\\n* Notifications: Toggle browser notifications for interval ends.\\n* Soundscapes & Animations: Choose different ambient sounds for work/break periods, and select visual background effects. Adjust master volume. For URL-based soundscapes, you can provide your own audio links.\\n* Mouse Trail Effect: Enable or disable a particle effect that follows your mouse.\\n* Initial Guide: Toggle the helpful guided tour that appears on first visit."
       },
       "collapsibleCards": {
         "title": "Collapsible Sections",
@@ -163,7 +167,7 @@
     "headerToolsTitle": "Header Tools",
     "headerToolsContent": "Access AI Summary (✨), Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
-    "settingsContent": "Customize timer durations, auto-start behavior, sounds, background animations, and more to fit your workflow.",
+    "settingsContent": "Customize timer durations, auto-start behavior, sounds (including custom URLs for some), background animations, and more to fit your workflow.",
     "allSetTitle": "You're All Set!",
     "allSetContent": "You've learned the basics of {{appName}}. Time to start your first focus session!"
   },

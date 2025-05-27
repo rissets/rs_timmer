@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation'; // usePathname added
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +63,7 @@ export default function PomodoroPage() {
   const { toast } = useToast();
   const { currentUser, loading: authLoading, logoutUser } = useAuth();
   const router = useRouter();
-  const pathname = usePathname(); // Get current path
+  const pathname = usePathname();
 
   const [currentNotes, setCurrentNotes] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -73,7 +73,7 @@ export default function PomodoroPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
-  
+
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
   const isMobile = useIsMobile();
@@ -87,6 +87,13 @@ export default function PomodoroPage() {
   const [isDefiningWord, setIsDefiningWord] = useState(false);
 
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
+
+  const soundscapePlayer = useSoundscapePlayer({
+    volume: settings.volume,
+    settings: settings,
+    isSettingsLoaded: isSettingsLoaded, // Pass isSettingsLoaded here
+  });
+
 
   useEffect(() => {
     if (!authLoading && !currentUser) {
@@ -133,7 +140,7 @@ export default function PomodoroPage() {
     },
     {
       title: t('interactiveTourDialog.dictionaryCardTitle'),
-      content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>, 
+      content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>,
     },
     {
       title: t('interactiveTourDialog.headerToolsTitle'),
@@ -151,7 +158,7 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (isSettingsLoaded && currentUser) { // Only show tour if logged in
+    if (isSettingsLoaded && currentUser) {
       const tourCompleted = localStorage.getItem(INTERACTIVE_TOUR_STORAGE_KEY);
       if (!tourCompleted && settings.showCoachMarks) {
         setIsInteractiveTourActive(true);
@@ -173,14 +180,12 @@ export default function PomodoroPage() {
     localStorage.setItem(INTERACTIVE_TOUR_STORAGE_KEY, "true");
   };
 
-  const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume });
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
-    // Decoupled soundscape from background animation - always use settings.
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
-  
+
   const getModeDisplayName = (mode: TimerMode) => {
     switch(mode) {
       case 'work': return t('timerModes.work');
@@ -199,11 +204,11 @@ export default function PomodoroPage() {
     setIsAiSummaryOpen(true);
     setAiSummary(null);
 
-    const sessionDetailsString = logForSummary.map(s => 
+    const sessionDetailsString = logForSummary.map(s =>
       `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? t('sessionHistoryDrawer.statusCompleted') : t('sessionHistoryDrawer.statusSkipped')})`
     ).join('\n');
-    
-    const tasksString = tasks.length > 0 
+
+    const tasksString = tasks.length > 0
       ? `${t('cards.tasksTitle')}:\n` + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
       : t('tasks.noTasks');
 
@@ -219,7 +224,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]); // Removed sessionLog from dependencies
+  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -227,16 +232,16 @@ export default function PomodoroPage() {
     if (lastSession) {
       addSessionToHistory(lastSession);
     }
-    
+
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-      if (endedMode === 'longBreak' && (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes)) { 
-         triggerAiSummary(sessionLogFromHook, currentSessionType); 
+      if (endedMode === 'longBreak' && (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes)) {
+         triggerAiSummary(sessionLogFromHook, currentSessionType);
       }
     }
   }, [settings.longBreakInterval, triggerAiSummary, tasks, currentNotes, currentSessionType]);
 
-  const timer = useTimerCore({ 
-    settings, 
+  const timer = useTimerCore({
+    settings,
     onIntervalEnd: handleIntervalEnd,
     onTimerStart: () => {},
     onTimerPause: () => {
@@ -248,13 +253,13 @@ export default function PomodoroPage() {
     onTimerSkip: () => {},
     getTranslatedText: t,
   });
-  
+
   useEffect(() => {
     if (!timer.isRunning || !isSettingsLoaded) {
       soundscapePlayer.stopSound();
       return;
     }
-    
+
     const soundId = getActiveSoundscapeId(timer.mode);
     if (soundId && soundId !== 'none') {
       soundscapePlayer.playSound(soundId);
@@ -264,9 +269,9 @@ export default function PomodoroPage() {
   }, [
     timer.mode,
     timer.isRunning,
-    soundscapePlayer, 
+    soundscapePlayer,
     isSettingsLoaded,
-    getActiveSoundscapeId 
+    getActiveSoundscapeId
   ]);
 
 
@@ -276,13 +281,13 @@ export default function PomodoroPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const currentModeDuration = 
+  const currentModeDuration =
     timer.mode === 'work' ? settings.workMinutes * 60 :
     timer.mode === 'shortBreak' ? settings.shortBreakMinutes * 60 :
     settings.longBreakMinutes * 60;
-  
+
   const progressPercentage = ((currentModeDuration - timer.timeLeft) / currentModeDuration) * 100;
-  
+
   const handleToggleMute = () => {
     setIsMuted(prevMuted => !prevMuted);
   };
@@ -303,7 +308,7 @@ export default function PomodoroPage() {
   const handleRemoveTask = (taskId: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
   };
-  
+
   const handleClearCompletedTasks = () => {
     setTasks(prevTasks => prevTasks.filter(task => !task.completed));
   };
@@ -330,7 +335,7 @@ export default function PomodoroPage() {
         }));
 
       const response = await chatWithAI({userInput: currentInput, history: genkitHistory});
-      
+
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
@@ -369,7 +374,7 @@ export default function PomodoroPage() {
         englishDefinition: engResult.definition,
         indonesianDefinition: indResult.definition,
       };
-      setDefinedWordsList(prev => [newEntry, ...prev]); 
+      setDefinedWordsList(prev => [newEntry, ...prev]);
     } catch (error: any) {
       console.error("Error defining word:", error);
       toast({
@@ -388,8 +393,8 @@ export default function PomodoroPage() {
       return;
     }
     const markdownContent = definedWordsList
-      .slice() 
-      .reverse() 
+      .slice()
+      .reverse()
       .map(entry => `## ${entry.word}\n\n**English:**\n${entry.englishDefinition}\n\n**Indonesian:**\n${entry.indonesianDefinition}\n\n---\n`)
       .join('\n');
 
@@ -411,24 +416,23 @@ export default function PomodoroPage() {
   };
 
 
-  if (authLoading || (!currentUser && pathname !== '/auth/login' && pathname !== '/auth/register' && pathname !== '/auth/forgot-password')) {
+  if (authLoading || (!currentUser && pathname !== '/auth/login' && pathname !== '/auth/register' && pathname !== '/auth/forgot-password') || !isSettingsLoaded) {
      return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
-   // If user is authenticated but on an auth page, redirect to home
+
   if (!authLoading && currentUser && (pathname === '/auth/login' || pathname === '/auth/register' || pathname === '/auth/forgot-password')) {
     router.push('/');
-    return ( // Render loading spinner during redirection
+    return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // If no user and not an auth page, redirect to login (already handled by first condition, but good to be explicit if structure changes)
   if (!authLoading && !currentUser && !pathname.startsWith('/auth')) {
      router.push('/auth/login');
      return (
@@ -437,7 +441,7 @@ export default function PomodoroPage() {
       </div>
     );
   }
-  
+
   const pomodoroDots = Array(settings.longBreakInterval).fill(0).map((_, i) => (
     <span
       key={i}
@@ -461,8 +465,8 @@ export default function PomodoroPage() {
         {settings.backgroundAnimation === 'snow' && <SnowEffect />}
         {settings.backgroundAnimation === 'starfield' && <StarfieldEffect />}
         {settings.backgroundAnimation === 'bubbles' && <FloatingBubblesEffect />}
-        {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />} 
-        
+        {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />}
+
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           {isMobile ? (
             <h1 className="text-xl font-semibold animate-title-reveal">{APP_NAME}</h1>
@@ -503,10 +507,10 @@ export default function PomodoroPage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center space-y-8">
               <div className="relative w-48 h-48 sm:w-60 sm:h-60" role="timer" aria-live="assertive">
-                <Progress 
-                  value={progressPercentage} 
-                  className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" 
-                  indicatorClassName="bg-primary!" 
+                <Progress
+                  value={progressPercentage}
+                  className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30"
+                  indicatorClassName="bg-primary!"
                   style={{clipPath: 'circle(50% at 50% 50%)'}} />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-5xl sm:text-7xl font-mono font-bold text-foreground tabular-nums">
@@ -516,8 +520,8 @@ export default function PomodoroPage() {
               </div>
 
               <div className="flex space-x-3">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   onClick={timer.isRunning ? timer.pauseTimer : timer.startTimer}
                   className="w-32 bg-primary hover:bg-primary/90 text-primary-foreground"
                   aria-label={timer.isRunning ? t('buttons.pause') : t('buttons.start')}
@@ -538,9 +542,9 @@ export default function PomodoroPage() {
             </CardContent>
           </Card>
 
-          <Accordion 
-            type="multiple" 
-            className="w-full space-y-4" 
+          <Accordion
+            type="multiple"
+            className="w-full space-y-4"
             value={openAccordionItems}
             onValueChange={setOpenAccordionItems}
           >
@@ -548,8 +552,8 @@ export default function PomodoroPage() {
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
               </AccordionTrigger>
-              <AccordionContent className="px-0"> 
-                <SimpleTaskList 
+              <AccordionContent className="px-0">
+                <SimpleTaskList
                   tasks={tasks}
                   onAddTask={handleAddTask}
                   onToggleTask={handleToggleTask}
@@ -561,7 +565,7 @@ export default function PomodoroPage() {
 
             <AccordionItem value="dictionary" className="border rounded-lg shadow-lg bg-card overflow-hidden">
                <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <DictionaryCard.Title /> 
+                  <DictionaryCard.Title />
                </AccordionTrigger>
                <AccordionContent className="px-0">
                   <DictionaryCard.Content
@@ -605,13 +609,13 @@ export default function PomodoroPage() {
                       onChange={(e) => setCurrentNotes(e.target.value)}
                       className="min-h-[100px] focus:ring-accent"
                     />
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         className="mt-3"
                         onClick={() => triggerAiSummary(
                           timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
                           currentSessionType
-                        )} 
+                        )}
                         disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
                         title={t('tooltips.analyzeCurrentData')}
                       >
@@ -624,14 +628,14 @@ export default function PomodoroPage() {
 
         </main>
 
-        <AiSummaryDialog 
-          summaryData={aiSummary} 
-          isOpen={isAiSummaryOpen} 
+        <AiSummaryDialog
+          summaryData={aiSummary}
+          isOpen={isAiSummaryOpen}
           onOpenChange={setIsAiSummaryOpen}
           isLoading={isAiLoading}
         />
 
-        <UserGuideDialog 
+        <UserGuideDialog
             isOpen={isUserGuideOpen}
             onOpenChange={setIsUserGuideOpen}
         />
@@ -655,7 +659,7 @@ export default function PomodoroPage() {
           onSendMessage={handleSendChatMessage}
           isLoadingAiResponse={isAiChatLoading}
         />
-        
+
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
           <p>{t('footerCopyright', { year: new Date().getFullYear().toString(), appName: APP_NAME })}</p>
         </footer>
@@ -663,4 +667,3 @@ export default function PomodoroPage() {
     </>
   );
 }
-

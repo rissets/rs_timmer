@@ -36,9 +36,10 @@ import { Slider } from "@/components/ui/slider";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import type { Settings, BackgroundAnimationType } from "@/lib/types";
-import { Settings as SettingsIcon, HelpCircle } from "lucide-react";
+import { Settings as SettingsIcon, HelpCircle, Music4 } from "lucide-react"; // Added Music4 icon
 import React from "react";
-import { useLanguageContext } from "@/contexts/language-context"; // Added
+import { useLanguageContext } from "@/contexts/language-context"; 
+import { Separator } from "@/components/ui/separator";
 
 const settingsSchema = z.object({
   workMinutes: z.coerce.number().min(1).max(120),
@@ -56,13 +57,16 @@ const settingsSchema = z.object({
   ).default(DEFAULT_SETTINGS.backgroundAnimation),
   mouseTrailEffectEnabled: z.boolean().default(DEFAULT_SETTINGS.mouseTrailEffectEnabled),
   showCoachMarks: z.boolean().default(DEFAULT_SETTINGS.showCoachMarks),
+  customSoundscapeUrls: z.record(
+    z.string().url({ message: "Please enter a valid URL (e.g., https://...)" }).optional().or(z.literal(""))
+  ).optional().default({}), // Added for custom URLs
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export function SettingsDialog() {
   const { settings, setSettings, isSettingsLoaded } = useSettingsContext();
-  const { t } = useLanguageContext(); // Added
+  const { t } = useLanguageContext(); 
   const [isOpen, setIsOpen] = React.useState(false);
 
   const form = useForm<SettingsFormValues>({
@@ -70,6 +74,10 @@ export function SettingsDialog() {
     defaultValues: {
         ...DEFAULT_SETTINGS,
         ...settings,
+        customSoundscapeUrls: { // Ensure this is initialized correctly
+          ...(DEFAULT_SETTINGS.customSoundscapeUrls || {}),
+          ...(settings.customSoundscapeUrls || {}),
+        }
       },
   });
 
@@ -78,12 +86,24 @@ export function SettingsDialog() {
       form.reset({
         ...DEFAULT_SETTINGS,
         ...settings,
+         customSoundscapeUrls: {
+          ...(DEFAULT_SETTINGS.customSoundscapeUrls || {}),
+          ...(settings.customSoundscapeUrls || {}),
+        }
       });
     }
   }, [settings, form, isSettingsLoaded]);
 
   function onSubmit(data: SettingsFormValues) {
-    setSettings(data as Settings);
+    // Ensure customSoundscapeUrls only contains entries for actual URL-type soundscapes
+    const validatedCustomUrls: Record<string, string> = {};
+    SOUNDSCAPE_OPTIONS.forEach(opt => {
+      if (opt.type === 'url' && data.customSoundscapeUrls && data.customSoundscapeUrls[opt.id]) {
+        validatedCustomUrls[opt.id] = data.customSoundscapeUrls[opt.id] as string;
+      }
+    });
+    
+    setSettings({ ...data, customSoundscapeUrls: validatedCustomUrls });
     setIsOpen(false);
   }
 
@@ -347,6 +367,40 @@ export function SettingsDialog() {
                 </FormItem>
               )}
             />
+
+            {/* Custom Soundscape URLs Section */}
+            <div className="space-y-4 pt-4">
+              <Separator />
+              <div className="flex items-center space-x-2 pt-2">
+                <Music4 className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-medium">{t('settingsDialog.customSoundscapeUrlsTitle')}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t('settingsDialog.customSoundscapeUrlsDescription')}
+              </p>
+              {SOUNDSCAPE_OPTIONS.filter(opt => opt.type === 'url').map(option => (
+                <FormField
+                  key={option.id}
+                  control={form.control}
+                  name={`customSoundscapeUrls.${option.id}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t(option.nameKey)} {t('settingsDialog.urlLabelSuffix')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t('settingsDialog.customUrlPlaceholder', { soundscapeName: t(option.nameKey) })}
+                          {...field}
+                          value={field.value || ''} // Ensure controlled component from potentially undefined value
+                        />
+                      </FormControl>
+                      <FormMessage /> {/* For URL validation errors */}
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+
+
             <DialogFooter>
               <Button type="submit">{t('buttons.saveChanges')}</Button>
             </DialogFooter>

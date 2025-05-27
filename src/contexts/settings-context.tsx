@@ -20,11 +20,19 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const storedSettings = localStorage.getItem("zenith-timer-settings");
+      const storedSettings = localStorage.getItem("rs-timer-settings"); // Updated key prefix
       if (storedSettings) {
         const parsedSettings = JSON.parse(storedSettings);
-        // Merge with defaults to ensure all keys are present
-        setSettings(prev => ({ ...DEFAULT_SETTINGS, ...prev, ...parsedSettings }));
+        // Merge with defaults to ensure all keys are present, especially new ones like customSoundscapeUrls
+        setSettings(prev => ({ 
+          ...DEFAULT_SETTINGS, 
+          ...prev, // Keep existing values if any
+          ...parsedSettings,
+          customSoundscapeUrls: { // Ensure customSoundscapeUrls is an object
+            ...(DEFAULT_SETTINGS.customSoundscapeUrls || {}),
+            ...(parsedSettings.customSoundscapeUrls || {})
+          } 
+        }));
       } else {
         setSettings(DEFAULT_SETTINGS);
       }
@@ -38,7 +46,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isSettingsLoaded) { 
         try {
-            localStorage.setItem("zenith-timer-settings", JSON.stringify(settings));
+            localStorage.setItem("rs-timer-settings", JSON.stringify(settings)); // Updated key prefix
         } catch (error) {
             console.error("Failed to save settings to localStorage:", error);
         }

@@ -86,7 +86,11 @@
     "selectSoundscapePlaceholder": "Pilih suara latar",
     "volume": "Volume: {{percentage}}%",
     "backgroundAnimation": "Animasi Latar Belakang",
-    "selectAnimationPlaceholder": "Pilih animasi"
+    "selectAnimationPlaceholder": "Pilih animasi",
+    "customSoundscapeUrlsTitle": "URL Suara Latar Kustom",
+    "customSoundscapeUrlsDescription": "Untuk suara latar yang diakhiri dengan '(URL)', Anda dapat memberikan tautan streaming audio langsung Anda sendiri (misalnya, MP3 dari sumber tepercaya). Pastikan tautan dapat diakses publik.",
+    "urlLabelSuffix": "URL",
+    "customUrlPlaceholder": "Tempel URL audio langsung untuk {{soundscapeName}}"
   },
   "userGuideDialog": {
     "title": "Panduan Pengguna {{appName}}",
@@ -102,7 +106,7 @@
       },
       "customization": {
         "title": "Kustomisasi (Pengaturan)",
-        "content": "Klik ikon roda gigi di header untuk membuka Pengaturan. Anda dapat menyesuaikan:\\n* Durasi Timer: Atur durasi khusus untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang.\\n* Interval Istirahat Panjang: Tentukan berapa banyak sesi kerja yang terjadi sebelum istirahat panjang.\\n* Mulai Otomatis: Aktifkan/nonaktifkan memulai istirahat dan Pomodoro secara otomatis.\\n* Notifikasi: Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara Latar & Animasi: Pilih suara sekitar yang berbeda untuk periode kerja/istirahat, dan pilih efek latar belakang visual. Sesuaikan volume utama.\\n* Efek Jejak Mouse: Aktifkan atau nonaktifkan efek partikel yang mengikuti mouse Anda.\\n* Panduan Awal: Aktifkan/nonaktifkan tur panduan bermanfaat yang muncul pada kunjungan pertama."
+        "content": "Klik ikon roda gigi di header untuk membuka Pengaturan. Anda dapat menyesuaikan:\\n* Durasi Timer: Atur durasi khusus untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang.\\n* Interval Istirahat Panjang: Tentukan berapa banyak sesi kerja yang terjadi sebelum istirahat panjang.\\n* Mulai Otomatis: Aktifkan/nonaktifkan memulai istirahat dan Pomodoro secara otomatis.\\n* Notifikasi: Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara Latar & Animasi: Pilih suara sekitar yang berbeda untuk periode kerja/istirahat, dan pilih efek latar belakang visual. Sesuaikan volume utama. Untuk suara latar berbasis URL, Anda dapat menyediakan tautan audio Anda sendiri.\\n* Efek Jejak Mouse: Aktifkan atau nonaktifkan efek partikel yang mengikuti mouse Anda.\\n* Panduan Awal: Aktifkan/nonaktifkan tur panduan bermanfaat yang muncul pada kunjungan pertama."
       },
       "collapsibleCards": {
         "title": "Bagian yang Dapat Dilipat",
@@ -163,7 +167,7 @@
     "headerToolsTitle": "Alat Header",
     "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
-    "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara, animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda.",
+    "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara (termasuk URL kustom untuk beberapa), animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda.",
     "allSetTitle": "Anda Sudah Siap!",
     "allSetContent": "Anda telah mempelajari dasar-dasar {{appName}}. Saatnya memulai sesi fokus pertama Anda!"
   },

@@ -17,6 +17,7 @@ export interface Settings {
   backgroundAnimation: BackgroundAnimationType;
   mouseTrailEffectEnabled: boolean;
   showCoachMarks: boolean;
+  customSoundscapeUrls: Record<string, string>; // Added for custom URLs
 }
 
 export interface SessionRecord {
@@ -55,7 +56,7 @@ export interface SoundscapeOption {
     bpm?: number;
     instruments?: any[];
     effects?: any;
-    audioSrc?: string; // Added for 'url' type
+    audioSrc?: string; // For 'url' type - can be default or placeholder
     sequence?: any[]; // Ensure sequence is part of params if used by patternLoop
     subdivision?: string; // Ensure subdivision is part of params if used by patternLoop
     duration?: string; // Ensure duration is part of params if used by patternLoop
