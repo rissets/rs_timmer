@@ -39,6 +39,7 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
 
   const activePatternElements = useRef<ActivePatternElements>({ synths: [], sequences: [], parts: [], effects: [] });
   const activePlayerType = useRef<'noise' | 'tone' | 'polysynth' | 'binaural' | 'patternLoop' | null>(null);
+  const lastPlayedSoundscapeIdRef = useRef<string | undefined>(undefined);
 
   const cleanupPattern = useCallback(() => {
     Tone.Transport.stop();
@@ -107,6 +108,7 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
       
       cleanupPattern();
       activePlayerType.current = null;
+      lastPlayedSoundscapeIdRef.current = undefined;
     };
   }, [cleanupPattern]);
 
@@ -128,26 +130,41 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
       cleanupPattern();
     }
     setIsPlaying(false);
-    // Do not reset activePlayerType.current here, playSound will set it.
+    // lastPlayedSoundscapeIdRef.current is not reset here intentionally, 
+    // playSound will set it or clear it. If stopSound is called externally,
+    // isPlaying becomes false, and the volume effect won't try to use an outdated ID.
   }, [cleanupPattern]);
 
   const playSound = useCallback(async (soundscapeId?: string) => {
-    if (!isReady || !soundscapeId || soundscapeId === 'none') {
+    if (!isReady) {
+      console.warn("Sound player not ready yet.");
+      return;
+    }
+    if (!soundscapeId || soundscapeId === 'none') {
       stopSound();
       activePlayerType.current = null;
+      lastPlayedSoundscapeIdRef.current = undefined;
       return;
     }
 
     const selectedSoundscape = SOUNDSCAPE_OPTIONS.find(s => s.id === soundscapeId);
     if (!selectedSoundscape) {
+      console.warn(`Soundscape with id ${soundscapeId} not found.`);
       stopSound();
       activePlayerType.current = null;
+      lastPlayedSoundscapeIdRef.current = undefined;
       return;
     }
     
     if (Tone.context.state !== 'running') {
-        await Tone.start();
-        console.log("AudioContext started by playSound");
+        try {
+          await Tone.start();
+          console.log("AudioContext started by playSound");
+        } catch (e) {
+          console.error("Failed to start AudioContext in playSound:", e);
+          setIsReady(false); // Potentially set to not ready if Tone.start fails.
+          return;
+        }
     }
 
     stopSound(); // Stop any currently playing sound before starting a new one
@@ -155,6 +172,8 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
     const baseGainValue = Tone.gainToDb(volume * 0.5); 
     const soundscapeVolumeAdjustment = selectedSoundscape.params?.volumeAdjustment || selectedSoundscape.params?.volume || 0;
     const finalGainValue = baseGainValue + soundscapeVolumeAdjustment;
+
+    lastPlayedSoundscapeIdRef.current = soundscapeId; // Set the current soundscape ID
 
     switch (selectedSoundscape.type) {
       case 'noise':
@@ -215,9 +234,9 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         setIsPlaying(true);
         break;
       case 'patternLoop':
-        const { bpm, instruments, effects: patternEffectsParams, volumeAdjustment: patternVolAdj } = selectedSoundscape.params;
+        const { bpm, instruments, effects: patternEffectsParams } = selectedSoundscape.params;
         
-        const patternMasterVol = new Tone.Volume(0).toDestination(); // Initial volume set by effect update
+        const patternMasterVol = new Tone.Volume(finalGainValue).toDestination();
         activePatternElements.current.effects.push(patternMasterVol);
         activePatternElements.current.masterVolumeNode = patternMasterVol;
 
@@ -233,7 +252,7 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
               synth = new Tone.NoiseSynth(instrument.synthOptions);
               break;
             case 'PolySynth':
-            default: // Default to PolySynth or handle other specific types
+            default:
               // @ts-ignore PolySynth can take specific synth type as first arg
               synth = new Tone.PolySynth(Tone.Synth, instrument.synthOptions); 
               break;
@@ -241,12 +260,12 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
           synth.connect(patternMasterVol);
           activePatternElements.current.synths.push(synth);
 
-          if (instrument.pattern && instrument.subdivision) { // For rhythmic patterns like drums
+          if (instrument.pattern && instrument.subdivision) {
             const seq = new Tone.Sequence((time, note) => {
               if (note) synth.triggerAttackRelease(note, instrument.duration || '8n', time);
             }, instrument.pattern, instrument.subdivision).start(0);
             activePatternElements.current.sequences.push(seq);
-          } else if (instrument.sequence) { // For melodic/chordal parts
+          } else if (instrument.sequence) {
             const part = new Tone.Part((time, value) => {
               synth.triggerAttackRelease(value.notes, value.duration, time);
             }, instrument.sequence).start(0);
@@ -255,25 +274,11 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         });
         
         if (patternEffectsParams?.reverb) {
-          const reverb = new Tone.Reverb(patternEffectsParams.reverb).connect(patternMasterVol);
-          // Connect synths to reverb IF reverb is meant to be an insert for all, or handle selectively
-          // For simplicity, let's assume it's a send effect, or master effect.
-          // If synths are already connected to patternMasterVol, and reverb is also connected to patternMasterVol,
-          // reverb needs to be placed before patternMasterVol in chain for synths, or use a send/return.
-          // Simpler: make patternMasterVol connect to Reverb, then Reverb to Destination.
-          // This requires re-routing patternMasterVol if reverb is active.
-          // For now, this simple reverb just adds to the output.
-          // A better setup: synths -> patternMasterVol -> (optional reverb) -> Destination
-          // Let's make reverb connect to destination and synths to it IF reverb exists
-           // This means synths need to connect to reverb if it exists, else patternMasterVol.
-           // For now, let's keep it simple: reverb is an additional effect on master.
-           // This might not be ideal. A dedicated effects chain per pattern would be better.
-           // Let's assume reverb is a final effect for now.
-           // This means patternMasterVol outputs to reverb, and reverb to destination
            if(activePatternElements.current.masterVolumeNode){
+                const reverb = new Tone.Reverb(patternEffectsParams.reverb);
                 activePatternElements.current.masterVolumeNode.disconnect(Tone.Destination);
                 activePatternElements.current.masterVolumeNode.connect(reverb);
-                reverb.toDestination(); // Reverb now goes to destination
+                reverb.toDestination();
                 activePatternElements.current.effects.push(reverb);
            }
         }
@@ -285,42 +290,20 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
       default:
         console.warn(`Soundscape type '${selectedSoundscape.type}' not implemented or 'off'.`);
         activePlayerType.current = null;
+        lastPlayedSoundscapeIdRef.current = undefined;
         setIsPlaying(false);
-    }
-    // Trigger volume update for the new sound
-    if (isReady) {
-        const currentSound = SOUNDSCAPE_OPTIONS.find(s => s.id === soundscapeId);
-        const soundscapeVolAdj = currentSound?.params?.volumeAdjustment || currentSound?.params?.volume || 0;
-        const baseGain = Tone.gainToDb(volume * 0.5);
-        const finalGain = baseGain + soundscapeVolAdj;
-
-        if (activePlayerType.current === 'noise' && noisePlayer.current) noisePlayer.current.volume.value = finalGain;
-        else if (activePlayerType.current === 'tone' && tonePlayer.current) tonePlayer.current.volume.value = finalGain;
-        else if (activePlayerType.current === 'polysynth' && polySynthPlayer.current) polySynthPlayer.current.volume.value = finalGain;
-        else if (activePlayerType.current === 'binaural' && tonePlayerLeft.current && tonePlayerRight.current) {
-            tonePlayerLeft.current.volume.value = finalGain;
-            tonePlayerRight.current.volume.value = finalGain;
-        } else if (activePlayerType.current === 'patternLoop' && activePatternElements.current.masterVolumeNode) {
-            activePatternElements.current.masterVolumeNode.volume.value = finalGain;
-        }
     }
 
   }, [isReady, volume, stopSound, cleanupPattern]);
   
   useEffect(() => {
-    if (isPlaying && isReady) {
-        const currentSoundscapeId = SOUNDSCAPE_OPTIONS.find(s => {
-            if (activePlayerType.current === 'noise' && s.type === 'noise' && noisePlayer.current && s.params.type === noisePlayer.current.type) return true;
-            if (activePlayerType.current === 'tone' && s.type === 'tone' && tonePlayer.current && !s.params.notes && s.params.frequency === tonePlayer.current.frequency.value) return true;
-            if (activePlayerType.current === 'polysynth' && s.type === 'tone' && polySynthPlayer.current && s.params.notes && JSON.stringify(s.params.notes) === JSON.stringify(polySynthPlayer.current.get().voices.map((v: any) => v.frequency.value))) return true; // More complex check
-            if (activePlayerType.current === 'binaural' && s.type === 'binaural') return true;
-            if (activePlayerType.current === 'patternLoop' && s.type === 'patternLoop') return true; // General check for pattern loop
-            return false;
-        })?.id;
-
+    if (isPlaying && isReady && lastPlayedSoundscapeIdRef.current) {
+      const currentSoundscapeId = lastPlayedSoundscapeIdRef.current;
       const selectedSound = SOUNDSCAPE_OPTIONS.find(s => s.id === currentSoundscapeId);
-      const soundscapeVolAdj = selectedSound?.params?.volumeAdjustment || selectedSound?.params?.volume || 0;
+      
+      if (!selectedSound) return;
 
+      const soundscapeVolAdj = selectedSound.params?.volumeAdjustment || selectedSound.params?.volume || 0;
       const baseGainValue = Tone.gainToDb(volume * 0.5);
       const finalGain = baseGainValue + soundscapeVolAdj;
 
@@ -337,7 +320,7 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         activePatternElements.current.masterVolumeNode.volume.value = finalGain;
       }
     }
-  }, [volume, isPlaying, isReady]);
+  }, [volume, isPlaying, isReady]); // lastPlayedSoundscapeIdRef is a ref, so not needed in dep array
 
   return { playSound, stopSound, isReady, isPlaying };
 }
