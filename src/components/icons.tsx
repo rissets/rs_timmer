@@ -1,29 +1,37 @@
 
 import type { SVGProps } from 'react';
-import { Focus } from 'lucide-react'; // Import the Focus icon
 
-// Use the Focus icon as the LogoIcon
+// Custom SVG "RS" Logo
 export const LogoIcon = (props: SVGProps<SVGSVGElement>) => (
-  <Focus {...props} />
-);
-
-// Example of a custom SVG icon if needed:
-/*
-export const MyCustomIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
+    viewBox="0 0 100 100" // Adjusted viewBox for better text rendering
+    fill="currentColor"
     stroke="currentColor"
     strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
     {...props}
   >
-    <path d="M12 2 L2 7 L12 12 L22 7 Z" />
-    <path d="M2 17 L12 22 L22 17" />
-    <path d="M2 12 L12 17 L22 12" />
+    {/* Transparent rect to enforce viewBox if no size given, not strictly necessary with text */}
+    {/* <rect width="100" height="100" fill="transparent" /> */}
+    <text
+      x="50%"
+      y="50%"
+      dominantBaseline="middle"
+      textAnchor="middle"
+      fontSize="60" // Adjusted font size
+      fontWeight="bold"
+      fontFamily="var(--font-geist-sans), Arial, sans-serif" // Use app's font
+      stroke="none" // Text should not have an outline by default unless desired
+    >
+      RS
+    </text>
   </svg>
 );
-*/
 
+// Example of keeping another icon if needed:
+/*
+import { Focus } from 'lucide-react';
+export const AnotherIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Focus {...props} />
+);
+*/
