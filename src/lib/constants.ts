@@ -1,5 +1,5 @@
 
-import type { Settings, SoundscapeOption, BackgroundAnimationOption, SessionType, SelectOptionWithTranslation } from '@/lib/types';
+import type { Settings, SoundscapeOption, BackgroundAnimationOption, SessionType } from '@/lib/types';
 
 export const DEFAULT_SETTINGS: Settings = {
   workMinutes: 25,
@@ -15,11 +15,11 @@ export const DEFAULT_SETTINGS: Settings = {
   backgroundAnimation: 'gradientFlow',
   mouseTrailEffectEnabled: false,
   showCoachMarks: true,
-  customSoundscapeUrls: {}, // Added default for custom URLs
+  // customSoundscapeUrls: {}, // Removed
 };
 
 // Note: 'name' properties are now translation keys
-export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
+export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   { id: 'none', nameKey: 'soundscapes.none', type: 'noise', params: { type: 'off' } },
   { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volumeAdjustment: -6 } },
   { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volumeAdjustment: -6 } },
@@ -40,9 +40,9 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     params: { 
       volumeAdjustment: -12,
       autoFilter: {
-        frequency: "2m", // Speed of the filter sweep (LFO of AutoFilter)
-        baseFrequency: 200, // Starting frequency of the filter
-        octaves: 4, // Range of the filter sweep in octaves
+        frequency: "2m",
+        baseFrequency: 200,
+        octaves: 4,
         filter: { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 },
       }
     } 
@@ -233,36 +233,37 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
       }
     }
   },
-  {
-    id: 'lofiVibesUrl',
-    nameKey: 'soundscapes.lofiVibesUrl',
-    type: 'url',
-    params: {
-      audioSrc: '/sounds/placeholder_lofi.mp3', // User can override this in settings
-      volumeAdjustment: 0,
-    }
-  },
-  {
-    id: 'smoothJazzUrl',
-    nameKey: 'soundscapes.smoothJazzUrl',
-    type: 'url',
-    params: {
-      audioSrc: '/sounds/placeholder_jazz.mp3', // User can override this in settings
-      volumeAdjustment: 0,
-    }
-  },
-  {
-    id: 'playfulTuneUrl',
-    nameKey: 'soundscapes.playfulTuneUrl',
-    type: 'url',
-    params: {
-      audioSrc: '/sounds/placeholder_child.mp3', // User can override this in settings
-      volumeAdjustment: 0,
-    }
-  },
+  // URL-based soundscapes removed as per user request to switch to uploads
+  // {
+  //   id: 'lofiVibesUrl',
+  //   nameKey: 'soundscapes.lofiVibesUrl',
+  //   type: 'url', // This type will be handled differently by the player
+  //   params: {
+  //     audioSrc: '/sounds/placeholder_lofi.mp3', // Placeholder, user will override in settings
+  //     volumeAdjustment: 0,
+  //   }
+  // },
+  // {
+  //   id: 'smoothJazzUrl',
+  //   nameKey: 'soundscapes.smoothJazzUrl',
+  //   type: 'url',
+  //   params: {
+  //     audioSrc: '/sounds/placeholder_jazz.mp3',
+  //     volumeAdjustment: 0,
+  //   }
+  // },
+  // {
+  //   id: 'playfulTuneUrl',
+  //   nameKey: 'soundscapes.playfulTuneUrl',
+  //   type: 'url',
+  //   params: {
+  //     audioSrc: '/sounds/placeholder_child.mp3',
+  //     volumeAdjustment: 0,
+  //   }
+  // },
 ];
 
-export const BACKGROUND_ANIMATION_OPTIONS: SelectOptionWithTranslation[] = [
+export const BACKGROUND_ANIMATION_OPTIONS: BackgroundAnimationOption[] = [
   { id: 'none', nameKey: 'backgroundAnimations.none' },
   { id: 'gradientFlow', nameKey: 'backgroundAnimations.gradientFlow' },
   { id: 'rain', nameKey: 'backgroundAnimations.rain' },

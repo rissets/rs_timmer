@@ -35,11 +35,13 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
-import type { Settings, BackgroundAnimationType } from "@/lib/types";
-import { Settings as SettingsIcon, HelpCircle, Music4 } from "lucide-react"; // Added Music4 icon
-import React from "react";
+import type { Settings, BackgroundAnimationType, UserSoundscapeListItem } from "@/lib/types";
+import { Settings as SettingsIcon, HelpCircle, Music4, UploadCloud, ListMusic, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useLanguageContext } from "@/contexts/language-context"; 
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { addSoundscape, getAllSoundscapeListItems, deleteSoundscape as deleteSoundscapeFromDB, getSoundscape } from "@/lib/audio-storage"; // Added
 
 const settingsSchema = z.object({
   workMinutes: z.coerce.number().min(1).max(120),
@@ -57,9 +59,7 @@ const settingsSchema = z.object({
   ).default(DEFAULT_SETTINGS.backgroundAnimation),
   mouseTrailEffectEnabled: z.boolean().default(DEFAULT_SETTINGS.mouseTrailEffectEnabled),
   showCoachMarks: z.boolean().default(DEFAULT_SETTINGS.showCoachMarks),
-  customSoundscapeUrls: z.record(
-    z.string().url({ message: "Please enter a valid URL (e.g., https://...)" }).optional().or(z.literal(""))
-  ).optional().default({}), // Added for custom URLs
+  // customSoundscapeUrls removed
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -67,43 +67,105 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 export function SettingsDialog() {
   const { settings, setSettings, isSettingsLoaded } = useSettingsContext();
   const { t } = useLanguageContext(); 
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [userSoundscapes, setUserSoundscapes] = useState<UserSoundscapeListItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [combinedSoundscapeOptions, setCombinedSoundscapeOptions] = useState(SOUNDSCAPE_OPTIONS);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
         ...DEFAULT_SETTINGS,
         ...settings,
-        customSoundscapeUrls: { // Ensure this is initialized correctly
-          ...(DEFAULT_SETTINGS.customSoundscapeUrls || {}),
-          ...(settings.customSoundscapeUrls || {}),
-        }
       },
   });
 
-  React.useEffect(() => {
+  const loadUserSoundscapes = async () => {
+    try {
+      const items = await getAllSoundscapeListItems();
+      setUserSoundscapes(items);
+    } catch (error) {
+      console.error("Failed to load user soundscapes:", error);
+      toast({ title: t('settingsDialog.errors.loadUserSoundscapesFailed'), variant: "destructive" });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadUserSoundscapes();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (isSettingsLoaded) {
       form.reset({
         ...DEFAULT_SETTINGS,
         ...settings,
-         customSoundscapeUrls: {
-          ...(DEFAULT_SETTINGS.customSoundscapeUrls || {}),
-          ...(settings.customSoundscapeUrls || {}),
-        }
       });
     }
   }, [settings, form, isSettingsLoaded]);
+  
+  useEffect(() => {
+    const userOptions: SoundscapeOption[] = userSoundscapes.map(us => ({
+      id: `user_${us.id}`, // Prefix to distinguish from predefined
+      nameKey: us.name, // For user sounds, nameKey is the actual name
+      type: 'userUploaded',
+      params: { indexedDbId: us.id }
+    }));
+    setCombinedSoundscapeOptions([...SOUNDSCAPE_OPTIONS, ...userOptions]);
+  }, [userSoundscapes]);
+
+
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+      toast({ title: t('settingsDialog.errors.invalidFileType'), variant: "destructive" });
+      return;
+    }
+    // Basic size check (e.g., 10MB) - can be adjusted
+    if (file.size > 10 * 1024 * 1024) {
+        toast({ title: t('settingsDialog.errors.fileTooLarge'), variant: "destructive" });
+        return;
+    }
+
+    setIsUploading(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      await addSoundscape(file.name, file.type, arrayBuffer);
+      toast({ title: t('settingsDialog.uploadSuccessTitle') });
+      await loadUserSoundscapes(); // Refresh the list
+    } catch (error: any) {
+      console.error("Error uploading soundscape:", error);
+      toast({ title: t('settingsDialog.errors.uploadFailed'), description: error?.message, variant: "destructive" });
+    } finally {
+      setIsUploading(false);
+      event.target.value = ''; // Reset file input
+    }
+  }
+
+  async function handleDeleteUserSoundscape(id: number, name: string) {
+    if (!confirm(t('settingsDialog.confirmDeleteSoundscape', { name }))) return;
+    try {
+      // Check if this soundscape is currently selected in settings
+      if (settings.soundscapeWork === `user_${id}` || settings.soundscapeBreak === `user_${id}`) {
+        toast({ title: t('settingsDialog.errors.soundscapeInUseTitle'), description: t('settingsDialog.errors.soundscapeInUseDescription'), variant: "destructive" });
+        return;
+      }
+      await deleteSoundscapeFromDB(id);
+      toast({ title: t('settingsDialog.deleteSuccessTitle', { name }) });
+      await loadUserSoundscapes();
+    } catch (error) {
+      console.error("Error deleting soundscape:", error);
+      toast({ title: t('settingsDialog.errors.deleteFailed'), variant: "destructive" });
+    }
+  }
+
 
   function onSubmit(data: SettingsFormValues) {
-    // Ensure customSoundscapeUrls only contains entries for actual URL-type soundscapes
-    const validatedCustomUrls: Record<string, string> = {};
-    SOUNDSCAPE_OPTIONS.forEach(opt => {
-      if (opt.type === 'url' && data.customSoundscapeUrls && data.customSoundscapeUrls[opt.id]) {
-        validatedCustomUrls[opt.id] = data.customSoundscapeUrls[opt.id] as string;
-      }
-    });
-    
-    setSettings({ ...data, customSoundscapeUrls: validatedCustomUrls });
+    setSettings(data);
     setIsOpen(false);
   }
 
@@ -289,15 +351,17 @@ export function SettingsDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('settingsDialog.soundscapeWork')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}> {/* Ensure value is passed */}
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t('settingsDialog.selectSoundscapePlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {SOUNDSCAPE_OPTIONS.map(opt => (
-                        <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
+                      {combinedSoundscapeOptions.map(opt => (
+                        <SelectItem key={opt.id} value={opt.id}>
+                          {opt.type === 'userUploaded' ? opt.nameKey : t(opt.nameKey)}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -311,15 +375,17 @@ export function SettingsDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('settingsDialog.soundscapeBreak')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}> {/* Ensure value is passed */}
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t('settingsDialog.selectSoundscapePlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {SOUNDSCAPE_OPTIONS.map(opt => (
-                        <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
+                      {combinedSoundscapeOptions.map(opt => (
+                        <SelectItem key={opt.id} value={opt.id}>
+                          {opt.type === 'userUploaded' ? opt.nameKey : t(opt.nameKey)}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -335,7 +401,7 @@ export function SettingsDialog() {
                     <FormLabel>{t('settingsDialog.volume', { percentage: Math.round(field.value * 100).toString() })}</FormLabel>
                     <FormControl>
                        <Slider
-                        defaultValue={[field.value]}
+                        value={[field.value]} // Ensure value is passed
                         max={1}
                         step={0.01}
                         onValueChange={(value) => field.onChange(value[0])}
@@ -351,7 +417,7 @@ export function SettingsDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('settingsDialog.backgroundAnimation')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}> {/* Ensure value is passed */}
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t('settingsDialog.selectAnimationPlaceholder')} />
@@ -368,36 +434,53 @@ export function SettingsDialog() {
               )}
             />
 
-            {/* Custom Soundscape URLs Section */}
+            {/* Custom Soundscape Upload Section */}
             <div className="space-y-4 pt-4">
               <Separator />
               <div className="flex items-center space-x-2 pt-2">
-                <Music4 className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-medium">{t('settingsDialog.customSoundscapeUrlsTitle')}</h3>
+                <UploadCloud className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-medium">{t('settingsDialog.myCustomSoundscapes.title')}</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                {t('settingsDialog.customSoundscapeUrlsDescription')}
+                {t('settingsDialog.myCustomSoundscapes.description')}
               </p>
-              {SOUNDSCAPE_OPTIONS.filter(opt => opt.type === 'url').map(option => (
-                <FormField
-                  key={option.id}
-                  control={form.control}
-                  name={`customSoundscapeUrls.${option.id}`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t(option.nameKey)} {t('settingsDialog.urlLabelSuffix')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t('settingsDialog.customUrlPlaceholder', { soundscapeName: t(option.nameKey) })}
-                          {...field}
-                          value={field.value || ''} // Ensure controlled component from potentially undefined value
-                        />
-                      </FormControl>
-                      <FormMessage /> {/* For URL validation errors */}
-                    </FormItem>
-                  )}
+              <FormItem>
+                <FormLabel htmlFor="soundscape-upload">{t('settingsDialog.myCustomSoundscapes.uploadLabel')}</FormLabel>
+                <Input 
+                  id="soundscape-upload" 
+                  type="file" 
+                  accept="audio/*" 
+                  onChange={handleFileUpload} 
+                  disabled={isUploading}
+                  className="focus:ring-accent"
                 />
-              ))}
+                {isUploading && <p className="text-sm text-muted-foreground">{t('settingsDialog.myCustomSoundscapes.uploading')}</p>}
+              </FormItem>
+
+              {userSoundscapes.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <h4 className="text-md font-semibold flex items-center">
+                    <ListMusic className="mr-2 h-5 w-5 text-primary/80" />
+                    {t('settingsDialog.myCustomSoundscapes.uploadedListTitle')}
+                  </h4>
+                  <ul className="max-h-40 overflow-y-auto rounded-md border p-2 space-y-1">
+                    {userSoundscapes.map((sound) => (
+                      <li key={sound.id} className="flex items-center justify-between p-1.5 hover:bg-accent/10 rounded-md">
+                        <span className="text-sm truncate" title={sound.name}>{sound.name}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7"
+                          onClick={() => handleDeleteUserSoundscape(sound.id, sound.name)}
+                          title={t('settingsDialog.myCustomSoundscapes.deleteButtonTooltip', {name: sound.name})}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
 

@@ -10,14 +10,14 @@ export interface Settings {
   longBreakInterval: number;
   autoStartBreaks: boolean;
   autoStartPomodoros: boolean;
-  soundscapeWork?: string;
-  soundscapeBreak?: string;
+  soundscapeWork?: string; // Can now be an ID of a predefined or user-uploaded sound
+  soundscapeBreak?: string; // Can now be an ID of a predefined or user-uploaded sound
   volume: number;
   notificationsEnabled: boolean;
   backgroundAnimation: BackgroundAnimationType;
   mouseTrailEffectEnabled: boolean;
   showCoachMarks: boolean;
-  customSoundscapeUrls: Record<string, string>; // Added for custom URLs
+  // customSoundscapeUrls: Record<string, string>; // Removed
 }
 
 export interface SessionRecord {
@@ -29,19 +29,10 @@ export interface SessionRecord {
   completed: boolean;
 }
 
-// Updated to use nameKey for translation
-export interface SelectOptionWithTranslation {
-  id: string;
-  nameKey: string; // Key for translation
-  type?: string; // For soundscapes
-  params?: any; // For soundscapes
-}
-
-// Kept original SoundscapeOption for internal use if needed, though SelectOptionWithTranslation is preferred for UI
 export interface SoundscapeOption {
   id: string;
-  name: string; // This would ideally be a translation key or handled by i18n
-  type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace' | 'url'; // Added 'url' type
+  nameKey: string;
+  type: 'noise' | 'tone' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace' | 'userUploaded'; // Added 'userUploaded'
   params?: {
     type?: 'white' | 'pink' | 'brown' | 'off' | Tone.ToneOscillatorType;
     frequency?: number;
@@ -56,11 +47,14 @@ export interface SoundscapeOption {
     bpm?: number;
     instruments?: any[];
     effects?: any;
-    audioSrc?: string; // For 'url' type - can be default or placeholder
-    sequence?: any[]; // Ensure sequence is part of params if used by patternLoop
-    subdivision?: string; // Ensure subdivision is part of params if used by patternLoop
-    duration?: string; // Ensure duration is part of params if used by patternLoop
-    loopEnd?: string; // Ensure loopEnd is part of params if used by patternLoop
+    // audioSrc?: string; // No longer needed for predefined 'url' types as they are removed
+    sequence?: any[];
+    subdivision?: string;
+    duration?: string;
+    loopEnd?: string;
+    // For userUploaded type, actual data will be fetched from IndexedDB
+    indexedDbId?: number; // To reference the sound in IndexedDB
+    mimeType?: string; // To store the MIME type of the uploaded file
   };
 }
 
@@ -70,10 +64,9 @@ export interface AiSessionSummary {
   improvements: string;
 }
 
-// Kept original BackgroundAnimationOption for internal use if needed
 export interface BackgroundAnimationOption {
   id: BackgroundAnimationType;
-  name: string; // This would ideally be a translation key or handled by i18n
+  nameKey: string;
 }
 
 
@@ -89,7 +82,7 @@ export interface SummarizeSessionInput {
 }
 
 export interface ChatMessage {
-  id: string;
+  id:string;
   sender: 'user' | 'ai';
   text: string;
   timestamp: Date;
@@ -100,4 +93,18 @@ export interface DefinedWordEntry {
   word: string;
   englishDefinition: string;
   indonesianDefinition: string;
+}
+
+// For IndexedDB storage of user soundscapes
+export interface UserSoundscapeRecord {
+  id?: number; // Auto-incremented by IndexedDB
+  name: string;
+  mimeType: string;
+  data: ArrayBuffer;
+}
+
+// For displaying in settings (without full data)
+export interface UserSoundscapeListItem {
+    id: number;
+    name: string;
 }

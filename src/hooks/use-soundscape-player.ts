@@ -5,9 +5,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Tone from 'tone';
 import type { SoundscapeOption, Settings } from '@/lib/types';
 import { SOUNDSCAPE_OPTIONS, DEFAULT_SETTINGS } from '@/lib/constants';
+import { getSoundscape as getSoundscapeFromDB } from '@/lib/audio-storage'; // For fetching uploaded sounds
 
 interface UseSoundscapePlayerProps {
-  volume: number; // 0-1
+  volume: number;
   settings: Settings;
   isSettingsLoaded: boolean;
 }
@@ -19,9 +20,8 @@ interface ActivePatternElements {
   loops: Tone.Loop[];
   effects: (Tone.Reverb | Tone.Volume | Tone.AutoFilter | Tone.Panner | Tone.FeedbackDelay | Tone.Chorus | Tone.Filter | Tone.LFO)[];
   masterVolumeNode?: Tone.Volume;
-  noiseSource?: Tone.Noise; // For ocean
-  autoFilter?: Tone.AutoFilter; // For ocean
-  // LFO was removed for ocean as it was problematic
+  noiseSource?: Tone.Noise;
+  autoFilter?: Tone.AutoFilter;
 }
 
 interface SoundscapePlayer {
@@ -31,7 +31,7 @@ interface SoundscapePlayer {
   isPlaying: boolean;
 }
 
-const scheduleDelay = 0.05; // 50ms for scheduling Tone.js events
+const scheduleDelay = 0.05; 
 
 export function useSoundscapePlayer({
   volume,
@@ -48,7 +48,10 @@ export function useSoundscapePlayer({
   const tonePlayerLeft = useRef<Tone.Synth | null>(null);
   const tonePlayerRight = useRef<Tone.Synth | null>(null);
   const generalNoisePlayer = useRef<Tone.Noise | null>(null);
+  
+  // For HTML5 Audio (used for user-uploaded files)
   const htmlAudioPlayer = useRef<HTMLAudioElement | null>(null);
+  const currentObjectUrl = useRef<string | null>(null); // To store and revoke object URLs
 
   const activePatternElements = useRef<ActivePatternElements>({
     synths: [],
@@ -62,35 +65,21 @@ export function useSoundscapePlayer({
 
 
   const cleanupDisposedSynths = useCallback(() => {
-    if (tonePlayer.current && !tonePlayer.current.disposed) {
-      tonePlayer.current.triggerRelease(Tone.now());
-      tonePlayer.current.dispose();
-    }
-    tonePlayer.current = null;
-
-    if (polySynthPlayer.current && !polySynthPlayer.current.disposed) {
-      polySynthPlayer.current.releaseAll(Tone.now());
-      polySynthPlayer.current.dispose();
-    }
-    polySynthPlayer.current = null;
-
-    if (tonePlayerLeft.current && !tonePlayerLeft.current.disposed) {
-      tonePlayerLeft.current.triggerRelease(Tone.now());
-      tonePlayerLeft.current.dispose();
-    }
-    tonePlayerLeft.current = null;
-
-    if (tonePlayerRight.current && !tonePlayerRight.current.disposed) {
-      tonePlayerRight.current.triggerRelease(Tone.now());
-      tonePlayerRight.current.dispose();
-    }
-    tonePlayerRight.current = null;
-
-    if (generalNoisePlayer.current && !generalNoisePlayer.current.disposed) {
-      generalNoisePlayer.current.stop(Tone.now());
-      generalNoisePlayer.current.dispose();
-    }
-    generalNoisePlayer.current = null;
+    const disposeSynth = (synthRef: React.MutableRefObject<any>) => {
+        if (synthRef.current && !synthRef.current.disposed) {
+            if (typeof synthRef.current.releaseAll === 'function') synthRef.current.releaseAll(Tone.now());
+            else if (typeof synthRef.current.triggerRelease === 'function') synthRef.current.triggerRelease(Tone.now());
+            else if (typeof synthRef.current.stop === 'function') synthRef.current.stop(Tone.now());
+            synthRef.current.dispose();
+        }
+        synthRef.current = null;
+    };
+    
+    disposeSynth(tonePlayer);
+    disposeSynth(polySynthPlayer);
+    disposeSynth(tonePlayerLeft);
+    disposeSynth(tonePlayerRight);
+    disposeSynth(generalNoisePlayer);
   }, []);
 
   const cleanupPattern = useCallback(() => {
@@ -159,12 +148,13 @@ export function useSoundscapePlayer({
       cleanupPattern();
     }
 
-    if (htmlAudioPlayer.current && activePlayerType.current === 'url') {
+    if (htmlAudioPlayer.current && (activePlayerType.current === 'userUploaded')) {
       htmlAudioPlayer.current.pause();
-      htmlAudioPlayer.current.currentTime = 0;
-      if (htmlAudioPlayer.current.src && htmlAudioPlayer.current.src !== "") {
-        htmlAudioPlayer.current.removeAttribute('src'); // More robust way to clear src
-        htmlAudioPlayer.current.load(); // Force reload of empty player
+      htmlAudioPlayer.current.removeAttribute('src');
+      htmlAudioPlayer.current.load(); // Force reload of empty player
+      if (currentObjectUrl.current) {
+        URL.revokeObjectURL(currentObjectUrl.current);
+        currentObjectUrl.current = null;
       }
     }
     setIsPlaying(false);
@@ -191,6 +181,10 @@ export function useSoundscapePlayer({
         htmlAudioPlayer.current.load();
         htmlAudioPlayer.current = null;
       }
+      if (currentObjectUrl.current) {
+        URL.revokeObjectURL(currentObjectUrl.current);
+        currentObjectUrl.current = null;
+      }
       lastPlayedSoundscapeIdRef.current = undefined;
     };
   }, [stopSound]);
@@ -211,14 +205,32 @@ export function useSoundscapePlayer({
       }
     }
 
-    stopSound();
+    stopSound(); // Stop any currently playing sound
 
     if (!soundscapeId || soundscapeId === 'none') {
       lastPlayedSoundscapeIdRef.current = undefined;
       return;
     }
+    
+    let selectedSoundscape: SoundscapeOption | undefined;
+    if (soundscapeId.startsWith('user_')) {
+        const dbId = parseInt(soundscapeId.split('_')[1], 10);
+        if (!isNaN(dbId)) {
+            const userSound = await getSoundscapeFromDB(dbId);
+            if (userSound) {
+                selectedSoundscape = {
+                    id: soundscapeId,
+                    nameKey: userSound.name, // Use the actual name
+                    type: 'userUploaded',
+                    params: { indexedDbId: dbId, mimeType: userSound.mimeType }
+                };
+            }
+        }
+    } else {
+        selectedSoundscape = SOUNDSCAPE_OPTIONS.find(s => s.id === soundscapeId);
+    }
 
-    const selectedSoundscape = SOUNDSCAPE_OPTIONS.find(s => s.id === soundscapeId);
+
     if (!selectedSoundscape) {
       lastPlayedSoundscapeIdRef.current = undefined;
       return;
@@ -244,26 +256,29 @@ export function useSoundscapePlayer({
     }
 
     switch (selectedSoundscape.type) {
-      case 'url':
-        if (htmlAudioPlayer.current) {
-          const customUrl = settings.customSoundscapeUrls?.[soundscapeId];
-          const audioSrcToPlay = customUrl || selectedSoundscape.params?.audioSrc;
-
-          if (audioSrcToPlay) {
+      case 'userUploaded':
+        if (htmlAudioPlayer.current && selectedSoundscape.params?.indexedDbId) {
             try {
-              htmlAudioPlayer.current.src = audioSrcToPlay;
-              htmlAudioPlayer.current.load();
-              htmlAudioPlayer.current.volume = finalHtmlVolume;
-              await htmlAudioPlayer.current.play();
-              setIsPlaying(true);
+                const soundData = await getSoundscapeFromDB(selectedSoundscape.params.indexedDbId);
+                if (soundData) {
+                    const blob = new Blob([soundData.data], { type: soundData.mimeType });
+                    if (currentObjectUrl.current) { // Revoke previous if any
+                        URL.revokeObjectURL(currentObjectUrl.current);
+                    }
+                    currentObjectUrl.current = URL.createObjectURL(blob);
+                    htmlAudioPlayer.current.src = currentObjectUrl.current;
+                    htmlAudioPlayer.current.load();
+                    htmlAudioPlayer.current.volume = finalHtmlVolume;
+                    await htmlAudioPlayer.current.play();
+                    setIsPlaying(true);
+                } else {
+                     console.warn("User uploaded sound not found in DB:", selectedSoundscape.params.indexedDbId);
+                     setIsPlaying(false);
+                }
             } catch (error: any) {
-              console.error("Error playing URL audio:", audioSrcToPlay, error);
-              setIsPlaying(false);
+                console.error("Error playing user uploaded audio:", selectedSoundscape.params.indexedDbId, error);
+                setIsPlaying(false);
             }
-          } else {
-            console.warn("No audio source for URL soundscape:", soundscapeId);
-            setIsPlaying(false);
-          }
         }
         break;
       case 'noise':
@@ -275,19 +290,17 @@ export function useSoundscapePlayer({
         }
         break;
       case 'tone':
-        const { notes, frequency, type: oscType = 'sine', envelope: envParam } = selectedSoundscape.params || {};
+        const { notes, frequency, type: oscType = 'sine', envelope } = selectedSoundscape.params || {};
         let synthOptions: Partial<Tone.SynthOptions> = { oscillator: { type: oscType as Tone.ToneOscillatorType } };
-        if (envParam && typeof envParam === 'object') {
-            synthOptions.envelope = envParam as Tone.EnvelopeOptions;
+        if (envelope && typeof envelope === 'object') {
+            synthOptions.envelope = envelope as Tone.EnvelopeOptions;
         }
 
         if (notes && Array.isArray(notes)) {
-          activePlayerType.current = 'polysynth';
           polySynthPlayer.current = new Tone.PolySynth(Tone.Synth, synthOptions).toDestination();
           polySynthPlayer.current.volume.value = finalGainValue;
           polySynthPlayer.current.triggerAttack(notes, Tone.now() + scheduleDelay);
         } else {
-          activePlayerType.current = 'tone';
           tonePlayer.current = new Tone.Synth(synthOptions).toDestination();
           tonePlayer.current.volume.value = finalGainValue;
           tonePlayer.current.triggerAttack(frequency || 440, Tone.now() + scheduleDelay);
@@ -320,25 +333,22 @@ export function useSoundscapePlayer({
             setIsPlaying(false);
             return;
         }
-        const oceanNoise = new Tone.Noise("brown");
-        activePatternElements.current.noiseSource = oceanNoise;
-
+        activePatternElements.current.noiseSource = new Tone.Noise("brown");
         const autoFilterParams = selectedSoundscape.params?.autoFilter;
-        const autoFilter = new Tone.AutoFilter({
+        activePatternElements.current.autoFilter = new Tone.AutoFilter({
             ...(autoFilterParams || {}),
             frequency: autoFilterParams?.frequency || "2m",
             baseFrequency: autoFilterParams?.baseFrequency || 200,
             octaves: autoFilterParams?.octaves || 4,
             filter: autoFilterParams?.filter || { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 }
         }).connect(activePatternElements.current.masterVolumeNode);
-        activePatternElements.current.autoFilter = autoFilter;
-        activePatternElements.current.effects.push(autoFilter);
+        activePatternElements.current.effects.push(activePatternElements.current.autoFilter);
         
-        oceanNoise.connect(autoFilter);
+        activePatternElements.current.noiseSource.connect(activePatternElements.current.autoFilter);
         
         Tone.Transport.scheduleOnce((transportTime) => {
-            if (autoFilter && !autoFilter.disposed) autoFilter.start(transportTime);
-            if (oceanNoise && !oceanNoise.disposed) oceanNoise.start(transportTime);
+            if (activePatternElements.current.autoFilter && !activePatternElements.current.autoFilter.disposed) activePatternElements.current.autoFilter.start(transportTime);
+            if (activePatternElements.current.noiseSource && !activePatternElements.current.noiseSource.disposed) activePatternElements.current.noiseSource.start(transportTime);
         }, scheduleDelay);
 
         setIsPlaying(true);
@@ -440,14 +450,21 @@ export function useSoundscapePlayer({
     }
 
     const currentSoundscapeId = lastPlayedSoundscapeIdRef.current;
-    const selectedSound = SOUNDSCAPE_OPTIONS.find(s => s.id === currentSoundscapeId);
+    let selectedSound: SoundscapeOption | undefined;
+
+    if (currentSoundscapeId.startsWith('user_')) {
+        selectedSound = { id: currentSoundscapeId, nameKey: '', type: 'userUploaded', params: { volumeAdjustment: 0 } }; // Minimal object for volume adjustment
+    } else {
+        selectedSound = SOUNDSCAPE_OPTIONS.find(s => s.id === currentSoundscapeId);
+    }
+
 
     if (!selectedSound) return;
 
     const soundscapeVolAdj = selectedSound.params?.volumeAdjustment || 0;
     const activeType = activePlayerType.current;
 
-    if (activeType === 'url' && htmlAudioPlayer.current) {
+    if (activeType === 'userUploaded' && htmlAudioPlayer.current) {
       const htmlVol = volume * 0.5;
       htmlAudioPlayer.current.volume = Math.max(0, Math.min(1, htmlVol * Math.pow(10, soundscapeVolAdj / 20) ));
     } else {
@@ -458,7 +475,7 @@ export function useSoundscapePlayer({
         generalNoisePlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
       } else if (activeType === 'tone' && tonePlayer.current && !tonePlayer.current.disposed) {
         tonePlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
-      } else if (activeType === 'polysynth' && polySynthPlayer.current && !polySynthPlayer.current.disposed) {
+      } else if (activeType === 'polysynth' && polySynthPlayer.current && !polySynthPlayer.current.disposed) { // 'tone' with notes array maps to 'polysynth' ref
         polySynthPlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
       } else if (activeType === 'binaural') {
         if (tonePlayerLeft.current && !tonePlayerLeft.current.disposed) tonePlayerLeft.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
