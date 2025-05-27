@@ -26,7 +26,8 @@
     "next": "Lanjut",
     "finish": "Selesai",
     "clearHistory": "Hapus Riwayat",
-    "clearTodaysHistory": "Hapus Riwayat Hari Ini"
+    "clearTodaysHistory": "Hapus Riwayat Hari Ini",
+    "saveToNotes": "Simpan ke Catatan"
   },
   "tooltips": {
     "aiSummary": "Dapatkan Ringkasan Sesi AI (jika data tersedia)",
@@ -65,7 +66,11 @@
     "loading": "Menganalisis sesi Anda...",
     "summaryTitle": "Ringkasan Sesi",
     "improvementsTitle": "Saran Perbaikan",
-    "noData": "Tidak ada data ringkasan yang tersedia."
+    "noData": "Tidak ada data ringkasan yang tersedia.",
+    "savedSummaryHeader": "Analisis Sesi AI ({{dateTime}})",
+    "savedSummaryFooter": "Akhir dari Analisis AI",
+    "saveSuccessTitle": "Analisis AI Disimpan",
+    "saveSuccessDescription": "Ringkasan telah ditambahkan ke catatan sesi Anda."
   },
   "sessionHistoryDrawer": {
     "title": "Riwayat Sesi",
@@ -153,7 +158,7 @@
       },
       "aiAnalysis": {
         "title": "Analisis Sesi AI",
-        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas."
+        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas. Ringkasan dapat disimpan ke catatan harian Anda."
       },
       "chatWidget": {
         "title": "Asisten Chat AI",
@@ -190,7 +195,7 @@
     "notesContextTitle": "Catatan & Konteks Sesi",
     "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan, konteks, dan kemampuan untuk melihat catatan masa lalu disimpan untuk hari ini di database Firebase Anda.",
     "aiAnalysisTitle": "Analisis AI",
-    "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan.",
+    "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan. Anda dapat menyimpan ringkasan ini ke catatan Anda.",
     "chatWidgetTitle": "Asisten Chat AI",
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "dictionaryCardTitle": "Kamus Sesi",
@@ -276,7 +281,10 @@
     "exportSuccessfulTitle": "Ekspor Berhasil",
     "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown.",
     "deleteEntryTooltip": "Hapus entri untuk '{{word}}'",
-    "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus entri kamus ini?"
+    "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus definisi untuk '{{word}}'?",
+    "entryDeletedTitle": "Entri Dihapus",
+    "entryDeletedDesc": "Definisi untuk '{{word}}' telah dihapus dari kamus sesi ini.",
+    "theEntry": "entri tersebut"
   },
   "auth": {
     "loginTitle": "Masuk ke {{appName}}",

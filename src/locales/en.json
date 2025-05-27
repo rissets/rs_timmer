@@ -26,7 +26,8 @@
     "next": "Next",
     "finish": "Finish",
     "clearHistory": "Clear History",
-    "clearTodaysHistory": "Clear Today's History"
+    "clearTodaysHistory": "Clear Today's History",
+    "saveToNotes": "Save to Notes"
   },
   "tooltips": {
     "aiSummary": "Get AI Session Summary (if data available)",
@@ -65,7 +66,11 @@
     "loading": "Analyzing your session...",
     "summaryTitle": "Session Summary",
     "improvementsTitle": "Suggested Improvements",
-    "noData": "No summary data available."
+    "noData": "No summary data available.",
+    "savedSummaryHeader": "AI Session Analysis ({{dateTime}})",
+    "savedSummaryFooter": "End of AI Analysis",
+    "saveSuccessTitle": "AI Analysis Saved",
+    "saveSuccessDescription": "The summary has been appended to your session notes."
   },
   "sessionHistoryDrawer": {
     "title": "Session History",
@@ -153,7 +158,7 @@
       },
       "aiAnalysis": {
         "title": "AI Session Analysis",
-        "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks."
+        "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks. The summary can be saved to your daily notes."
       },
       "chatWidget": {
         "title": "AI Chat Assistant",
@@ -190,7 +195,7 @@
     "notesContextTitle": "Session Notes & Context",
     "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes, context, and the ability to view past notes are saved for the current day in your Firebase database.",
     "aiAnalysisTitle": "AI Analysis",
-    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips.",
+    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant for quick questions or support related to your focus session.",
     "dictionaryCardTitle": "Session Dictionary",
@@ -276,7 +281,10 @@
     "exportSuccessfulTitle": "Export Successful",
     "exportSuccessfulDescription": "Your dictionary session has been downloaded as a Markdown file.",
     "deleteEntryTooltip": "Delete entry for '{{word}}'",
-    "confirmDeleteEntry": "Are you sure you want to delete this dictionary entry?"
+    "confirmDeleteEntry": "Are you sure you want to delete the definition for '{{word}}'?",
+    "entryDeletedTitle": "Entry Deleted",
+    "entryDeletedDesc": "The definition for '{{word}}' has been removed from this session's dictionary.",
+    "theEntry": "the entry"
   },
   "auth": {
     "loginTitle": "Login to {{appName}}",

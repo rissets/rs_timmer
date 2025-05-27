@@ -13,18 +13,26 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { AiSessionSummary } from '@/lib/types';
-import { Sparkles } from 'lucide-react';
-import { useLanguageContext } from "@/contexts/language-context"; // Added
+import { Sparkles, Save } from 'lucide-react'; // Added Save icon
+import { useLanguageContext } from "@/contexts/language-context";
 
 interface AiSummaryDialogProps {
   summaryData: AiSessionSummary | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   isLoading: boolean;
+  onSaveSummary?: (summary: string, improvements: string) => void; // New prop
 }
 
-export function AiSummaryDialog({ summaryData, isOpen, onOpenChange, isLoading }: AiSummaryDialogProps) {
-  const { t } = useLanguageContext(); // Added
+export function AiSummaryDialog({ summaryData, isOpen, onOpenChange, isLoading, onSaveSummary }: AiSummaryDialogProps) {
+  const { t } = useLanguageContext();
+  
+  const handleSave = () => {
+    if (summaryData && onSaveSummary) {
+      onSaveSummary(summaryData.summary, summaryData.improvements);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -58,10 +66,16 @@ export function AiSummaryDialog({ summaryData, isOpen, onOpenChange, isLoading }
             <p className="text-center text-muted-foreground">{t('aiSummaryDialog.noData')}</p>
           )}
         </ScrollArea>
-        <DialogFooter>
+        <DialogFooter className="sm:justify-between">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t('buttons.close')}
           </Button>
+          {onSaveSummary && summaryData && !isLoading && (
+            <Button type="button" onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" />
+              {t('buttons.saveToNotes')}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

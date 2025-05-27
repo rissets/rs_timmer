@@ -52,7 +52,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon, Loader2 } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon, Loader2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -162,7 +162,7 @@ export default function PomodoroPage() {
       }
     };
     loadData();
-  }, [currentDateKey, currentUser, isSettingsLoaded, toast]);
+  }, [currentDateKey, currentUser, isSettingsLoaded, toast, t]);
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
@@ -341,12 +341,17 @@ export default function PomodoroPage() {
   useEffect(() => {
     if (!currentUser || !isSettingsLoaded) return;
     if (!isLoadingDailyData && timer.sessionLog.length > 0) {
-      saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
-        console.error("Error saving session log to Firestore:", error);
-        toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
-      });
+      // Save only if there's new log activity to avoid redundant saves
+      // This basic check compares length; a more robust check might compare actual content if needed.
+      if (timer.sessionLog.length !== (JSON.parse(localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`) || '[]')).length) {
+          saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
+            console.error("Error saving session log to Firestore:", error);
+            toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
+          });
+      }
     }
   }, [timer.sessionLog, currentDateKey, currentUser, isSettingsLoaded, isLoadingDailyData, toast, t]);
+
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
@@ -437,8 +442,10 @@ export default function PomodoroPage() {
   };
 
   const handleRemoveDefinedWord = (wordId: string) => {
-    if (confirm(t('dictionaryCard.confirmDeleteEntry'))) {
+    const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
+    if (confirm(t('dictionaryCard.confirmDeleteEntry', {word: wordToRemove}))) {
        setDefinedWordsList(prev => prev.filter(entry => entry.id !== wordId));
+       toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
     }
   };
 
@@ -471,17 +478,23 @@ export default function PomodoroPage() {
     try {
       const dateKey = formatDateToKey(date);
       const notes = await loadNotesForDay(currentUser.uid, dateKey);
-      setPastDateNotes(notes || t('notes.noNotesForDate')); // Provide feedback if no notes
+      setPastDateNotes(notes || t('notes.noNotesForDate')); 
     } catch (error) {
       console.error("Error fetching past notes:", error);
       toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadPastNotesDescription"), variant: "destructive" });
       setPastDateNotes(t('notes.errorLoadingNotes'));
     } finally {
       setIsLoadingPastNotes(false);
-      setIsPastNotesPopoverOpen(false); // Close popover after selection
+      setIsPastNotesPopoverOpen(false); 
     }
   };
 
+  const handleSaveAiSummaryToNotes = (summary: string, improvements: string) => {
+    const formattedSummary = `\n\n--- ${t('aiSummaryDialog.savedSummaryHeader', { dateTime: new Date().toLocaleString() })} ---\n${t('aiSummaryDialog.summaryTitle')}:\n${summary}\n\n${t('aiSummaryDialog.improvementsTitle')}:\n${improvements}\n--- ${t('aiSummaryDialog.savedSummaryFooter')} ---`;
+    setCurrentNotes(prevNotes => prevNotes + formattedSummary);
+    toast({ title: t('aiSummaryDialog.saveSuccessTitle'), description: t('aiSummaryDialog.saveSuccessDescription') });
+    setIsAiSummaryOpen(false); // Close dialog after saving
+  };
 
   const handleLogout = async () => {
     await logoutUser();
@@ -496,13 +509,18 @@ export default function PomodoroPage() {
     );
   }
   if (!currentUser) {
-      router.push('/auth/login');
+      // This should ideally not be reached if the useEffect for auth redirection works correctly.
+      // However, as a fallback, we ensure it redirects.
+      if (typeof window !== 'undefined') { // Ensure router.push is called client-side
+          router.push('/auth/login');
+      }
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
       );
   }
+
 
   const pomodoroDots = Array(settings.longBreakInterval).fill(0).map((_, i) => (
     <span
@@ -708,7 +726,7 @@ export default function PomodoroPage() {
                               mode="single"
                               selected={selectedPastDateForNotes}
                               onSelect={handleFetchPastNotes}
-                              disabled={(date) => date > new Date() || date < new Date("2000-01-01")} // Example range
+                              disabled={(date) => date > new Date() || date < new Date("2000-01-01")} 
                               initialFocus
                             />
                           </PopoverContent>
@@ -732,7 +750,13 @@ export default function PomodoroPage() {
           </Accordion>
         </main>
 
-        <AiSummaryDialog summaryData={aiSummary} isOpen={isAiSummaryOpen} onOpenChange={setIsAiSummaryOpen} isLoading={isAiLoading} />
+        <AiSummaryDialog 
+          summaryData={aiSummary} 
+          isOpen={isAiSummaryOpen} 
+          onOpenChange={setIsAiSummaryOpen} 
+          isLoading={isAiLoading}
+          onSaveSummary={handleSaveAiSummaryToNotes}
+        />
         <UserGuideDialog isOpen={isUserGuideOpen} onOpenChange={setIsUserGuideOpen} />
         <InteractiveTourDialog isOpen={isInteractiveTourActive} currentStep={currentTourStep} totalSteps={tourSteps.length} stepData={tourSteps[currentTourStep]} onNext={handleNextTourStep} onSkip={handleFinishTour} />
         <ChatWidgetButton onClick={() => setIsChatOpen(prev => !prev)} />
