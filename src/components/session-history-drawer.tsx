@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"; // Keep for "Clear History" button
 import {
   Sheet,
   SheetClose,
@@ -12,12 +12,14 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"; // Changed from drawer
+} from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { SessionRecord } from "@/lib/types";
 import { History, Trash2 } from "lucide-react";
-import { format, formatDistanceToNowStrict } from 'date-fns';
+import { format } from 'date-fns';
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 const SESSION_HISTORY_KEY = "zenith-timer-session-history";
 
@@ -58,17 +60,18 @@ export function SessionHistoryDrawer() {
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}> {/* Changed from Drawer */}
-      <SheetTrigger asChild> {/* Changed from DrawerTrigger */}
-        <Button variant="ghost" size="icon" aria-label="Open session history">
-          <History className="h-5 w-5" />
-        </Button>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger 
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "flex items-center justify-center")}
+        aria-label="Open session history"
+      >
+        <History className="h-5 w-5" />
       </SheetTrigger>
-      <SheetContent> {/* Changed from DrawerContent */}
+      <SheetContent>
         <div className="mx-auto w-full max-w-md">
-          <SheetHeader> {/* Changed from DrawerHeader */}
-            <SheetTitle>Session History</SheetTitle> {/* Changed from DrawerTitle */}
-            <SheetDescription>Review your completed Pomodoro sessions.</SheetDescription> {/* Changed from DrawerDescription */}
+          <SheetHeader>
+            <SheetTitle>Session History</SheetTitle>
+            <SheetDescription>Review your completed Pomodoro sessions.</SheetDescription>
           </SheetHeader>
           <div className="p-4 pb-0">
             {history.length === 0 ? (
@@ -93,19 +96,19 @@ export function SessionHistoryDrawer() {
               </ScrollArea>
             )}
           </div>
-          <SheetFooter className="pt-4"> {/* Changed from DrawerFooter */}
+          <SheetFooter className="pt-4">
             {history.length > 0 && (
               <Button variant="destructive" onClick={clearHistory} className="mb-2">
                 <Trash2 className="mr-2 h-4 w-4" /> Clear History
               </Button>
             )}
-            <SheetClose asChild> {/* Changed from DrawerClose */}
-              <Button variant="outline">Close</Button>
+            <SheetClose className={buttonVariants({ variant: "outline" })}>
+              Close
             </SheetClose>
           </SheetFooter>
         </div>
-      </SheetContent> {/* Changed from DrawerContent */}
-    </Sheet> /* Changed from Drawer */
+      </SheetContent>
+    </Sheet>
   );
 }
 
