@@ -91,7 +91,7 @@ export default function PomodoroPage() {
 
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
-    settings: settings || DEFAULT_SETTINGS,
+    settings: settings, // Pass the full settings object
     isSettingsLoaded,
   });
 
@@ -338,9 +338,7 @@ export default function PomodoroPage() {
   
     const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-      if (playInitiatedForIdRef.current !== soundId) { // Check if already initiated for this ID
-         playSound(soundId);
-      }
+       playSound(soundId);
     } else {
       stopSound();
     }
@@ -349,12 +347,12 @@ export default function PomodoroPage() {
     timer.isRunning, 
     isSettingsLoaded, 
     isSoundPlayerReady, 
-    getActiveSoundscapeId,
-    playSound,
-    stopSound,
-    settings.soundscapeWork,
-    settings.soundscapeBreak,
-    isMuted // Added isMuted here
+    getActiveSoundscapeId, // This is now stable
+    playSound, // This is now stable
+    stopSound, // This is now stable
+    isMuted, // Added isMuted here
+    settings.soundscapeWork, // Explicitly include these if getActiveSoundscapeId depends on them directly
+    settings.soundscapeBreak
   ]);
 
 
@@ -518,9 +516,6 @@ export default function PomodoroPage() {
       title={t('tooltips.pomodoroProgress', { completed: (i+1).toString(), total: settings.longBreakInterval.toString() })}
     ></span>
   ));
-
-  // Ref for soundscape player's playInitiatedForIdRef (to avoid direct dependency issue in useEffect)
-  const playInitiatedForIdRef = soundscapePlayer.playInitiatedForIdRef;
 
 
   return (
