@@ -36,6 +36,7 @@ import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed"; // Keeping old key to not reset tour for existing users
 
@@ -97,6 +98,7 @@ export default function PomodoroPage() {
   
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (isSettingsLoaded) {
@@ -182,7 +184,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType]); // Removed sessionLog
+  }, [currentNotes, tasks, toast, currentSessionType]); 
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -276,7 +278,7 @@ export default function PomodoroPage() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-        <p className="ml-4 text-lg">Loading {APP_NAME} Timer...</p>
+        <p className="ml-4 text-lg">Loading ${APP_NAME} Timer...</p>
       </div>
     );
   }
@@ -306,10 +308,14 @@ export default function PomodoroPage() {
         {settings.backgroundAnimation === 'bubbles' && <FloatingBubblesEffect />}
         
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
-          <div className="flex items-center space-x-2">
-            <LogoIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-semibold animate-title-reveal">RS Timer</h1>
-          </div>
+          {isMobile ? (
+            <h1 className="text-xl font-semibold animate-title-reveal">{APP_NAME}</h1>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <LogoIcon className="h-8 w-8 text-primary" />
+              <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME} Timer</h1>
+            </div>
+          )}
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
               <SparklesIcon className="h-5 w-5" />
@@ -452,5 +458,7 @@ export default function PomodoroPage() {
     </>
   );
 }
+
+    
 
     
