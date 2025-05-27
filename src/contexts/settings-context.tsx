@@ -19,23 +19,49 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
 
   useEffect(() => {
+    let loadedSettings: Partial<Settings> = {};
     try {
-      const storedSettings = localStorage.getItem("rs-timer-settings");
-      if (storedSettings) {
-        const parsedSettings = JSON.parse(storedSettings);
-        // Merge with defaults to ensure all keys are present
-        setSettings(prev => ({ 
-          ...DEFAULT_SETTINGS, 
-          ...prev, 
-          ...parsedSettings,
-          // customSoundscapeUrls field removed
-        }));
-      } else {
-        setSettings(DEFAULT_SETTINGS);
+      const storedSettingsString = localStorage.getItem("rs-timer-settings");
+      if (storedSettingsString) {
+        try {
+            loadedSettings = JSON.parse(storedSettingsString);
+        } catch (e) {
+            console.error("Error parsing settings from localStorage:", e);
+            // Keep loadedSettings empty, defaults will apply
+        }
       }
-    } catch (error) {
+
+      // Sanitize specific problematic fields that should be string | undefined
+      if (loadedSettings.soundscapeWork === null) {
+        loadedSettings.soundscapeWork = undefined;
+      }
+      if (loadedSettings.soundscapeBreak === null) {
+        loadedSettings.soundscapeBreak = undefined;
+      }
+      if (loadedSettings.customSoundscapeUrls === null) {
+        loadedSettings.customSoundscapeUrls = undefined; // Or {} if it should always be an object
+      }
+       if (loadedSettings.backgroundAnimation === null) {
+        loadedSettings.backgroundAnimation = undefined;
+      }
+
+
+      // Merge with defaults: DEFAULT_SETTINGS provides base, loadedSettings overrides
+      // Ensure customSoundscapeUrls is always at least an empty object if not defined.
+      const finalSettings = {
+        ...DEFAULT_SETTINGS,
+        ...loadedSettings,
+        customSoundscapeUrls: {
+          ...DEFAULT_SETTINGS.customSoundscapeUrls, // Ensure defaults for customSoundscapeUrls are there
+          ...(loadedSettings.customSoundscapeUrls || {}), // Spread user's custom URLs, or empty if none
+        },
+      };
+      
+      setSettings(finalSettings);
+
+    } catch (error) { // Catch errors from localStorage.getItem or broader issues
       console.error("Failed to load settings from localStorage:", error);
-      setSettings(DEFAULT_SETTINGS);
+      setSettings(DEFAULT_SETTINGS); // Fallback to absolute defaults on any error
     }
     setIsSettingsLoaded(true);
   }, []);
