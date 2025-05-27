@@ -44,9 +44,9 @@ import { chatWithAI } from "@/ai/flows/chat-flow";
 import { defineWord } from "@/ai/flows/define-word-flow";
 import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage, DefinedWordEntry } from "@/lib/types";
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
-import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
+import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -90,16 +90,16 @@ export default function PomodoroPage() {
 
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
-    settings: settings, 
-    isSettingsLoaded: isSettingsLoaded,
+    settings: settings || DEFAULT_SETTINGS,
+    isSettingsLoaded,
   });
 
 
   useEffect(() => {
-    if (!authLoading && !currentUser) {
+    if (!authLoading && !currentUser && !isSettingsLoaded) { // Ensure settings are also checked if relevant for redirect
       router.push('/auth/login');
     }
-  }, [currentUser, authLoading, router]);
+  }, [currentUser, authLoading, router, isSettingsLoaded]);
 
   const tourSteps = React.useMemo(() => [
     {
@@ -255,17 +255,13 @@ export default function PomodoroPage() {
   const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
 
   useEffect(() => {
-    if (!isSettingsLoaded) {
-      stopSound();
+    if (!isSettingsLoaded || !isSoundPlayerReady) {
+      stopSound(); // Stop sound if settings or player isn't ready
       return;
     }
-    if (!isSoundPlayerReady) {
-      stopSound();
-      return;
-    }
-
+  
+    const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-      const soundId = getActiveSoundscapeId(timer.mode);
       if (soundId && soundId !== 'none') {
         playSound(soundId);
       } else {
@@ -274,18 +270,18 @@ export default function PomodoroPage() {
     } else {
       stopSound();
     }
+  // Adding playSound and stopSound to dependency array
+  // Also adding settings.soundscapeWork and settings.soundscapeBreak as getActiveSoundscapeId depends on them
   }, [
-    timer.mode,
-    timer.isRunning,
-    playSound, 
-    stopSound, 
-    isSoundPlayerReady,
-    isSettingsLoaded,
-    getActiveSoundscapeId, // useCallback ensures this is stable based on its own deps
-    // Explicit dependencies of getActiveSoundscapeId:
-    isMuted, 
-    settings.soundscapeWork, 
-    settings.soundscapeBreak
+    timer.mode, 
+    timer.isRunning, 
+    isSettingsLoaded, 
+    isSoundPlayerReady, 
+    getActiveSoundscapeId,
+    playSound, // Added
+    stopSound,  // Added
+    settings.soundscapeWork, // Added
+    settings.soundscapeBreak // Added
   ]);
 
 
@@ -471,7 +467,7 @@ export default function PomodoroPage() {
           ) : (
             <div className="flex items-center space-x-2">
               <LogoIcon className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME} Timer</h1>
+              {/* "RS Timer" text removed for desktop as per user request */}
             </div>
           )}
           <div className="flex items-center space-x-1">
@@ -548,7 +544,10 @@ export default function PomodoroPage() {
           >
             <AccordionItem value="tasks" className="border rounded-lg shadow-lg bg-card overflow-hidden">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
+                <div className="flex items-center">
+                  <ListChecks className="mr-2 h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
+                </div>
               </AccordionTrigger>
               <AccordionContent className="px-0">
                 <SimpleTaskList
@@ -579,7 +578,10 @@ export default function PomodoroPage() {
 
             <AccordionItem value="notes" className="border rounded-lg shadow-lg bg-card overflow-hidden">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
+                <div className="flex items-center">
+                  <FileText className="mr-2 h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
+                </div>
               </AccordionTrigger>
               <AccordionContent className="px-0">
                  <CardContent>
