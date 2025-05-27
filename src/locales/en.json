@@ -72,7 +72,7 @@
     "description": "Adjust your Pomodoro timer settings and preferences.",
     "tabs": {
       "timer": "Timer",
-      "sound": "Sound & Soundscapes",
+      "sound": "Sound",
       "appearance": "Appearance"
     },
     "showInitialGuide": "Show Initial Guide",

@@ -72,7 +72,7 @@
     "description": "Sesuaikan pengaturan dan preferensi timer Pomodoro Anda.",
     "tabs": {
       "timer": "Timer",
-      "sound": "Suara & Suara Latar",
+      "sound": "Suara",
       "appearance": "Tampilan"
     },
     "showInitialGuide": "Tampilkan Panduan Awal",
