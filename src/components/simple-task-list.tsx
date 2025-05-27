@@ -46,7 +46,7 @@ export function SimpleTaskList({
         <CardTitle className="text-lg">Today's Tasks</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex space-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2 sm:gap-0">
           <Input
             type="text"
             placeholder="Add a new task..."
@@ -55,7 +55,7 @@ export function SimpleTaskList({
             onKeyPress={handleKeyPress}
             className="focus:ring-accent"
           />
-          <Button onClick={handleAddTask} aria-label="Add task">
+          <Button onClick={handleAddTask} aria-label="Add task" className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" /> Add
           </Button>
         </div>

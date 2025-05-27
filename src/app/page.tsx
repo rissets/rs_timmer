@@ -168,7 +168,7 @@ export default function PomodoroPage() {
     
     const tasksString = tasks.length > 0 
       ? "Tasks:\n" + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
-      : "No specific tasks listed for this session.";
+      : "No specific tasks listed for this analysis.";
 
     const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : "No pomodoro session log for this analysis."}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || "No additional notes provided."}`;
 
@@ -182,7 +182,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast]);
+  }, [currentNotes, tasks, toast, currentSessionType]); // Added currentSessionType
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -357,13 +357,13 @@ export default function PomodoroPage() {
                   {timer.isRunning ? <Pause className="mr-2 h-5 w-5" /> : <Play className="mr-2 h-5 w-5" />}
                   {timer.isRunning ? 'Pause' : 'Start'}
                 </Button>
-                <Button variant="outline" size="lg" onClick={timer.skipTimer} aria-label="Skip current interval">
+                <Button variant="outline" size="icon" onClick={timer.skipTimer} aria-label="Skip current interval">
                   <SkipForward className="h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={() => timer.resetTimer()} aria-label="Reset timer">
+                <Button variant="outline" size="icon" onClick={() => timer.resetTimer()} aria-label="Reset timer">
                   <RotateCcw className="h-5 w-5" />
                 </Button>
-                 <Button variant="outline" size="lg" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
+                 <Button variant="outline" size="icon" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
                   {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
                 </Button>
               </div>
