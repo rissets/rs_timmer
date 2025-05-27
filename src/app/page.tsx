@@ -38,7 +38,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed"; // Keeping old key to not reset tour for existing users
+const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed"; 
 
 const tourSteps = [
   {
@@ -184,7 +184,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType]); 
+  }, [currentNotes, tasks, toast, currentSessionType]); // Removed sessionLog from dependencies, ensure it's not needed or passed correctly
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -277,8 +277,7 @@ export default function PomodoroPage() {
   if (!isSettingsLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-        <p className="ml-4 text-lg">Loading ${APP_NAME} Timer...</p>
+        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -458,6 +457,8 @@ export default function PomodoroPage() {
     </>
   );
 }
+
+    
 
     
 
