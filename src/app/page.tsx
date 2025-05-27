@@ -90,8 +90,8 @@ export default function PomodoroPage() {
 
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
-    settings: settings,
-    isSettingsLoaded: isSettingsLoaded, // Pass isSettingsLoaded here
+    settings, // Pass the whole settings object
+    isSettingsLoaded,
   });
 
 
@@ -180,20 +180,14 @@ export default function PomodoroPage() {
     localStorage.setItem(INTERACTIVE_TOUR_STORAGE_KEY, "true");
   };
 
-
-  const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
-    if (isMuted) return 'none';
-    return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-  }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
-
-  const getModeDisplayName = (mode: TimerMode) => {
+  const getModeDisplayName = useCallback((mode: TimerMode) => {
     switch(mode) {
       case 'work': return t('timerModes.work');
       case 'shortBreak': return t('timerModes.shortBreak');
       case 'longBreak': return t('timerModes.longBreak');
       default: return t('timerModes.focus');
     }
-  };
+  }, [t]);
 
   const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType) => {
     if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
@@ -253,6 +247,11 @@ export default function PomodoroPage() {
     onTimerSkip: () => {},
     getTranslatedText: t,
   });
+
+  const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
+    if (isMuted) return 'none';
+    return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
+  }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
   useEffect(() => {
     if (!timer.isRunning || !isSettingsLoaded) {
@@ -375,7 +374,8 @@ export default function PomodoroPage() {
         indonesianDefinition: indResult.definition,
       };
       setDefinedWordsList(prev => [newEntry, ...prev]);
-    } catch (error: any) {
+    } catch (error: any)
+      {
       console.error("Error defining word:", error);
       toast({
         title: t('dictionaryCard.errorDefiningTitle'),
@@ -667,3 +667,5 @@ export default function PomodoroPage() {
     </>
   );
 }
+
+    
