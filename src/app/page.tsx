@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // Removed usePathname as it wasn't used
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,7 +48,7 @@ import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constant
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from '@/lib/utils';
+import { cn, getCurrentDateString } from '@/lib/utils'; // Added getCurrentDateString
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguageContext } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -63,11 +63,14 @@ export default function PomodoroPage() {
   const { toast } = useToast();
   const { currentUser, loading: authLoading, logoutUser } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
+
+  const [currentDateKey, setCurrentDateKey] = useState(getCurrentDateString());
 
   const [currentNotes, setCurrentNotes] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
+  const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
+
   const [aiSummary, setAiSummary] = useState<AiSessionSummary | null>(null);
   const [isAiSummaryOpen, setIsAiSummaryOpen] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -82,8 +85,6 @@ export default function PomodoroPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInputValue, setChatInputValue] = useState("");
   const [isAiChatLoading, setIsAiChatLoading] = useState(false);
-
-  const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
   const [isDefiningWord, setIsDefiningWord] = useState(false);
 
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
@@ -94,9 +95,85 @@ export default function PomodoroPage() {
     isSettingsLoaded,
   });
 
+  // Effect to update currentDateKey if the day changes while the app is open
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newDateKey = getCurrentDateString();
+      if (newDateKey !== currentDateKey) {
+        setCurrentDateKey(newDateKey);
+        // Data for new day will be loaded by individual useEffects below due to currentDateKey change
+      }
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [currentDateKey]);
+
+  // Load/Save Tasks
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return; // Ensure settings and user are loaded
+    const storedTasks = localStorage.getItem(`rs-timer-tasks-${currentDateKey}`);
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    } else {
+      setTasks([]); // Start with empty tasks for a new day or if no data
+    }
+  }, [currentDateKey, isSettingsLoaded, currentUser]);
 
   useEffect(() => {
-    if (!authLoading && !currentUser && !isSettingsLoaded) { // Ensure settings are also checked if relevant for redirect
+    if (!isSettingsLoaded || !currentUser) return;
+    localStorage.setItem(`rs-timer-tasks-${currentDateKey}`, JSON.stringify(tasks));
+  }, [tasks, currentDateKey, isSettingsLoaded, currentUser]);
+
+  // Load/Save Notes
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return;
+    const storedNotes = localStorage.getItem(`rs-timer-notes-${currentDateKey}`);
+    if (storedNotes) {
+      setCurrentNotes(storedNotes);
+    } else {
+      setCurrentNotes("");
+    }
+  }, [currentDateKey, isSettingsLoaded, currentUser]);
+
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return;
+    localStorage.setItem(`rs-timer-notes-${currentDateKey}`, currentNotes);
+  }, [currentNotes, currentDateKey, isSettingsLoaded, currentUser]);
+
+  // Load/Save Dictionary
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return;
+    const storedDictionary = localStorage.getItem(`rs-timer-dictionary-${currentDateKey}`);
+    if (storedDictionary) {
+      setDefinedWordsList(JSON.parse(storedDictionary));
+    } else {
+      setDefinedWordsList([]);
+    }
+  }, [currentDateKey, isSettingsLoaded, currentUser]);
+
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return;
+    localStorage.setItem(`rs-timer-dictionary-${currentDateKey}`, JSON.stringify(definedWordsList));
+  }, [definedWordsList, currentDateKey, isSettingsLoaded, currentUser]);
+
+  // Load/Save Session Type
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return;
+    const storedSessionType = localStorage.getItem(`rs-timer-sessionType-${currentDateKey}`);
+    if (storedSessionType) {
+      setCurrentSessionType(storedSessionType as SessionType);
+    } else {
+      setCurrentSessionType('general');
+    }
+  }, [currentDateKey, isSettingsLoaded, currentUser]);
+
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser) return;
+    localStorage.setItem(`rs-timer-sessionType-${currentDateKey}`, currentSessionType);
+  }, [currentSessionType, currentDateKey, isSettingsLoaded, currentUser]);
+
+
+  useEffect(() => {
+    if (!authLoading && !currentUser && isSettingsLoaded) {
       router.push('/auth/login');
     }
   }, [currentUser, authLoading, router, isSettingsLoaded]);
@@ -232,20 +309,19 @@ export default function PomodoroPage() {
   const timer = useTimerCore({
     settings,
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: () => {
-      // Sound controlled by useEffect
-    },
-    onTimerPause: () => {
-      // Sound controlled by useEffect
-    },
-    onTimerReset: () => {
-      // Sound controlled by useEffect
-    },
-    onTimerSkip: () => {
-      // Sound for next interval will be handled by useEffect
-    },
+    onTimerStart: () => { /* Sound controlled by useEffect */ },
+    onTimerPause: () => { /* Sound controlled by useEffect */ },
+    onTimerReset: () => { /* Sound controlled by useEffect */ },
+    onTimerSkip: () => { /* Sound for next interval will be handled by useEffect */ },
     getTranslatedText: t,
   });
+
+  // Save Session History (Pomodoro Logs) per day
+  useEffect(() => {
+    if (!isSettingsLoaded || !currentUser || timer.sessionLog.length === 0) return;
+    localStorage.setItem(`rs-timer-sessionHistory-${currentDateKey}`, JSON.stringify(timer.sessionLog));
+  }, [timer.sessionLog, currentDateKey, isSettingsLoaded, currentUser]);
+
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
@@ -256,32 +332,29 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!isSettingsLoaded || !isSoundPlayerReady) {
-      stopSound(); // Stop sound if settings or player isn't ready
+      stopSound();
       return;
     }
   
     const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-      if (soundId && soundId !== 'none') {
-        playSound(soundId);
-      } else {
-        stopSound();
+      if (playInitiatedForIdRef.current !== soundId) { // Check if already initiated for this ID
+         playSound(soundId);
       }
     } else {
       stopSound();
     }
-  // Adding playSound and stopSound to dependency array
-  // Also adding settings.soundscapeWork and settings.soundscapeBreak as getActiveSoundscapeId depends on them
   }, [
     timer.mode, 
     timer.isRunning, 
     isSettingsLoaded, 
     isSoundPlayerReady, 
     getActiveSoundscapeId,
-    playSound, // Added
-    stopSound,  // Added
-    settings.soundscapeWork, // Added
-    settings.soundscapeBreak // Added
+    playSound,
+    stopSound,
+    settings.soundscapeWork,
+    settings.soundscapeBreak,
+    isMuted // Added isMuted here
   ]);
 
 
@@ -413,7 +486,7 @@ export default function PomodoroPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `rs_timer_dictionary_session_${new Date().toISOString().split('T')[0]}.md`;
+    a.download = `rs_timer_dictionary_session_${currentDateKey}.md`; // Include date in filename
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -446,6 +519,9 @@ export default function PomodoroPage() {
     ></span>
   ));
 
+  // Ref for soundscape player's playInitiatedForIdRef (to avoid direct dependency issue in useEffect)
+  const playInitiatedForIdRef = soundscapePlayer.playInitiatedForIdRef;
+
 
   return (
     <>
@@ -463,11 +539,10 @@ export default function PomodoroPage() {
 
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           {isMobile ? (
-            <h1 className="text-xl font-semibold animate-title-reveal">{APP_NAME}</h1>
+             <h1 className="text-xl font-semibold animate-title-reveal">RS</h1>
           ) : (
             <div className="flex items-center space-x-2">
               <LogoIcon className="h-8 w-8 text-primary" />
-              {/* "RS Timer" text removed for desktop as per user request */}
             </div>
           )}
           <div className="flex items-center space-x-1">
@@ -475,7 +550,7 @@ export default function PomodoroPage() {
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
               <SparklesIcon className="h-5 w-5" />
             </Button>
-            <SessionHistoryDrawer />
+            <SessionHistoryDrawer currentDateKey={currentDateKey} /> {/* Pass currentDateKey */}
             <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
                 <BookOpen className="h-5 w-5" />
             </Button>

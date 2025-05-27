@@ -25,7 +25,8 @@
     "skipTour": "Lewati Tur",
     "next": "Lanjut",
     "finish": "Selesai",
-    "clearHistory": "Hapus Riwayat"
+    "clearHistory": "Hapus Riwayat",
+    "clearTodaysHistory": "Hapus Riwayat Hari Ini"
   },
   "tooltips": {
     "aiSummary": "Dapatkan Ringkasan Sesi AI (jika data tersedia)",
@@ -62,10 +63,13 @@
   },
   "sessionHistoryDrawer": {
     "title": "Riwayat Sesi",
+    "titleToday": "Riwayat Sesi ({{date}})",
     "description": "Tinjau sesi Pomodoro Anda yang telah selesai.",
     "noSessions": "Belum ada sesi yang direkam.",
+    "noSessionsToday": "Belum ada sesi yang direkam untuk hari ini.",
     "statusCompleted": "Selesai",
-    "statusSkipped": "Dilewati/Terinterupsi"
+    "statusSkipped": "Dilewati/Terinterupsi",
+    "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini? Tindakan ini tidak dapat dibatalkan."
   },
   "settingsDialog": {
     "title": "Pengaturan Timer",
@@ -93,24 +97,24 @@
     "backgroundAnimation": "Animasi Latar Belakang",
     "selectAnimationPlaceholder": "Pilih animasi",
     "myCustomSoundscapes": {
-        "title": "Suara Latar Kustom Saya",
-        "description": "Unggah file audio Anda sendiri (mis., MP3, WAV, OGG) untuk digunakan sebagai suara latar. File disimpan secara lokal di browser Anda.",
-        "uploadLabel": "Unggah suara latar baru",
-        "uploading": "Mengunggah...",
-        "uploadedListTitle": "Suara Unggahan Saya",
-        "deleteButtonTooltip": "Hapus {{name}}"
+      "title": "Suara Latar Kustom Saya",
+      "description": "Unggah file audio Anda sendiri (mis., MP3, WAV, OGG) untuk digunakan sebagai suara latar. File disimpan secara lokal di browser Anda.",
+      "uploadLabel": "Unggah suara latar baru",
+      "uploading": "Mengunggah...",
+      "uploadedListTitle": "Suara Unggahan Saya",
+      "deleteButtonTooltip": "Hapus {{name}}"
     },
     "confirmDeleteSoundscape": "Apakah Anda yakin ingin menghapus '{{name}}'? Suara latar ini akan dihapus dari penyimpanan browser Anda.",
     "uploadSuccessTitle": "Unggah Berhasil",
     "deleteSuccessTitle": "Suara Latar '{{name}}' Dihapus",
     "errors": {
-        "loadUserSoundscapesFailed": "Gagal memuat suara latar kustom.",
-        "invalidFileType": "Jenis file tidak valid. Harap unggah file audio.",
-        "fileTooLarge": "Ukuran file terlalu besar. Ukuran maksimum adalah 10MB.",
-        "uploadFailed": "Unggah gagal. Silakan coba lagi.",
-        "deleteFailed": "Gagal menghapus suara latar.",
-        "soundscapeInUseTitle": "Suara Latar Sedang Digunakan",
-        "soundscapeInUseDescription": "Suara latar ini sedang dipilih untuk Kerja atau Istirahat. Harap ubah pilihan Anda sebelum menghapus."
+      "loadUserSoundscapesFailed": "Gagal memuat suara latar kustom.",
+      "invalidFileType": "Jenis file tidak valid. Harap unggah file audio.",
+      "fileTooLarge": "Ukuran file terlalu besar. Ukuran maksimum adalah 10MB.",
+      "uploadFailed": "Unggah gagal. Silakan coba lagi.",
+      "deleteFailed": "Gagal menghapus suara latar.",
+      "soundscapeInUseTitle": "Suara Latar Sedang Digunakan",
+      "soundscapeInUseDescription": "Suara latar ini sedang dipilih untuk Kerja atau Istirahat. Harap ubah pilihan Anda sebelum menghapus."
     }
   },
   "userGuideDialog": {
@@ -135,11 +139,11 @@
       },
       "tasksAndNotes": {
         "title": "Tugas & Catatan",
-        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul.\\nTugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI."
+        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul.\\nTugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI. Data ini disimpan secara lokal per hari."
       },
       "sessionContext": {
         "title": "Konteks Sesi",
-        "content": "Sebelum menganalisis data sesi Anda (catatan, tugas, atau log Pomodoro lengkap), Anda dapat menentukan \"Konteks Sesi\" (misalnya, Kerja, Belajar, Umum).\\nIni membantu AI memberikan umpan balik dan saran yang lebih disesuaikan dengan aktivitas Anda saat ini."
+        "content": "Sebelum menganalisis data sesi Anda (catatan, tugas, atau log Pomodoro lengkap), Anda dapat menentukan \"Konteks Sesi\" (misalnya, Kerja, Belajar, Umum).\\nIni membantu AI memberikan umpan balik dan saran yang lebih disesuaikan dengan aktivitas Anda saat ini. Konteks ini juga disimpan secara lokal per hari."
       },
       "aiAnalysis": {
         "title": "Analisis Sesi AI",
@@ -151,11 +155,11 @@
       },
       "dictionaryCard": {
         "title": "Kamus Sesi",
-        "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia selama sesi Anda. Definisi ini disimpan sementara dan dapat diekspor ke file Markdown untuk catatan Anda."
+        "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia selama sesi Anda. Definisi ini disimpan secara lokal per hari dan dapat diekspor ke file Markdown."
       },
       "sessionHistory": {
         "title": "Riwayat Sesi",
-        "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai.\\nIni membantu Anda melacak sesi fokus Anda dari waktu ke waktu. Anda juga dapat menghapus riwayat dari panel ini."
+        "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai untuk hari ini.\\nIni membantu Anda melacak sesi fokus Anda. Melihat riwayat dari hari-hari sebelumnya adalah fitur yang direncanakan."
       },
       "themeAndAppearance": {
         "title": "Tema & Tampilan",
@@ -176,17 +180,17 @@
     "collapsibleCardsTitle": "Bagian yang Dapat Dilipat",
     "collapsibleCardsContent": "Bagian untuk Tugas, Kamus, dan Catatan di bawah timer dapat diperluas atau dilipat dengan mengklik judulnya.",
     "tasksTitle": "Tugas",
-    "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas dapat disertakan dalam Analisis AI.",
+    "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas dapat disertakan dalam Analisis AI dan disimpan untuk hari ini.",
     "notesContextTitle": "Catatan & Konteks Sesi",
-    "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan.",
+    "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan dan konteks disimpan untuk hari ini.",
     "aiAnalysisTitle": "Analisis AI",
     "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan.",
     "chatWidgetTitle": "Asisten Chat AI",
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "dictionaryCardTitle": "Kamus Sesi",
-    "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda dapat diekspor ke Markdown.",
+    "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda disimpan untuk hari ini dan dapat diekspor ke Markdown.",
     "headerToolsTitle": "Alat Header",
-    "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
+    "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒 untuk hari ini), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
     "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara (termasuk mengunggah milik Anda sendiri!), animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda.",
     "allSetTitle": "Anda Sudah Siap!",
@@ -320,5 +324,3 @@
     }
   }
 }
-
-    

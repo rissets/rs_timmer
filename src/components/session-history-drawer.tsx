@@ -19,35 +19,44 @@ import { History, Trash2 } from "lucide-react";
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { useLanguageContext } from "@/contexts/language-context"; // Added
+import { useLanguageContext } from "@/contexts/language-context";
 
-const SESSION_HISTORY_KEY = "rs-timer-session-history";
+// The old SESSION_HISTORY_KEY is no longer the primary source for the drawer.
+// The drawer will now load based on the currentDateKey passed as a prop.
 
-export function SessionHistoryDrawer() {
+interface SessionHistoryDrawerProps {
+  currentDateKey: string; // To load today's history
+  // We might add functionality later to view other dates
+}
+
+export function SessionHistoryDrawer({ currentDateKey }: SessionHistoryDrawerProps) {
   const [history, setHistory] = useState<SessionRecord[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const { t } = useLanguageContext(); // Added
+  const { t } = useLanguageContext();
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && currentDateKey) {
       try {
-        const storedHistory = localStorage.getItem(SESSION_HISTORY_KEY);
+        const storedHistory = localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`);
         if (storedHistory) {
           setHistory(JSON.parse(storedHistory));
+        } else {
+          setHistory([]); // No history for today yet
         }
       } catch (error) {
         console.error("Failed to load session history from localStorage:", error);
         setHistory([]);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, currentDateKey]);
 
-  const clearHistory = () => {
+  const clearTodaysHistory = () => {
+    if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) return;
     try {
-      localStorage.removeItem(SESSION_HISTORY_KEY);
+      localStorage.removeItem(`rs-timer-sessionHistory-${currentDateKey}`);
       setHistory([]);
     } catch (error) {
-      console.error("Failed to clear session history from localStorage:", error);
+      console.error("Failed to clear today's session history from localStorage:", error);
     }
   };
   
@@ -72,14 +81,14 @@ export function SessionHistoryDrawer() {
       <SheetContent>
         <div className="mx-auto w-full max-w-md">
           <SheetHeader>
-            <SheetTitle>{t('sessionHistoryDrawer.title')}</SheetTitle>
+            <SheetTitle>{t('sessionHistoryDrawer.titleToday', { date: currentDateKey })}</SheetTitle>
             <SheetDescription>{t('sessionHistoryDrawer.description')}</SheetDescription>
           </SheetHeader>
           <div className="p-4 pb-0">
             {history.length === 0 ? (
-              <p className="text-center text-muted-foreground">{t('sessionHistoryDrawer.noSessions')}</p>
+              <p className="text-center text-muted-foreground">{t('sessionHistoryDrawer.noSessionsToday')}</p>
             ) : (
-              <ScrollArea className="h-[40vh]">
+              <ScrollArea className="h-[calc(100vh-250px)] sm:h-[calc(70vh-150px)]"> {/* Adjusted height */}
                 <div className="space-y-2">
                   {history.slice().reverse().map((session) => (
                     <React.Fragment key={session.id}>
@@ -100,8 +109,8 @@ export function SessionHistoryDrawer() {
           </div>
           <SheetFooter className="pt-4">
             {history.length > 0 && (
-              <Button variant="destructive" onClick={clearHistory} className="mb-2">
-                <Trash2 className="mr-2 h-4 w-4" /> {t('buttons.clearHistory')}
+              <Button variant="destructive" onClick={clearTodaysHistory} className="mb-2">
+                <Trash2 className="mr-2 h-4 w-4" /> {t('buttons.clearTodaysHistory')}
               </Button>
             )}
             <SheetClose className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
@@ -114,12 +123,17 @@ export function SessionHistoryDrawer() {
   );
 }
 
+// This function is now less critical for displaying today's history in the drawer,
+// as PomodoroPage.tsx handles saving the daily log.
+// It might still be useful if other parts of the app need to add to a global, non-daily log.
+// For now, it's left as is, but its usage for the daily drawer is superseded.
 export const addSessionToHistory = (session: SessionRecord) => {
+  const LEGACY_SESSION_HISTORY_KEY = "rs-timer-session-history"; // Old key
   try {
-    const storedHistory = localStorage.getItem(SESSION_HISTORY_KEY);
+    const storedHistory = localStorage.getItem(LEGACY_SESSION_HISTORY_KEY);
     const historyArray: SessionRecord[] = storedHistory ? JSON.parse(storedHistory) : [];
-    localStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify([...historyArray, session]));
+    localStorage.setItem(LEGACY_SESSION_HISTORY_KEY, JSON.stringify([...historyArray, session]));
   } catch (error) {
-    console.error("Failed to save session to localStorage:", error);
+    console.error("Failed to save session to legacy localStorage:", error);
   }
 };

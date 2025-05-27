@@ -25,7 +25,8 @@
     "skipTour": "Skip Tour",
     "next": "Next",
     "finish": "Finish",
-    "clearHistory": "Clear History"
+    "clearHistory": "Clear History",
+    "clearTodaysHistory": "Clear Today's History"
   },
   "tooltips": {
     "aiSummary": "Get AI Session Summary (if data available)",
@@ -62,10 +63,13 @@
   },
   "sessionHistoryDrawer": {
     "title": "Session History",
+    "titleToday": "Session History ({{date}})",
     "description": "Review your completed Pomodoro sessions.",
     "noSessions": "No sessions recorded yet.",
+    "noSessionsToday": "No sessions recorded for today yet.",
     "statusCompleted": "Completed",
-    "statusSkipped": "Skipped/Interrupted"
+    "statusSkipped": "Skipped/Interrupted",
+    "confirmClearToday": "Are you sure you want to clear all session history for today? This action cannot be undone."
   },
   "settingsDialog": {
     "title": "Timer Settings",
@@ -93,24 +97,24 @@
     "backgroundAnimation": "Background Animation",
     "selectAnimationPlaceholder": "Select animation",
     "myCustomSoundscapes": {
-        "title": "My Custom Soundscapes",
-        "description": "Upload your own audio files (e.g., MP3, WAV, OGG) to use as soundscapes. Files are stored locally in your browser.",
-        "uploadLabel": "Upload new soundscape",
-        "uploading": "Uploading...",
-        "uploadedListTitle": "My Uploaded Sounds",
-        "deleteButtonTooltip": "Delete {{name}}"
+      "title": "My Custom Soundscapes",
+      "description": "Upload your own audio files (e.g., MP3, WAV, OGG) to use as soundscapes. Files are stored locally in your browser.",
+      "uploadLabel": "Upload new soundscape",
+      "uploading": "Uploading...",
+      "uploadedListTitle": "My Uploaded Sounds",
+      "deleteButtonTooltip": "Delete {{name}}"
     },
     "confirmDeleteSoundscape": "Are you sure you want to delete '{{name}}'? This soundscape will be removed from your browser storage.",
     "uploadSuccessTitle": "Upload Successful",
     "deleteSuccessTitle": "Soundscape '{{name}}' Deleted",
     "errors": {
-        "loadUserSoundscapesFailed": "Failed to load custom soundscapes.",
-        "invalidFileType": "Invalid file type. Please upload an audio file.",
-        "fileTooLarge": "File is too large. Maximum size is 10MB.",
-        "uploadFailed": "Upload failed. Please try again.",
-        "deleteFailed": "Failed to delete soundscape.",
-        "soundscapeInUseTitle": "Soundscape in Use",
-        "soundscapeInUseDescription": "This soundscape is currently selected for Work or Break. Please change your selection before deleting."
+      "loadUserSoundscapesFailed": "Failed to load custom soundscapes.",
+      "invalidFileType": "Invalid file type. Please upload an audio file.",
+      "fileTooLarge": "File is too large. Maximum size is 10MB.",
+      "uploadFailed": "Upload failed. Please try again.",
+      "deleteFailed": "Failed to delete soundscape.",
+      "soundscapeInUseTitle": "Soundscape in Use",
+      "soundscapeInUseDescription": "This soundscape is currently selected for Work or Break. Please change your selection before deleting."
     }
   },
   "userGuideDialog": {
@@ -135,11 +139,11 @@
       },
       "tasksAndNotes": {
         "title": "Tasks & Notes",
-        "content": "Below the timer, you'll find sections for managing tasks and taking notes:\\n* Today's Tasks: Add tasks you want to accomplish during your focus sessions. Mark them as complete or delete them.\\n* Session Notes & Context: Use the textarea to jot down thoughts, distractions, or ideas that arise.\\nYour tasks and notes can be included in the AI Session Analysis."
+        "content": "Below the timer, you'll find sections for managing tasks and taking notes:\\n* Today's Tasks: Add tasks you want to accomplish during your focus sessions. Mark them as complete or delete them.\\n* Session Notes & Context: Use the textarea to jot down thoughts, distractions, or ideas that arise.\\nYour tasks and notes can be included in the AI Session Analysis. This data is stored locally per day."
       },
       "sessionContext": {
         "title": "Session Context",
-        "content": "Before analyzing your session data (notes, tasks, or a full Pomodoro log), you can specify a \"Session Context\" (e.g., Work, Learning, General).\\nThis helps the AI provide more tailored feedback and suggestions relevant to your current activity."
+        "content": "Before analyzing your session data (notes, tasks, or a full Pomodoro log), you can specify a \"Session Context\" (e.g., Work, Learning, General).\\nThis helps the AI provide more tailored feedback and suggestions relevant to your current activity. This context is also stored locally per day."
       },
       "aiAnalysis": {
         "title": "AI Session Analysis",
@@ -151,11 +155,11 @@
       },
       "dictionaryCard": {
         "title": "Session Dictionary",
-        "content": "Use the Dictionary Card to get definitions for words in English and Indonesian during your session. These definitions are stored temporarily and can be exported to a Markdown file for your records."
+        "content": "Use the Dictionary Card to get definitions for words in English and Indonesian during your session. These definitions are stored locally per day and can be exported to a Markdown file."
       },
       "sessionHistory": {
         "title": "Session History",
-        "content": "Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals.\\nThis helps you track your focus sessions over time. You can also clear the history from this panel."
+        "content": "Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals for the current day.\\nThis helps you track your focus sessions. Viewing history from previous days is a planned feature."
       },
       "themeAndAppearance": {
         "title": "Theme & Appearance",
@@ -176,17 +180,17 @@
     "collapsibleCardsTitle": "Collapsible Sections",
     "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Notes below the timer can be expanded or collapsed by clicking their titles.",
     "tasksTitle": "Tasks",
-    "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks can be included in the AI Analysis.",
+    "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks can be included in the AI Analysis and are saved for the current day.",
     "notesContextTitle": "Session Notes & Context",
-    "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback.",
+    "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved for the current day.",
     "aiAnalysisTitle": "AI Analysis",
     "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant for quick questions or support related to your focus session.",
     "dictionaryCardTitle": "Session Dictionary",
-    "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions can be exported to Markdown.",
+    "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions are saved for the current day and can be exported to Markdown.",
     "headerToolsTitle": "Header Tools",
-    "headerToolsContent": "Access AI Summary (✨), Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
+    "headerToolsContent": "Access AI Summary (✨), Session History (🕒 for today), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
     "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow.",
     "allSetTitle": "You're All Set!",
@@ -320,5 +324,3 @@
     }
   }
 }
-
-    
