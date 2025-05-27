@@ -15,7 +15,8 @@ export interface Settings {
   volume: number; // 0 to 1
   notificationsEnabled: boolean;
   backgroundAnimation: BackgroundAnimationType;
-  mouseTrailEffectEnabled: boolean; // New setting for mouse trail
+  mouseTrailEffectEnabled: boolean;
+  showCoachMarks: boolean; // New setting for coach marks
 }
 
 export interface SessionRecord {
@@ -30,8 +31,8 @@ export interface SessionRecord {
 export interface SoundscapeOption {
   id: string;
   name: string;
-  type: 'noise' | 'tone' | 'file' | 'binaural'; // Added 'binaural'
-  params?: any; // For Tone.js specific parameters or file URL
+  type: 'noise' | 'tone' | 'file' | 'binaural';
+  params?: any;
 }
 
 export interface AiSessionSummary {
@@ -50,8 +51,6 @@ export interface Task {
   completed: boolean;
 }
 
-// This type is defined in src/ai/flows/summarize-session.ts
-// but also useful here for page.tsx
 export interface SummarizeSessionInput {
   sessionDetails: string;
   sessionType?: SessionType;

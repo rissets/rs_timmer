@@ -36,7 +36,7 @@ import { Slider } from "@/components/ui/slider";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import type { Settings, BackgroundAnimationType } from "@/lib/types";
-import { Settings as SettingsIcon } from "lucide-react";
+import { Settings as SettingsIcon, HelpCircle } from "lucide-react";
 import React from "react";
 
 const settingsSchema = z.object({
@@ -54,6 +54,7 @@ const settingsSchema = z.object({
     BACKGROUND_ANIMATION_OPTIONS.some(opt => opt.id === val)
   ).default(DEFAULT_SETTINGS.backgroundAnimation),
   mouseTrailEffectEnabled: z.boolean().default(DEFAULT_SETTINGS.mouseTrailEffectEnabled),
+  showCoachMarks: z.boolean().default(DEFAULT_SETTINGS.showCoachMarks),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -65,16 +66,16 @@ export function SettingsDialog() {
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-        ...DEFAULT_SETTINGS, // Start with all defaults
-        ...settings, // Override with current settings
+        ...DEFAULT_SETTINGS,
+        ...settings,
       },
   });
 
   React.useEffect(() => {
     if (isSettingsLoaded) {
       form.reset({
-        ...DEFAULT_SETTINGS, // Ensure all defaults are present
-        ...settings, // Then apply current settings
+        ...DEFAULT_SETTINGS,
+        ...settings,
       });
     }
   }, [settings, form, isSettingsLoaded]);
@@ -108,6 +109,30 @@ export function SettingsDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
+            <FormField
+              control={form.control}
+              name="showCoachMarks"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel className="flex items-center">
+                      <HelpCircle className="mr-2 h-4 w-4 text-muted-foreground" />
+                      Show Coach Marks
+                    </FormLabel>
+                    <FormDescription>
+                      Display helpful tooltips on UI elements.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-label="Toggle coach marks"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}

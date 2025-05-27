@@ -23,22 +23,20 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const storedSettings = localStorage.getItem("zenith-timer-settings");
       if (storedSettings) {
         const parsedSettings = JSON.parse(storedSettings);
-        // Merge with defaults to ensure all keys are present, including new ones like mouseTrailEffectEnabled
+        // Merge with defaults to ensure all keys are present
         setSettings(prev => ({ ...DEFAULT_SETTINGS, ...prev, ...parsedSettings }));
       } else {
-        // If no stored settings, initialize with defaults
         setSettings(DEFAULT_SETTINGS);
       }
     } catch (error) {
       console.error("Failed to load settings from localStorage:", error);
-      // Fallback to default settings if parsing fails
       setSettings(DEFAULT_SETTINGS);
     }
     setIsSettingsLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (isSettingsLoaded) { // Only save after initial load to prevent overwriting with defaults
+    if (isSettingsLoaded) { 
         try {
             localStorage.setItem("zenith-timer-settings", JSON.stringify(settings));
         } catch (error) {

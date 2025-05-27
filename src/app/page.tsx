@@ -14,6 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { useTimerCore } from "@/hooks/use-timer-core";
 import { useSoundscapePlayer } from "@/hooks/use-soundscape-player";
@@ -21,6 +27,7 @@ import { ThemeToggleButton } from "@/components/theme-toggle-button";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SessionHistoryDrawer, addSessionToHistory } from "@/components/session-history-drawer";
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
+import { UserGuideDialog } from "@/components/user-guide-dialog"; // New import
 import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
@@ -31,9 +38,25 @@ import { summarizeSession } from "@/ai/flows/summarize-session";
 import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType } from "@/lib/types";
 import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen } from "lucide-react"; // Added BookOpen
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
+
+// Helper component for Coach Marks
+const CoachMark: React.FC<{ content: string; children: React.ReactNode; show: boolean; side?: "top" | "bottom" | "left" | "right"}> = ({ content, children, show, side }) => {
+  if (!show) return <>{children}</>;
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent side={side} className="max-w-xs text-center">
+          <p>{content}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 
 export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
@@ -45,6 +68,7 @@ export default function PomodoroPage() {
   const [isAiSummaryOpen, setIsAiSummaryOpen] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isUserGuideOpen, setIsUserGuideOpen] = useState(false); // New state for User Guide
 
   const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume });
 
@@ -106,7 +130,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, getModeDisplayName, summarizeSession, setIsAiLoading, setIsAiSummaryOpen, setAiSummary]); 
+  }, [currentNotes, tasks, toast, getModeDisplayName]); // Removed sessionLog, it was incorrect. summarizeSession is a dependency now.
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -231,114 +255,156 @@ export default function PomodoroPage() {
         
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           <div className="flex items-center space-x-2">
-            <LogoIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME}</h1>
+            <CoachMark content="This is the app logo!" show={settings.showCoachMarks}>
+              <LogoIcon className="h-8 w-8 text-primary" />
+            </CoachMark>
+            <CoachMark content={`Welcome to ${APP_NAME}! Your personal focus timer.`} show={settings.showCoachMarks}>
+              <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME}</h1>
+            </CoachMark>
           </div>
           <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
-              <SparklesIcon className="h-5 w-5" />
-            </Button>
-            <SessionHistoryDrawer />
-            <SettingsDialog />
-            <ThemeToggleButton />
+            <CoachMark content="Get an AI-powered summary and improvement tips for your session." show={settings.showCoachMarks}>
+              <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
+                <SparklesIcon className="h-5 w-5" />
+              </Button>
+            </CoachMark>
+            <CoachMark content="View your past Pomodoro session history." show={settings.showCoachMarks}>
+              <SessionHistoryDrawer />
+            </CoachMark>
+            <CoachMark content="Open the User Guide to learn more about the app features." show={settings.showCoachMarks}>
+                <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title="Open User Guide">
+                    <BookOpen className="h-5 w-5" />
+                </Button>
+            </CoachMark>
+            <CoachMark content="Customize timer durations, sounds, appearance, and other preferences." show={settings.showCoachMarks}>
+              <SettingsDialog />
+            </CoachMark>
+            <CoachMark content="Toggle between light and dark themes." show={settings.showCoachMarks}>
+              <ThemeToggleButton />
+            </CoachMark>
           </div>
         </header>
 
         <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1] space-y-6">
           <Card className="w-full shadow-xl">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-medium text-primary">
-                {getModeDisplayName(timer.mode)}
-              </CardTitle>
-              <div className="flex justify-center mt-2" aria-label={`Completed ${timer.currentCyclePomodoros} of ${settings.longBreakInterval} pomodoros in this cycle.`}>
-                  {pomodoroDots}
-              </div>
+                <CoachMark content={`Current mode: ${getModeDisplayName(timer.mode)}. Focus on your task or take a break!`} show={settings.showCoachMarks} side="bottom">
+                  <CardTitle className="text-2xl font-medium text-primary">
+                    {getModeDisplayName(timer.mode)}
+                  </CardTitle>
+                </CoachMark>
+              <CoachMark content={`Dots show completed Pomodoros in the current cycle (out of ${settings.longBreakInterval}). A long break follows a full cycle.`} show={settings.showCoachMarks} side="bottom">
+                <div className="flex justify-center mt-2" aria-label={`Completed ${timer.currentCyclePomodoros} of ${settings.longBreakInterval} pomodoros in this cycle.`}>
+                    {pomodoroDots}
+                </div>
+              </CoachMark>
             </CardHeader>
             <CardContent className="flex flex-col items-center space-y-8">
-              <div className="relative w-48 h-48 sm:w-60 sm:h-60" role="timer" aria-live="assertive">
-                <Progress 
-                  value={progressPercentage} 
-                  className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" 
-                  indicatorClassName="bg-primary!" 
-                  style={{clipPath: 'circle(50% at 50% 50%)'}} />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-5xl sm:text-7xl font-mono font-bold text-foreground tabular-nums">
-                    {formatTime(timer.timeLeft)}
-                  </span>
+              <CoachMark content="Time remaining for the current interval. The outer ring shows progress." show={settings.showCoachMarks} side="bottom">
+                <div className="relative w-48 h-48 sm:w-60 sm:h-60" role="timer" aria-live="assertive">
+                  <Progress 
+                    value={progressPercentage} 
+                    className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" 
+                    indicatorClassName="bg-primary!" 
+                    style={{clipPath: 'circle(50% at 50% 50%)'}} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-5xl sm:text-7xl font-mono font-bold text-foreground tabular-nums">
+                      {formatTime(timer.timeLeft)}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </CoachMark>
 
               <div className="flex space-x-3">
-                <Button 
-                  size="lg" 
-                  onClick={timer.isRunning ? timer.pauseTimer : timer.startTimer}
-                  className="w-32 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  aria-label={timer.isRunning ? "Pause timer" : "Start timer"}
-                >
-                  {timer.isRunning ? <Pause className="mr-2 h-5 w-5" /> : <Play className="mr-2 h-5 w-5" />}
-                  {timer.isRunning ? 'Pause' : 'Start'}
-                </Button>
-                <Button variant="outline" size="lg" onClick={timer.skipTimer} aria-label="Skip current interval">
-                  <SkipForward className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" size="lg" onClick={() => timer.resetTimer()} aria-label="Reset timer">
-                  <RotateCcw className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" size="lg" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
-                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-                </Button>
+                <CoachMark content={timer.isRunning ? "Pause the timer." : "Start the timer for the current interval."} show={settings.showCoachMarks}>
+                  <Button 
+                    size="lg" 
+                    onClick={timer.isRunning ? timer.pauseTimer : timer.startTimer}
+                    className="w-32 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    aria-label={timer.isRunning ? "Pause timer" : "Start timer"}
+                  >
+                    {timer.isRunning ? <Pause className="mr-2 h-5 w-5" /> : <Play className="mr-2 h-5 w-5" />}
+                    {timer.isRunning ? 'Pause' : 'Start'}
+                  </Button>
+                </CoachMark>
+                <CoachMark content="Skip to the next interval (e.g., from Work to Break)." show={settings.showCoachMarks}>
+                  <Button variant="outline" size="lg" onClick={timer.skipTimer} aria-label="Skip current interval">
+                    <SkipForward className="h-5 w-5" />
+                  </Button>
+                </CoachMark>
+                <CoachMark content="Reset the current interval to its full duration and pause." show={settings.showCoachMarks}>
+                  <Button variant="outline" size="lg" onClick={() => timer.resetTimer()} aria-label="Reset timer">
+                    <RotateCcw className="h-5 w-5" />
+                  </Button>
+                </CoachMark>
+                 <CoachMark content={isMuted ? "Unmute all soundscapes." : "Mute all soundscapes."} show={settings.showCoachMarks}>
+                  <Button variant="outline" size="lg" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
+                    {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                  </Button>
+                </CoachMark>
               </div>
             </CardContent>
           </Card>
 
-          <SimpleTaskList 
-            tasks={tasks}
-            onAddTask={handleAddTask}
-            onToggleTask={handleToggleTask}
-            onRemoveTask={handleRemoveTask}
-            onClearCompletedTasks={handleClearCompletedTasks}
-          />
+          <CoachMark content="Manage your tasks for the session here. Add, complete, or remove tasks." show={settings.showCoachMarks} side="bottom">
+            <SimpleTaskList 
+              tasks={tasks}
+              onAddTask={handleAddTask}
+              onToggleTask={handleToggleTask}
+              onRemoveTask={handleRemoveTask}
+              onClearCompletedTasks={handleClearCompletedTasks}
+            />
+          </CoachMark>
           
           <Card className="w-full shadow-lg">
             <CardHeader>
-              <CardTitle className="text-lg">Session Notes & Context</CardTitle>
+              <CoachMark content="Optional notes and context for your session. This info can be used by the AI analyzer." show={settings.showCoachMarks} side="bottom">
+                <CardTitle className="text-lg">Session Notes & Context</CardTitle>
+              </CoachMark>
             </CardHeader>
             <CardContent>
               <div className="mb-4">
-                <Label htmlFor="session-type-select" className="text-sm font-medium">Session Context</Label>
-                 <Select
-                    value={currentSessionType}
-                    onValueChange={(value) => setCurrentSessionType(value as SessionType)}
-                  >
-                    <SelectTrigger id="session-type-select" className="w-full mt-1">
-                      <SelectValue placeholder="Select session context" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SESSION_TYPE_OPTIONS.map(opt => (
-                        <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <CoachMark content="Select the primary context of your session (e.g., Work, Learning) to get more tailored AI feedback." show={settings.showCoachMarks}>
+                  <div>
+                    <Label htmlFor="session-type-select" className="text-sm font-medium">Session Context</Label>
+                    <Select
+                        value={currentSessionType}
+                        onValueChange={(value) => setCurrentSessionType(value as SessionType)}
+                      >
+                        <SelectTrigger id="session-type-select" className="w-full mt-1">
+                          <SelectValue placeholder="Select session context" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SESSION_TYPE_OPTIONS.map(opt => (
+                            <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                  </div>
+                </CoachMark>
               </div>
-              <Textarea
-                placeholder="Jot down tasks, distractions, or thoughts during your session..."
-                value={currentNotes}
-                onChange={(e) => setCurrentNotes(e.target.value)}
-                className="min-h-[100px] focus:ring-accent"
-              />
-              <Button 
-                  variant="outline" 
-                  className="mt-3"
-                  onClick={() => triggerAiSummary(
-                    // Provide an empty log entry if only notes/tasks exist, so AI knows it's not a full session
-                    timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
-                    currentSessionType
-                  )} 
-                  disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
-                  title="Analyze current session notes, tasks and log with selected context"
-                >
-                  <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Data
-                </Button>
+              <CoachMark content="Jot down any thoughts, distractions, or ideas that come up during your session." show={settings.showCoachMarks}>
+                <Textarea
+                  placeholder="Jot down tasks, distractions, or thoughts during your session..."
+                  value={currentNotes}
+                  onChange={(e) => setCurrentNotes(e.target.value)}
+                  className="min-h-[100px] focus:ring-accent"
+                />
+              </CoachMark>
+              <CoachMark content="Click to analyze your current notes, tasks, and session log (if any) with AI, using the selected context." show={settings.showCoachMarks}>
+                <Button 
+                    variant="outline" 
+                    className="mt-3"
+                    onClick={() => triggerAiSummary(
+                      timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
+                      currentSessionType
+                    )} 
+                    disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
+                    title="Analyze current session notes, tasks and log with selected context"
+                  >
+                    <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Data
+                  </Button>
+              </CoachMark>
             </CardContent>
           </Card>
 
@@ -350,6 +416,11 @@ export default function PomodoroPage() {
           onOpenChange={setIsAiSummaryOpen}
           isLoading={isAiLoading}
         />
+
+        <UserGuideDialog 
+            isOpen={isUserGuideOpen}
+            onOpenChange={setIsUserGuideOpen}
+        />
         
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
           <p>&copy; {new Date().getFullYear()} {APP_NAME}. Stay focused!</p>
@@ -358,4 +429,3 @@ export default function PomodoroPage() {
     </>
   );
 }
-

@@ -13,7 +13,8 @@ export const DEFAULT_SETTINGS: Settings = {
   volume: 0.5,
   notificationsEnabled: true,
   backgroundAnimation: 'gradientFlow',
-  mouseTrailEffectEnabled: false, // Default for new mouse trail setting
+  mouseTrailEffectEnabled: false,
+  showCoachMarks: true, // Default to true for first-time users, can be turned off
 };
 
 export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
