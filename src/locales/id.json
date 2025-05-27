@@ -119,6 +119,10 @@
         "title": "Asisten Chat AI",
         "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami.\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
+      "dictionaryCard": {
+        "title": "Kamus Sesi",
+        "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia selama sesi Anda. Definisi ini disimpan sementara dan dapat diekspor ke file Markdown untuk catatan Anda."
+      },
       "sessionHistory": {
         "title": "Riwayat Sesi",
         "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai.\\nIni membantu Anda melacak sesi fokus Anda dari waktu ke waktu. Anda juga dapat menghapus riwayat dari panel ini."
@@ -147,6 +151,8 @@
     "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan.",
     "chatWidgetTitle": "Asisten Chat AI",
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
+    "dictionaryCardTitle": "Kamus Sesi",
+    "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda dapat diekspor ke Markdown.",
     "headerToolsTitle": "Alat Header",
     "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
@@ -208,5 +214,19 @@
     "inputPlaceholder": "Tanyakan sesuatu...",
     "sendButtonLabel": "Kirim",
     "aiPlaceholderResponse": "Gema: {{userMessage}}"
+  },
+  "dictionaryCard": {
+    "title": "Kamus Sesi",
+    "description": "Definisikan kata dan simpan untuk sesi Anda saat ini. Ekspor ke Markdown kapan saja.",
+    "wordInputLabel": "Masukkan kata",
+    "wordInputPlaceholder": "contoh: produktivitas",
+    "defineButton": "Definisikan",
+    "sessionDefinitionsTitle": "Definisi Sesi",
+    "exportMarkdownButton": "Ekspor Semua ke Markdown",
+    "errorDefiningTitle": "Kesalahan Definisi",
+    "errorDefiningDescription": "Tidak dapat mengambil definisi untuk kata tersebut. Silakan coba lagi.",
+    "nothingToExport": "Belum ada kata yang didefinisikan dalam sesi ini.",
+    "exportSuccessfulTitle": "Ekspor Berhasil",
+    "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown."
   }
 }

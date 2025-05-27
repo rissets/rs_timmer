@@ -119,6 +119,10 @@
         "title": "AI Chat Assistant",
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant.\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
+      "dictionaryCard": {
+        "title": "Session Dictionary",
+        "content": "Use the Dictionary Card to get definitions for words in English and Indonesian during your session. These definitions are stored temporarily and can be exported to a Markdown file for your records."
+      },
       "sessionHistory": {
         "title": "Session History",
         "content": "Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals.\\nThis helps you track your focus sessions over time. You can also clear the history from this panel."
@@ -147,6 +151,8 @@
     "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant for quick questions or support related to your focus session.",
+    "dictionaryCardTitle": "Session Dictionary",
+    "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions can be exported to Markdown.",
     "headerToolsTitle": "Header Tools",
     "headerToolsContent": "Access AI Summary (✨), Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
@@ -208,5 +214,19 @@
     "inputPlaceholder": "Ask something...",
     "sendButtonLabel": "Send",
     "aiPlaceholderResponse": "Echo: {{userMessage}}"
+  },
+  "dictionaryCard": {
+    "title": "Session Dictionary",
+    "description": "Define words and store them for your current session. Export to Markdown anytime.",
+    "wordInputLabel": "Enter a word",
+    "wordInputPlaceholder": "e.g., productivity",
+    "defineButton": "Define",
+    "sessionDefinitionsTitle": "Session Definitions",
+    "exportMarkdownButton": "Export All to Markdown",
+    "errorDefiningTitle": "Definition Error",
+    "errorDefiningDescription": "Could not get definitions for the word. Please try again.",
+    "nothingToExport": "No words defined yet in this session.",
+    "exportSuccessfulTitle": "Export Successful",
+    "exportSuccessfulDescription": "Your dictionary session has been downloaded as a Markdown file."
   }
 }

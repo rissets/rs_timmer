@@ -29,10 +29,12 @@ import StarfieldEffect from "@/components/effects/StarfieldEffect";
 import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { SimpleTaskList } from "@/components/simple-task-list";
+import { DictionaryCard } from "@/components/dictionary-card"; // Added
 import { summarizeSession } from "@/ai/flows/summarize-session";
-import { chatWithAI } from "@/ai/flows/chat-flow"; // Added
-import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage } from "@/lib/types";
-import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow"; // Added
+import { chatWithAI } from "@/ai/flows/chat-flow";
+import { defineWord } from "@/ai/flows/define-word-flow"; // Added
+import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage, DefinedWordEntry } from "@/lib/types"; // Added DefinedWordEntry
+import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen } from "lucide-react";
@@ -69,6 +71,10 @@ export default function PomodoroPage() {
   const [chatInputValue, setChatInputValue] = useState("");
   const [isAiChatLoading, setIsAiChatLoading] = useState(false);
 
+  // Dictionary Card State
+  const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
+  const [isDefiningWord, setIsDefiningWord] = useState(false);
+
 
   const tourSteps = React.useMemo(() => [
     {
@@ -102,6 +108,10 @@ export default function PomodoroPage() {
      {
       title: t('interactiveTourDialog.chatWidgetTitle'),
       content: <p>{t('interactiveTourDialog.chatWidgetContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.dictionaryCardTitle'), // Added
+      content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>, // Added
     },
     {
       title: t('interactiveTourDialog.headerToolsTitle'),
@@ -336,6 +346,57 @@ export default function PomodoroPage() {
     }
   };
 
+  const handleDefineWord = async (word: string) => {
+    if (!word.trim()) return;
+    setIsDefiningWord(true);
+    try {
+      const [engResult, indResult] = await Promise.all([
+        defineWord({ word: word.trim(), targetLanguage: 'English' }),
+        defineWord({ word: word.trim(), targetLanguage: 'Indonesian' }),
+      ]);
+
+      const newEntry: DefinedWordEntry = {
+        id: Date.now().toString(),
+        word: word.trim(),
+        englishDefinition: engResult.definition,
+        indonesianDefinition: indResult.definition,
+      };
+      setDefinedWordsList(prev => [newEntry, ...prev]); // Add to beginning for recency
+    } catch (error) {
+      console.error("Error defining word:", error);
+      toast({
+        title: t('dictionaryCard.errorDefiningTitle'),
+        description: t('dictionaryCard.errorDefiningDescription'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsDefiningWord(false);
+    }
+  };
+
+  const handleExportMarkdown = () => {
+    if (definedWordsList.length === 0) {
+      toast({ title: t('dictionaryCard.nothingToExport'), variant: 'default' });
+      return;
+    }
+    const markdownContent = definedWordsList
+      .slice() // Create a copy to avoid reversing original
+      .reverse() // Export in chronological order
+      .map(entry => `## ${entry.word}\n\n**English:**\n${entry.englishDefinition}\n\n**Indonesian:**\n${entry.indonesianDefinition}\n\n---\n`)
+      .join('\n');
+
+    const blob = new Blob([markdownContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rs_timer_dictionary_session_${new Date().toISOString().split('T')[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: t('dictionaryCard.exportSuccessfulTitle'), description: t('dictionaryCard.exportSuccessfulDescription') });
+  };
+
 
   if (!isSettingsLoaded) {
     return (
@@ -392,7 +453,7 @@ export default function PomodoroPage() {
           </div>
         </header>
 
-        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1] space-y-6 pb-20"> {/* Added pb-20 for chat button */}
+        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1] space-y-6 pb-20">
           <Card className="w-full shadow-xl">
             <CardHeader className="text-center">
                 <CardTitle className="text-2xl font-medium text-primary">
@@ -445,6 +506,13 @@ export default function PomodoroPage() {
             onToggleTask={handleToggleTask}
             onRemoveTask={handleRemoveTask}
             onClearCompletedTasks={handleClearCompletedTasks}
+          />
+
+          <DictionaryCard
+            definedWordsList={definedWordsList}
+            onDefineWord={handleDefineWord}
+            onExportMarkdown={handleExportMarkdown}
+            isDefining={isDefiningWord}
           />
           
           <Card className="w-full shadow-lg">

@@ -57,8 +57,12 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       contentKey: "userGuideDialog.sections.aiAnalysis.content",
     },
     {
-      titleKey: "userGuideDialog.sections.chatWidget.title", // Added chat widget section
+      titleKey: "userGuideDialog.sections.chatWidget.title", 
       contentKey: "userGuideDialog.sections.chatWidget.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.dictionaryCard.title", // Added
+      contentKey: "userGuideDialog.sections.dictionaryCard.content", // Added
     },
     {
       titleKey: "userGuideDialog.sections.sessionHistory.title",

@@ -74,3 +74,10 @@ export interface ChatMessage {
   text: string;
   timestamp: Date;
 }
+
+export interface DefinedWordEntry {
+  id: string;
+  word: string;
+  englishDefinition: string;
+  indonesianDefinition: string;
+}
