@@ -1,6 +1,4 @@
 
-version: '3.8'
-
 services:
   app:
     # Specifies the build context (current directory) and Dockerfile to use
@@ -31,3 +29,4 @@ services:
     # volumes:
     #   - ./uploads:/app/uploads # Example: Mounts a local ./uploads directory to /app/uploads in the container
     #   - ./.env:/app/.env # Example: Mounts your local .env file into the container (use with caution for secrets)
+
