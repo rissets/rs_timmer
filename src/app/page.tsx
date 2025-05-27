@@ -14,6 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { useTimerCore } from "@/hooks/use-timer-core";
 import { useSoundscapePlayer } from "@/hooks/use-soundscape-player";
@@ -29,11 +35,11 @@ import StarfieldEffect from "@/components/effects/StarfieldEffect";
 import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { SimpleTaskList } from "@/components/simple-task-list";
-import { DictionaryCard } from "@/components/dictionary-card"; // Added
+import { DictionaryCard } from "@/components/dictionary-card";
 import { summarizeSession } from "@/ai/flows/summarize-session";
 import { chatWithAI } from "@/ai/flows/chat-flow";
-import { defineWord } from "@/ai/flows/define-word-flow"; // Added
-import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage, DefinedWordEntry } from "@/lib/types"; // Added DefinedWordEntry
+import { defineWord } from "@/ai/flows/define-word-flow";
+import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage, DefinedWordEntry } from "@/lib/types";
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
@@ -75,6 +81,8 @@ export default function PomodoroPage() {
   const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
   const [isDefiningWord, setIsDefiningWord] = useState(false);
 
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
+
 
   const tourSteps = React.useMemo(() => [
     {
@@ -93,6 +101,10 @@ export default function PomodoroPage() {
       title: t('interactiveTourDialog.pomodoroDotsTitle'),
       content: <p>{t('interactiveTourDialog.pomodoroDotsContent')}</p>,
     },
+     {
+      title: t('interactiveTourDialog.collapsibleCardsTitle'),
+      content: <p>{t('interactiveTourDialog.collapsibleCardsContent')}</p>,
+    },
     {
       title: t('interactiveTourDialog.tasksTitle'),
       content: <p>{t('interactiveTourDialog.tasksContent')}</p>,
@@ -110,8 +122,8 @@ export default function PomodoroPage() {
       content: <p>{t('interactiveTourDialog.chatWidgetContent')}</p>,
     },
     {
-      title: t('interactiveTourDialog.dictionaryCardTitle'), // Added
-      content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>, // Added
+      title: t('interactiveTourDialog.dictionaryCardTitle'),
+      content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>, 
     },
     {
       title: t('interactiveTourDialog.headerToolsTitle'),
@@ -155,23 +167,9 @@ export default function PomodoroPage() {
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
-
-    switch (settings.backgroundAnimation) {
-      case 'rain':
-        return 'gentleRain';
-      case 'snow':
-        return 'pinkNoise'; 
-      case 'starfield':
-        return 'ambientPad';
-      case 'bubbles':
-        return 'calmingChimes';
-      case 'gradientFlow': 
-        return 'whiteNoise';
-      case 'none':
-      default:
-        return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-    }
-  }, [isMuted, settings.backgroundAnimation, settings.soundscapeWork, settings.soundscapeBreak]);
+    // Decoupled from backgroundAnimation. Always use selected soundscape.
+    return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
+  }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
   
   const getModeDisplayName = (mode: TimerMode) => {
     switch(mode) {
@@ -361,7 +359,7 @@ export default function PomodoroPage() {
         englishDefinition: engResult.definition,
         indonesianDefinition: indResult.definition,
       };
-      setDefinedWordsList(prev => [newEntry, ...prev]); // Add to beginning for recency
+      setDefinedWordsList(prev => [newEntry, ...prev]); 
     } catch (error) {
       console.error("Error defining word:", error);
       toast({
@@ -380,8 +378,8 @@ export default function PomodoroPage() {
       return;
     }
     const markdownContent = definedWordsList
-      .slice() // Create a copy to avoid reversing original
-      .reverse() // Export in chronological order
+      .slice() 
+      .reverse() 
       .map(entry => `## ${entry.word}\n\n**English:**\n${entry.englishDefinition}\n\n**Indonesian:**\n${entry.indonesianDefinition}\n\n---\n`)
       .join('\n');
 
@@ -500,64 +498,89 @@ export default function PomodoroPage() {
             </CardContent>
           </Card>
 
-          <SimpleTaskList 
-            tasks={tasks}
-            onAddTask={handleAddTask}
-            onToggleTask={handleToggleTask}
-            onRemoveTask={handleRemoveTask}
-            onClearCompletedTasks={handleClearCompletedTasks}
-          />
+          <Accordion 
+            type="multiple" 
+            className="w-full space-y-4" 
+            value={openAccordionItems}
+            onValueChange={setOpenAccordionItems}
+          >
+            <AccordionItem value="tasks" className="border rounded-lg shadow-lg bg-card overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
+              </AccordionTrigger>
+              <AccordionContent className="px-0"> 
+                <SimpleTaskList 
+                  tasks={tasks}
+                  onAddTask={handleAddTask}
+                  onToggleTask={handleToggleTask}
+                  onRemoveTask={handleRemoveTask}
+                  onClearCompletedTasks={handleClearCompletedTasks}
+                />
+              </AccordionContent>
+            </AccordionItem>
 
-          <DictionaryCard
-            definedWordsList={definedWordsList}
-            onDefineWord={handleDefineWord}
-            onExportMarkdown={handleExportMarkdown}
-            isDefining={isDefiningWord}
-          />
-          
-          <Card className="w-full shadow-lg">
-            <CardHeader>
+            <AccordionItem value="dictionary" className="border rounded-lg shadow-lg bg-card overflow-hidden">
+               <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                  <DictionaryCard.Title /> 
+               </AccordionTrigger>
+               <AccordionContent className="px-0">
+                  <DictionaryCard.Content
+                    definedWordsList={definedWordsList}
+                    onDefineWord={handleDefineWord}
+                    isDefining={isDefiningWord}
+                  />
+                  {definedWordsList.length > 0 && (
+                    <DictionaryCard.Footer onExportMarkdown={handleExportMarkdown} />
+                  )}
+               </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="notes" className="border rounded-lg shadow-lg bg-card overflow-hidden">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <div>
-                  <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
-                  <Select
-                      value={currentSessionType}
-                      onValueChange={(value) => setCurrentSessionType(value as SessionType)}
-                    >
-                      <SelectTrigger id="session-type-select" className="w-full mt-1">
-                        <SelectValue placeholder={t('cards.sessionContextPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SESSION_TYPE_OPTIONS.map(opt => (
-                          <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                </div>
-              </div>
-              <Textarea
-                placeholder={t('notes.textareaPlaceholder')}
-                value={currentNotes}
-                onChange={(e) => setCurrentNotes(e.target.value)}
-                className="min-h-[100px] focus:ring-accent"
-              />
-              <Button 
-                  variant="outline" 
-                  className="mt-3"
-                  onClick={() => triggerAiSummary(
-                    timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
-                    currentSessionType
-                  )} 
-                  disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
-                  title={t('tooltips.analyzeCurrentData')}
-                >
-                  <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
-                </Button>
-            </CardContent>
-          </Card>
+              </AccordionTrigger>
+              <AccordionContent className="px-0">
+                 <CardContent>
+                    <div className="mb-4">
+                      <div>
+                        <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
+                        <Select
+                            value={currentSessionType}
+                            onValueChange={(value) => setCurrentSessionType(value as SessionType)}
+                          >
+                            <SelectTrigger id="session-type-select" className="w-full mt-1">
+                              <SelectValue placeholder={t('cards.sessionContextPlaceholder')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SESSION_TYPE_OPTIONS.map(opt => (
+                                <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                      </div>
+                    </div>
+                    <Textarea
+                      placeholder={t('notes.textareaPlaceholder')}
+                      value={currentNotes}
+                      onChange={(e) => setCurrentNotes(e.target.value)}
+                      className="min-h-[100px] focus:ring-accent"
+                    />
+                    <Button 
+                        variant="outline" 
+                        className="mt-3"
+                        onClick={() => triggerAiSummary(
+                          timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
+                          currentSessionType
+                        )} 
+                        disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
+                        title={t('tooltips.analyzeCurrentData')}
+                      >
+                        <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
+                      </Button>
+                  </CardContent>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
         </main>
 
@@ -600,3 +623,5 @@ export default function PomodoroPage() {
     </>
   );
 }
+
+    

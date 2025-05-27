@@ -101,7 +101,11 @@
       },
       "customization": {
         "title": "Kustomisasi (Pengaturan)",
-        "content": "Klik ikon roda gigi di header untuk membuka Pengaturan. Anda dapat menyesuaikan:\\n* Durasi Timer: Atur durasi khusus untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang.\\n* Interval Istirahat Panjang: Tentukan berapa banyak sesi kerja yang terjadi sebelum istirahat panjang.\\n* Mulai Otomatis: Aktifkan/nonaktifkan memulai istirahat dan Pomodoro secara otomatis.\\n* Notifikasi: Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara Latar: Pilih suara sekitar yang berbeda untuk periode kerja dan istirahat, dan sesuaikan volume utama.\\n* Animasi Latar Belakang: Pilih efek latar belakang visual atau tidak sama sekali.\\n* Efek Jejak Mouse: Aktifkan atau nonaktifkan efek partikel yang mengikuti mouse Anda.\\n* Panduan Awal: Aktifkan/nonaktifkan tur panduan bermanfaat yang muncul pada kunjungan pertama."
+        "content": "Klik ikon roda gigi di header untuk membuka Pengaturan. Anda dapat menyesuaikan:\\n* Durasi Timer: Atur durasi khusus untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang.\\n* Interval Istirahat Panjang: Tentukan berapa banyak sesi kerja yang terjadi sebelum istirahat panjang.\\n* Mulai Otomatis: Aktifkan/nonaktifkan memulai istirahat dan Pomodoro secara otomatis.\\n* Notifikasi: Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara Latar & Animasi: Pilih suara sekitar yang berbeda untuk periode kerja/istirahat, dan pilih efek latar belakang visual. Sesuaikan volume utama.\\n* Efek Jejak Mouse: Aktifkan atau nonaktifkan efek partikel yang mengikuti mouse Anda.\\n* Panduan Awal: Aktifkan/nonaktifkan tur panduan bermanfaat yang muncul pada kunjungan pertama."
+      },
+      "collapsibleCards": {
+        "title": "Bagian yang Dapat Dilipat",
+        "content": "Bagian 'Tugas Hari Ini', 'Kamus Sesi', dan 'Catatan & Konteks Sesi' di bawah timer dapat dilipat. Klik judulnya untuk memperluas atau menyembunyikannya, membantu Anda mengatur tampilan ruang kerja Anda."
       },
       "tasksAndNotes": {
         "title": "Tugas & Catatan",
@@ -143,6 +147,8 @@
     "timerControlsContent": "Gunakan tombol ini untuk Mulai/Jeda, Lewati ke interval berikutnya, Atur Ulang interval saat ini, atau Bisukan/Aktifkan suara.",
     "pomodoroDotsTitle": "Titik Pomodoro",
     "pomodoroDotsContent": "Titik-titik ini melacak kemajuan Anda melalui siklus Pomodoro. Satu siklus penuh (biasanya 4 sesi kerja) memberi Anda Istirahat Panjang.",
+    "collapsibleCardsTitle": "Bagian yang Dapat Dilipat",
+    "collapsibleCardsContent": "Bagian untuk Tugas, Kamus, dan Catatan di bawah timer dapat diperluas atau dilipat dengan mengklik judulnya.",
     "tasksTitle": "Tugas",
     "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas dapat disertakan dalam Analisis AI.",
     "notesContextTitle": "Catatan & Konteks Sesi",
@@ -230,3 +236,5 @@
     "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown."
   }
 }
+
+    

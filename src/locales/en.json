@@ -101,7 +101,11 @@
       },
       "customization": {
         "title": "Customization (Settings)",
-        "content": "Click the gear icon in the header to open Settings. You can customize:\\n* Timer Durations: Set custom lengths for Work, Short Break, and Long Break intervals.\\n* Long Break Interval: Define how many work sessions occur before a long break.\\n* Auto-start: Enable/disable automatic starting of breaks and Pomodoros.\\n* Notifications: Toggle browser notifications for interval ends.\\n* Soundscapes: Choose different ambient sounds for work and break periods, and adjust the master volume.\\n* Background Animation: Select a visual background effect or none.\\n* Mouse Trail Effect: Enable or disable a particle effect that follows your mouse.\\n* Initial Guide: Toggle the helpful guided tour that appears on first visit."
+        "content": "Click the gear icon in the header to open Settings. You can customize:\\n* Timer Durations: Set custom lengths for Work, Short Break, and Long Break intervals.\\n* Long Break Interval: Define how many work sessions occur before a long break.\\n* Auto-start: Enable/disable automatic starting of breaks and Pomodoros.\\n* Notifications: Toggle browser notifications for interval ends.\\n* Soundscapes & Animations: Choose different ambient sounds for work/break periods, and select visual background effects. Adjust master volume.\\n* Mouse Trail Effect: Enable or disable a particle effect that follows your mouse.\\n* Initial Guide: Toggle the helpful guided tour that appears on first visit."
+      },
+      "collapsibleCards": {
+        "title": "Collapsible Sections",
+        "content": "The 'Today's Tasks', 'Session Dictionary', and 'Session Notes & Context' sections below the timer are collapsible. Click on their titles to expand or hide them, helping you manage your workspace view."
       },
       "tasksAndNotes": {
         "title": "Tasks & Notes",
@@ -116,11 +120,11 @@
         "content": "{{appName}} Timer features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant",
+        "title": "AI Chat Assistant", 
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant.\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "dictionaryCard": {
-        "title": "Session Dictionary",
+        "title": "Session Dictionary", 
         "content": "Use the Dictionary Card to get definitions for words in English and Indonesian during your session. These definitions are stored temporarily and can be exported to a Markdown file for your records."
       },
       "sessionHistory": {
@@ -143,6 +147,8 @@
     "timerControlsContent": "Use these buttons to Start/Pause, Skip to the next interval, Reset the current interval, or Mute/Unmute sounds.",
     "pomodoroDotsTitle": "Pomodoro Dots",
     "pomodoroDotsContent": "These dots track your progress through a Pomodoro cycle. A full cycle (usually 4 work sessions) earns you a Long Break.",
+    "collapsibleCardsTitle": "Collapsible Sections",
+    "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Notes below the timer can be expanded or collapsed by clicking their titles.",
     "tasksTitle": "Tasks",
     "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks can be included in the AI Analysis.",
     "notesContextTitle": "Session Notes & Context",
@@ -151,7 +157,7 @@
     "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant for quick questions or support related to your focus session.",
-    "dictionaryCardTitle": "Session Dictionary",
+    "dictionaryCardTitle": "Session Dictionary", 
     "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions can be exported to Markdown.",
     "headerToolsTitle": "Header Tools",
     "headerToolsContent": "Access AI Summary (✨), Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
@@ -230,3 +236,5 @@
     "exportSuccessfulDescription": "Your dictionary session has been downloaded as a Markdown file."
   }
 }
+
+    

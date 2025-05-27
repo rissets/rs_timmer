@@ -3,13 +3,13 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { CardContent, CardFooter } from "@/components/ui/card"; // Removed Card, CardHeader, CardTitle
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2, Plus } from "lucide-react";
 import type { Task } from "@/lib/types";
-import { useLanguageContext } from "@/contexts/language-context"; // Added
+import { useLanguageContext } from "@/contexts/language-context";
 
 interface SimpleTaskListProps {
   tasks: Task[];
@@ -27,7 +27,7 @@ export function SimpleTaskList({
   onClearCompletedTasks
 }: SimpleTaskListProps) {
   const [newTaskText, setNewTaskText] = useState("");
-  const { t } = useLanguageContext(); // Added
+  const { t } = useLanguageContext();
 
   const handleAddTask = () => {
     if (newTaskText.trim()) {
@@ -43,11 +43,8 @@ export function SimpleTaskList({
   };
 
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <>
+      <CardContent className="space-y-4 pt-6"> {/* Added pt-6 for padding consistency */}
         <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2 sm:gap-0">
           <Input
             type="text"
@@ -103,6 +100,8 @@ export function SimpleTaskList({
             </Button>
          </CardFooter>
       )}
-    </Card>
+    </>
   );
 }
+
+    
