@@ -20,8 +20,8 @@ interface ActivePatternElements {
   loops: Tone.Loop[];
   effects: (Tone.Reverb | Tone.Volume | Tone.AutoFilter | Tone.Panner | Tone.FeedbackDelay | Tone.Chorus | Tone.Filter | Tone.LFO)[];
   masterVolumeNode?: Tone.Volume;
-  noiseSource?: Tone.Noise;
-  autoFilter?: Tone.AutoFilter;
+  noiseSource?: Tone.Noise; // For ocean
+  autoFilter?: Tone.AutoFilter; // For ocean
 }
 
 interface SoundscapePlayer {
@@ -31,7 +31,7 @@ interface SoundscapePlayer {
   isPlaying: boolean;
 }
 
-const scheduleDelay = 0.05; 
+const scheduleDelay = 0.05; // 50ms delay for scheduling transport-based events
 
 export function useSoundscapePlayer({
   volume,
@@ -43,6 +43,7 @@ export function useSoundscapePlayer({
 
   const settings = isSettingsLoaded && propSettings ? propSettings : DEFAULT_SETTINGS;
 
+  // Refs for Tone.js synths
   const tonePlayer = useRef<Tone.Synth | null>(null);
   const polySynthPlayer = useRef<Tone.PolySynth | null>(null);
   const tonePlayerLeft = useRef<Tone.Synth | null>(null);
@@ -63,7 +64,6 @@ export function useSoundscapePlayer({
   const activePlayerType = useRef<SoundscapeOption['type'] | null>(null);
   const lastPlayedSoundscapeIdRef = useRef<string | undefined>(undefined);
 
-
   const cleanupDisposedSynths = useCallback(() => {
     const disposeSynth = (synthRef: React.MutableRefObject<any>) => {
         if (synthRef.current && !synthRef.current.disposed) {
@@ -83,24 +83,24 @@ export function useSoundscapePlayer({
   }, []);
 
   const cleanupPattern = useCallback(() => {
-    Tone.Transport.stop();
+    Tone.Transport.stop(); // Stop transport first
 
     activePatternElements.current.loops.forEach(loop => {
       if (loop && !loop.disposed) {
-        loop.stop(0);
+        loop.stop(0); // Stop loop immediately on transport timeline
         loop.dispose();
       }
     });
     activePatternElements.current.parts.forEach(part => {
       if (part && !part.disposed) {
-        part.stop(0);
+        part.stop(0); // Stop part immediately
         part.clear();
         part.dispose();
       }
     });
     activePatternElements.current.sequences.forEach(seq => {
       if (seq && !seq.disposed) {
-        seq.stop(0);
+        seq.stop(0); // Stop sequence immediately
         seq.clear();
         seq.dispose();
       }
@@ -122,6 +122,7 @@ export function useSoundscapePlayer({
     activePatternElements.current.noiseSource = undefined;
 
     if (activePatternElements.current.autoFilter && !activePatternElements.current.autoFilter.disposed) {
+        activePatternElements.current.autoFilter.stop?.(Tone.now()); // Stop if it has a start/stop method
         activePatternElements.current.autoFilter.dispose();
     }
     activePatternElements.current.autoFilter = undefined;
@@ -137,49 +138,89 @@ export function useSoundscapePlayer({
     }
     activePatternElements.current.masterVolumeNode = undefined;
     
-    Tone.Transport.cancel(0);
+    Tone.Transport.cancel(0); // Clear all scheduled events on transport
     activePatternElements.current = { synths: [], sequences: [], parts: [], loops: [], effects: [] };
   }, []);
 
   const stopSound = useCallback(() => {
-    cleanupDisposedSynths();
+    // Dispose Tone.js synths that are directly managed by refs
+    if (tonePlayer.current && !tonePlayer.current.disposed) {
+        tonePlayer.current.triggerRelease(Tone.now());
+        tonePlayer.current.dispose();
+        tonePlayer.current = null;
+    }
+    if (polySynthPlayer.current && !polySynthPlayer.current.disposed) {
+        polySynthPlayer.current.releaseAll(Tone.now());
+        polySynthPlayer.current.dispose();
+        polySynthPlayer.current = null;
+    }
+    if (tonePlayerLeft.current && !tonePlayerLeft.current.disposed) {
+        tonePlayerLeft.current.triggerRelease(Tone.now());
+        tonePlayerLeft.current.dispose();
+        tonePlayerLeft.current = null;
+    }
+    if (tonePlayerRight.current && !tonePlayerRight.current.disposed) {
+        tonePlayerRight.current.triggerRelease(Tone.now());
+        tonePlayerRight.current.dispose();
+        tonePlayerRight.current = null;
+    }
+    if (generalNoisePlayer.current && !generalNoisePlayer.current.disposed) {
+        generalNoisePlayer.current.stop(Tone.now());
+        generalNoisePlayer.current.dispose();
+        generalNoisePlayer.current = null;
+    }
 
+    // Cleanup pattern-based sounds (which includes synths, loops, effects etc. in activePatternElements)
     if (['patternLoop', 'ocean', 'fireplace'].includes(activePlayerType.current || '')) {
       cleanupPattern();
     }
 
+    // Handle HTML5 audio player
     if (htmlAudioPlayer.current && (activePlayerType.current === 'userUploaded')) {
       htmlAudioPlayer.current.pause();
-      htmlAudioPlayer.current.removeAttribute('src');
-      htmlAudioPlayer.current.load(); // Force reload of empty player
+      htmlAudioPlayer.current.removeAttribute('src'); // Remove src
+      htmlAudioPlayer.current.load(); // Reset player state
       if (currentObjectUrl.current) {
         URL.revokeObjectURL(currentObjectUrl.current);
         currentObjectUrl.current = null;
       }
     }
+
     setIsPlaying(false);
-    activePlayerType.current = null;
-  }, [cleanupDisposedSynths, cleanupPattern]);
+    activePlayerType.current = null; // Reset active player type
+  }, [cleanupPattern]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    // Initialize HTML5 audio player
+    if (typeof window !== 'undefined' && !htmlAudioPlayer.current) {
       htmlAudioPlayer.current = new Audio();
       htmlAudioPlayer.current.loop = true;
+    }
 
+    // Initialize Tone.js context
+    const initializeTone = async () => {
       if (Tone.context.state !== 'running') {
-        // Defer Tone.start()
+        try {
+          await Tone.start();
+          setIsReady(true);
+          console.log("Tone.js AudioContext started.");
+        } catch (e) {
+          console.error("Failed to start Tone.js AudioContext:", e);
+          setIsReady(false); // Explicitly set to false if Tone.start fails
+        }
       } else {
         setIsReady(true);
       }
-    }
+    };
+    initializeTone();
 
     return () => {
-      stopSound();
+      stopSound(); // Cleanup on component unmount
       if (htmlAudioPlayer.current) {
         htmlAudioPlayer.current.pause();
         htmlAudioPlayer.current.removeAttribute('src');
         htmlAudioPlayer.current.load();
-        htmlAudioPlayer.current = null;
+        htmlAudioPlayer.current = null; // Release the reference
       }
       if (currentObjectUrl.current) {
         URL.revokeObjectURL(currentObjectUrl.current);
@@ -197,7 +238,7 @@ export function useSoundscapePlayer({
     
     if (!isReady && soundscapeId && soundscapeId !== 'none') {
       try {
-        await Tone.start();
+        await Tone.start(); // Ensure Tone is started
         setIsReady(true);
       } catch (e) {
         console.error("Failed to start Tone.js in playSound:", e);
@@ -205,7 +246,7 @@ export function useSoundscapePlayer({
       }
     }
 
-    stopSound(); // Stop any currently playing sound
+    stopSound(); // Stop any currently playing sound before starting a new one
 
     if (!soundscapeId || soundscapeId === 'none') {
       lastPlayedSoundscapeIdRef.current = undefined;
@@ -222,7 +263,7 @@ export function useSoundscapePlayer({
                     id: soundscapeId,
                     nameKey: userSound.name, // Use the actual name
                     type: 'userUploaded',
-                    params: { indexedDbId: dbId, mimeType: userSound.mimeType }
+                    params: { indexedDbId: dbId, mimeType: userSound.mimeType, volumeAdjustment: 0 } // Add default volumeAdjustment
                 };
             }
         }
@@ -232,6 +273,7 @@ export function useSoundscapePlayer({
 
 
     if (!selectedSoundscape) {
+      console.warn("Selected soundscape not found:", soundscapeId);
       lastPlayedSoundscapeIdRef.current = undefined;
       return;
     }
@@ -247,6 +289,9 @@ export function useSoundscapePlayer({
 
     const transportSensitiveTypes: SoundscapeOption['type'][] = ['patternLoop', 'ocean', 'fireplace'];
     if (transportSensitiveTypes.includes(selectedSoundscape.type)) {
+      if (activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
+        activePatternElements.current.masterVolumeNode.dispose();
+      }
       activePatternElements.current.masterVolumeNode = new Tone.Volume(finalGainValue).toDestination();
       activePatternElements.current.effects.push(activePatternElements.current.masterVolumeNode);
       
@@ -258,25 +303,27 @@ export function useSoundscapePlayer({
     switch (selectedSoundscape.type) {
       case 'userUploaded':
         if (htmlAudioPlayer.current && selectedSoundscape.params?.indexedDbId) {
+            const audioSrcToPlay = `user_sound_${selectedSoundscape.params.indexedDbId}`; // For logging/identification
             try {
                 const soundData = await getSoundscapeFromDB(selectedSoundscape.params.indexedDbId);
-                if (soundData) {
+                if (soundData && soundData.data) {
                     const blob = new Blob([soundData.data], { type: soundData.mimeType });
-                    if (currentObjectUrl.current) { // Revoke previous if any
-                        URL.revokeObjectURL(currentObjectUrl.current);
+                    if (currentObjectUrl.current) { 
+                        URL.revokeObjectURL(currentObjectUrl.current); // Revoke previous before creating new
                     }
                     currentObjectUrl.current = URL.createObjectURL(blob);
+                    
                     htmlAudioPlayer.current.src = currentObjectUrl.current;
-                    htmlAudioPlayer.current.load();
                     htmlAudioPlayer.current.volume = finalHtmlVolume;
+                    htmlAudioPlayer.current.load(); // Explicitly load the new source
                     await htmlAudioPlayer.current.play();
                     setIsPlaying(true);
                 } else {
-                     console.warn("User uploaded sound not found in DB:", selectedSoundscape.params.indexedDbId);
+                     console.warn("User uploaded sound data not found in DB or data is empty:", selectedSoundscape.params.indexedDbId);
                      setIsPlaying(false);
                 }
             } catch (error: any) {
-                console.error("Error playing user uploaded audio:", selectedSoundscape.params.indexedDbId, error);
+                console.error("Error playing user uploaded audio:", audioSrcToPlay, error);
                 setIsPlaying(false);
             }
         }
@@ -299,11 +346,29 @@ export function useSoundscapePlayer({
         if (notes && Array.isArray(notes)) {
           polySynthPlayer.current = new Tone.PolySynth(Tone.Synth, synthOptions).toDestination();
           polySynthPlayer.current.volume.value = finalGainValue;
-          polySynthPlayer.current.triggerAttack(notes, Tone.now() + scheduleDelay);
+          Tone.Transport.scheduleOnce((time) => {
+              if (polySynthPlayer.current && !polySynthPlayer.current.disposed) {
+                  polySynthPlayer.current.triggerAttack(notes, time);
+              }
+          }, scheduleDelay);
         } else {
           tonePlayer.current = new Tone.Synth(synthOptions).toDestination();
           tonePlayer.current.volume.value = finalGainValue;
-          tonePlayer.current.triggerAttack(frequency || 440, Tone.now() + scheduleDelay);
+          Tone.Transport.scheduleOnce((time) => {
+            if (tonePlayer.current && !tonePlayer.current.disposed) {
+                tonePlayer.current.triggerAttack(frequency || 440, time);
+            }
+          }, scheduleDelay);
+        }
+         if (Tone.Transport.state !== "started" && (notes && Array.isArray(notes))) { // Only start transport if needed by polysynth
+            Tone.Transport.start(Tone.now() + scheduleDelay);
+        } else if (!(notes && Array.isArray(notes)) && tonePlayer.current) { // For single tone, ensure it plays if transport isn't involved
+            // No transport start needed for single triggerAttack with Tone.now() + offset
+             if (tonePlayer.current && !tonePlayer.current.disposed && !(frequency || 440)) {
+                // if frequency is null/undefined, we might need to ensure it's scheduled with Tone.now if not using transport
+                // However, the scheduleOnce should handle this. Re-evaluating if still an issue.
+                // For now, the scheduleOnce should be sufficient.
+             }
         }
         setIsPlaying(true);
         break;
@@ -319,11 +384,17 @@ export function useSoundscapePlayer({
 
         tonePlayerLeft.current = new Tone.Synth(binauralSynthOpts).connect(pannerL);
         tonePlayerLeft.current.volume.value = finalGainValue;
-        tonePlayerLeft.current.triggerAttack(freqLeft, Tone.now() + scheduleDelay);
-
+        
         tonePlayerRight.current = new Tone.Synth(binauralSynthOpts).connect(pannerR);
         tonePlayerRight.current.volume.value = finalGainValue;
-        tonePlayerRight.current.triggerAttack(freqRight, Tone.now() + scheduleDelay);
+
+        Tone.Transport.scheduleOnce((time) => {
+            if(tonePlayerLeft.current && !tonePlayerLeft.current.disposed) tonePlayerLeft.current.triggerAttack(freqLeft, time);
+            if(tonePlayerRight.current && !tonePlayerRight.current.disposed) tonePlayerRight.current.triggerAttack(freqRight, time);
+        }, scheduleDelay);
+        if (Tone.Transport.state !== "started") {
+            Tone.Transport.start(Tone.now() + scheduleDelay);
+        }
         setIsPlaying(true);
         break;
       case 'ocean':
@@ -333,22 +404,25 @@ export function useSoundscapePlayer({
             setIsPlaying(false);
             return;
         }
-        activePatternElements.current.noiseSource = new Tone.Noise("brown");
-        const autoFilterParams = selectedSoundscape.params?.autoFilter;
-        activePatternElements.current.autoFilter = new Tone.AutoFilter({
-            ...(autoFilterParams || {}),
-            frequency: autoFilterParams?.frequency || "2m",
-            baseFrequency: autoFilterParams?.baseFrequency || 200,
-            octaves: autoFilterParams?.octaves || 4,
-            filter: autoFilterParams?.filter || { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 }
+        const oceanNoise = new Tone.Noise("brown");
+        activePatternElements.current.noiseSource = oceanNoise;
+
+        const autoFilterParams = selectedSoundscape.params?.autoFilter || {};
+        const oceanAutoFilter = new Tone.AutoFilter({
+            frequency: autoFilterParams.frequency || "4m", // Slower frequency for wave-like effect
+            baseFrequency: autoFilterParams.baseFrequency || 100,
+            octaves: autoFilterParams.octaves || 5,
+            filter: autoFilterParams.filter || { type: "lowpass" as const, rolloff: -24 as const, Q: 3 },
+            wet: 1
         }).connect(activePatternElements.current.masterVolumeNode);
-        activePatternElements.current.effects.push(activePatternElements.current.autoFilter);
+        activePatternElements.current.autoFilter = oceanAutoFilter;
+        activePatternElements.current.effects.push(oceanAutoFilter);
         
-        activePatternElements.current.noiseSource.connect(activePatternElements.current.autoFilter);
+        oceanNoise.connect(oceanAutoFilter);
         
         Tone.Transport.scheduleOnce((transportTime) => {
-            if (activePatternElements.current.autoFilter && !activePatternElements.current.autoFilter.disposed) activePatternElements.current.autoFilter.start(transportTime);
-            if (activePatternElements.current.noiseSource && !activePatternElements.current.noiseSource.disposed) activePatternElements.current.noiseSource.start(transportTime);
+            if (oceanAutoFilter && !oceanAutoFilter.disposed) oceanAutoFilter.start(transportTime);
+            if (oceanNoise && !oceanNoise.disposed) oceanNoise.start(transportTime);
         }, scheduleDelay);
 
         setIsPlaying(true);
@@ -370,10 +444,10 @@ export function useSoundscapePlayer({
         const crackleLoop = new Tone.Loop(transportTime => {
             if (fireNoiseSynth && !fireNoiseSynth.disposed) {
                 fireNoiseSynth.volume.value = finalGainValue - (Math.random() * 6);
-                const randomOffset = 0.001 + (Math.random() * 0.049);
+                const randomOffset = 0.001 + (Math.random() * 0.049); // Ensure offset is always positive and small
                 fireNoiseSynth.triggerAttackRelease("32n", transportTime + randomOffset);
             }
-        }, "16n").start(scheduleDelay);
+        }, "16n").start(scheduleDelay); // Start loop on transport
         crackleLoop.probability = 0.6;
         activePatternElements.current.loops.push(crackleLoop);
         setIsPlaying(true);
@@ -407,7 +481,7 @@ export function useSoundscapePlayer({
           if (activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
             synth.connect(activePatternElements.current.masterVolumeNode);
           } else {
-            synth.toDestination();
+            synth.toDestination(); // Fallback, though masterVolumeNode should exist
           }
           activePatternElements.current.synths.push(synth);
 
@@ -415,14 +489,16 @@ export function useSoundscapePlayer({
             const seq = new Tone.Sequence((transportTime, note) => {
               if (note && synth && !synth.disposed && typeof synth.triggerAttackRelease === 'function') {
                  synth.triggerAttackRelease(note, instrumentDef.duration || '8n', transportTime);
-              } else if (note && synth && !synth.disposed && typeof synth.triggerAttack === 'function') {
+              } else if (note && synth && !synth.disposed && typeof synth.triggerAttack === 'function') { // For synths like NoiseSynth that only have triggerAttack
                  synth.triggerAttack(note, transportTime);
               }
             }, instrumentDef.pattern, instrumentDef.subdivision).start(scheduleDelay);
             activePatternElements.current.sequences.push(seq);
-          } else if (instrumentDef.sequence) {
+          } else if (instrumentDef.sequence) { // For more complex sequences (array of objects with time, notes, duration)
             const part = new Tone.Part((transportTime, value) => {
-              if(synth && !synth.disposed && value.notes && typeof synth.triggerAttackRelease === 'function') synth.triggerAttackRelease(value.notes, value.duration, transportTime);
+              if(synth && !synth.disposed && value.notes && typeof synth.triggerAttackRelease === 'function') {
+                synth.triggerAttackRelease(value.notes, value.duration, transportTime);
+              }
             }, instrumentDef.sequence).start(scheduleDelay);
             part.loop = true;
             if (instrumentDef.loopEnd) part.loopEnd = instrumentDef.loopEnd;
@@ -430,9 +506,9 @@ export function useSoundscapePlayer({
           }
         });
         if (patternEffectsParams?.reverb && activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
-           const reverb = new Tone.Reverb(patternEffectsParams.reverb).toDestination();
-           activePatternElements.current.masterVolumeNode.disconnect(Tone.Destination);
-           activePatternElements.current.masterVolumeNode.connect(reverb);
+           const reverb = new Tone.Reverb(patternEffectsParams.reverb).toDestination(); // Reverb goes to destination
+           activePatternElements.current.masterVolumeNode.disconnect(Tone.Destination); // Disconnect direct path
+           activePatternElements.current.masterVolumeNode.connect(reverb); // Connect volume node to reverb
            activePatternElements.current.effects.push(reverb);
         }
         setIsPlaying(true);
@@ -442,7 +518,7 @@ export function useSoundscapePlayer({
         lastPlayedSoundscapeIdRef.current = undefined;
         setIsPlaying(false);
     }
-  }, [isReady, volume, stopSound, cleanupPattern, cleanupDisposedSynths, settings, isSettingsLoaded]);
+  }, [isReady, volume, stopSound, cleanupPattern, settings, isSettingsLoaded]);
 
   useEffect(() => {
     if (!isSettingsLoaded || !settings || !isPlaying || !isReady || !lastPlayedSoundscapeIdRef.current) {
@@ -453,7 +529,16 @@ export function useSoundscapePlayer({
     let selectedSound: SoundscapeOption | undefined;
 
     if (currentSoundscapeId.startsWith('user_')) {
-        selectedSound = { id: currentSoundscapeId, nameKey: '', type: 'userUploaded', params: { volumeAdjustment: 0 } }; // Minimal object for volume adjustment
+        // For user sounds, the type is 'userUploaded'. Params like volumeAdjustment are expected.
+        const dbId = parseInt(currentSoundscapeId.split('_')[1], 10);
+        // We need to find the name or rely on a default volume adjustment for user sounds if not stored
+        // For now, assume a default volumeAdjustment if not specifically fetched/stored with user sound metadata
+        selectedSound = {
+            id: currentSoundscapeId,
+            nameKey: 'User Sound', // Placeholder nameKey
+            type: 'userUploaded',
+            params: { indexedDbId: dbId, volumeAdjustment: settings.customSoundscapeUrls?.[currentSoundscapeId]?.volumeAdjustment || 0 }
+        };
     } else {
         selectedSound = SOUNDSCAPE_OPTIONS.find(s => s.id === currentSoundscapeId);
     }
@@ -473,10 +558,13 @@ export function useSoundscapePlayer({
 
       if (activeType === 'noise' && generalNoisePlayer.current && !generalNoisePlayer.current.disposed) {
         generalNoisePlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
-      } else if (activeType === 'tone' && tonePlayer.current && !tonePlayer.current.disposed) {
-        tonePlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
-      } else if (activeType === 'polysynth' && polySynthPlayer.current && !polySynthPlayer.current.disposed) { // 'tone' with notes array maps to 'polysynth' ref
-        polySynthPlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
+      } else if (activeType === 'tone') {
+        if (tonePlayer.current && !tonePlayer.current.disposed) {
+            tonePlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
+        }
+        if (polySynthPlayer.current && !polySynthPlayer.current.disposed) {
+            polySynthPlayer.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
+        }
       } else if (activeType === 'binaural') {
         if (tonePlayerLeft.current && !tonePlayerLeft.current.disposed) tonePlayerLeft.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
         if (tonePlayerRight.current && !tonePlayerRight.current.disposed) tonePlayerRight.current.volume.linearRampToValueAtTime(finalGain, Tone.now() + 0.1);
@@ -488,3 +576,4 @@ export function useSoundscapePlayer({
 
   return { playSound, stopSound, isReady, isPlaying };
 }
+
