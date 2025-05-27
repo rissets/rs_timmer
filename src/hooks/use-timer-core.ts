@@ -5,6 +5,8 @@ import type { Settings, TimerMode, SessionRecord } from '@/lib/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import * as Tone from 'tone';
+// No direct import for useLanguageContext here, notifications are not React components.
+// If t function is needed for notification text, it must be passed in or obtained differently.
 
 interface UseTimerCoreProps {
   settings: Settings;
@@ -14,6 +16,7 @@ interface UseTimerCoreProps {
   onTimerSkip?: (mode: TimerMode, nextMode: TimerMode) => void;
   onIntervalEnd: (mode: TimerMode, completedPomodoros: number, sessionLog: SessionRecord[]) => void;
   onTick?: (timeLeft: number, mode: TimerMode) => void;
+  getTranslatedText: (key: string, replacements?: Record<string, string>) => string; // For notifications
 }
 
 interface TimerCore {
@@ -38,6 +41,7 @@ export function useTimerCore({
   onTimerSkip,
   onIntervalEnd,
   onTick,
+  getTranslatedText, // Use this for notification text
 }: UseTimerCoreProps): TimerCore {
   const { toast } = useToast();
   const [mode, setMode] = useState<TimerMode>('work');
@@ -54,10 +58,13 @@ export function useTimerCore({
     if (Notification.permission !== 'granted') {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        toast({ title: "Notifications Disabled", description: "You won't receive interval alerts." });
+        toast({ 
+            title: getTranslatedText('notifications.disabled'), 
+            description: getTranslatedText('notifications.disabledDescription') 
+        });
       }
     }
-  }, [settings.notificationsEnabled, toast]);
+  }, [settings.notificationsEnabled, toast, getTranslatedText]);
 
   useEffect(() => {
     requestNotificationPermission();
@@ -65,7 +72,7 @@ export function useTimerCore({
 
   const sendNotification = useCallback((title: string, body: string) => {
     if (settings.notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body, icon: 'https://placehold.co/192x192.png' });
+      new Notification(title, { body, icon: '/icons/icon-192x192.png' });
     }
   }, [settings.notificationsEnabled]);
 
@@ -109,20 +116,31 @@ export function useTimerCore({
       } else {
         nextMode = 'shortBreak';
       }
-    } else { // break ended
+    } else { 
       nextMode = 'work';
       if (mode === 'longBreak') {
-        completedPomodorosUpdate = 0; // Reset cycle
+        completedPomodorosUpdate = 0; 
       }
     }
     
     setMode(nextMode);
     setTimeLeft(getDurationForMode(nextMode));
     setCurrentCyclePomodoros(completedPomodorosUpdate);
-    onIntervalEnd(mode, completedPomodorosUpdate, sessionLog); 
+    // Ensure sessionLog passed to onIntervalEnd is the most up-to-date.
+    // Since setSessionLog is async, we construct it here for the callback.
+    const updatedSessionLog = [...sessionLog, logSession(!skipped, Math.round(actualDurationSeconds / 60))];
 
-    const notificationTitle = mode === 'work' ? 'Work session ended!' : 'Break time is over!';
-    const notificationBody = `Time for ${nextMode === 'work' ? 'work' : nextMode === 'shortBreak' ? 'a short break' : 'a long break'}.`;
+
+    onIntervalEnd(mode, completedPomodorosUpdate, updatedSessionLog); 
+
+    const notificationTitle = mode === 'work' 
+        ? getTranslatedText('notifications.workSessionEnded') 
+        : getTranslatedText('notifications.breakTimeOver');
+    const notificationBody = nextMode === 'work' 
+        ? getTranslatedText('notifications.timeForWork') 
+        : nextMode === 'shortBreak' 
+            ? getTranslatedText('notifications.timeForShortBreak') 
+            : getTranslatedText('notifications.timeForLongBreak');
     sendNotification(notificationTitle, notificationBody);
 
     if ((mode === 'work' && settings.autoStartBreaks) || (mode !== 'work' && settings.autoStartPomodoros)) {
@@ -131,7 +149,7 @@ export function useTimerCore({
         setIsRunning(false);
     }
 
-  }, [mode, currentCyclePomodoros, settings, timeLeft, getDurationForMode, onIntervalEnd, sendNotification, logSession, sessionLog]);
+  }, [mode, currentCyclePomodoros, settings, timeLeft, getDurationForMode, onIntervalEnd, sendNotification, logSession, sessionLog, getTranslatedText]);
 
 
   useEffect(() => {
@@ -164,10 +182,14 @@ export function useTimerCore({
   }, [isRunning, mode, moveToNextMode, onTick]);
 
   useEffect(() => {
+    // Only reset timeLeft if the timer is not running AND settings or mode changed
+    // This prevents resetting on pause.
     if (!isRunning) {
-      setTimeLeft(getDurationForMode(mode));
+        setTimeLeft(getDurationForMode(mode));
     }
-  }, [settings, mode, getDurationForMode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode]);
+
 
   const startTimer = () => {
     if (Tone.context.state !== 'running') { 

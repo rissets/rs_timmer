@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import { APP_NAME } from '@/lib/constants';
 import { BookOpen } from 'lucide-react';
+import { useLanguageContext } from "@/contexts/language-context"; // Added
 
 interface UserGuideDialogProps {
   isOpen: boolean;
@@ -27,9 +28,13 @@ interface UserGuideDialogProps {
 }
 
 export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) {
+  const { t } = useLanguageContext(); // Added
+
+  // For full content translation, you'd fetch these from en.json/id.json
+  // For now, only titles are translated.
   const guideSections = [
     {
-      title: "Getting Started with Pomodoro",
+      titleKey: "userGuideDialog.sections.gettingStarted.title",
       content: (
         <>
           <p className="mb-2">The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.</p>
@@ -39,7 +44,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       ),
     },
     {
-      title: "Timer Controls",
+      titleKey: "userGuideDialog.sections.timerControls.title",
       content: (
         <ul className="list-disc pl-5 space-y-2">
           <li><strong>Start/Pause:</strong> Click the main button to start or pause the current timer (Work, Short Break, or Long Break).</li>
@@ -50,7 +55,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       ),
     },
     {
-      title: "Customization (Settings)",
+      titleKey: "userGuideDialog.sections.customization.title",
       content: (
         <>
           <p className="mb-2">Click the gear icon in the header to open Settings. You can customize:</p>
@@ -67,8 +72,8 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
         </>
       ),
     },
-    {
-      title: "Tasks & Notes",
+     {
+      titleKey: "userGuideDialog.sections.tasksAndNotes.title",
       content: (
         <>
           <p className="mb-2">Below the timer, you'll find sections for managing tasks and taking notes:</p>
@@ -81,7 +86,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       ),
     },
     {
-      title: "Session Context",
+      titleKey: "userGuideDialog.sections.sessionContext.title",
       content: (
         <p className="mb-2">
           Before analyzing your session data (notes, tasks, or a full Pomodoro log), you can specify a "Session Context" (e.g., Work, Learning, General).
@@ -90,7 +95,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       ),
     },
     {
-      title: "AI Session Analysis",
+      titleKey: "userGuideDialog.sections.aiAnalysis.title",
       content: (
         <>
           <p className="mb-2">
@@ -104,7 +109,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       ),
     },
     {
-      title: "Session History",
+      titleKey: "userGuideDialog.sections.sessionHistory.title",
       content: (
         <p className="mb-2">
           Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals.
@@ -113,7 +118,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       ),
     },
     {
-        title: "Theme & Appearance",
+        titleKey: "userGuideDialog.sections.themeAndAppearance.title",
         content: (
             <ul className="list-disc pl-5 space-y-2">
                 <li><strong>Dark/Light Mode:</strong> Toggle between dark and light themes using the sun/moon icon in the header.</li>
@@ -129,19 +134,19 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <BookOpen className="mr-2 h-6 w-6 text-primary" />
-            {APP_NAME} Timer User Guide
+            {t('userGuideDialog.title')}
           </DialogTitle>
           <DialogDescription>
-            Learn how to make the most of your focus sessions.
+            {t('userGuideDialog.description')}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] p-1 pr-3">
           <Accordion type="single" collapsible className="w-full">
             {guideSections.map((section, index) => (
               <AccordionItem value={`item-${index}`} key={index}>
-                <AccordionTrigger>{section.title}</AccordionTrigger>
+                <AccordionTrigger>{t(section.titleKey)}</AccordionTrigger>
                 <AccordionContent className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
-                  {section.content}
+                  {section.content} 
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -149,7 +154,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
         </ScrollArea>
         <DialogFooter>
           <Button type="button" onClick={() => onOpenChange(false)}>
-            Got it!
+            {t('buttons.gotIt')}
           </Button>
         </DialogFooter>
       </DialogContent>

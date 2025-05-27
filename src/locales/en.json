@@ -1,0 +1,177 @@
+
+{
+  "appName": "RS Timer",
+  "loading": "Loading RS Timer...",
+  "footerCopyright": "© {{year}} RS Timer. Stay focused!",
+  "timerModes": {
+    "work": "Work",
+    "shortBreak": "Short Break",
+    "longBreak": "Long Break",
+    "focus": "Focus"
+  },
+  "buttons": {
+    "start": "Start",
+    "pause": "Pause",
+    "skip": "Skip current interval",
+    "reset": "Reset timer",
+    "mute": "Mute sound",
+    "unmute": "Unmute sound",
+    "analyzeData": "Analyze Data",
+    "add": "Add",
+    "clearCompletedTasks": "Clear Completed Tasks",
+    "close": "Close",
+    "saveChanges": "Save Changes",
+    "gotIt": "Got it!",
+    "skipTour": "Skip Tour",
+    "next": "Next",
+    "finish": "Finish",
+    "clearHistory": "Clear History"
+  },
+  "tooltips": {
+    "aiSummary": "Get AI Session Summary (if data available)",
+    "sessionHistory": "Open session history",
+    "userGuide": "Open User Guide",
+    "settings": "Open settings",
+    "themeToggle": "Toggle theme",
+    "analyzeCurrentData": "Analyze current session notes, tasks and log with selected context",
+    "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle."
+  },
+  "cards": {
+    "tasksTitle": "Today's Tasks",
+    "notesTitle": "Session Notes & Context",
+    "sessionContextLabel": "Session Context",
+    "sessionContextPlaceholder": "Select session context"
+  },
+  "tasks": {
+    "addTaskPlaceholder": "Add a new task...",
+    "noTasks": "No tasks yet. Add some!",
+    "deleteTask": "Delete task: {{taskText}}"
+  },
+  "notes": {
+    "textareaPlaceholder": "Jot down tasks, distractions, or thoughts during your session..."
+  },
+  "aiSummaryDialog": {
+    "title": "AI Session Analysis",
+    "description": "Here's a summary of your session and suggestions for improvement.",
+    "loading": "Analyzing your session...",
+    "summaryTitle": "Session Summary",
+    "improvementsTitle": "Suggested Improvements",
+    "noData": "No summary data available."
+  },
+  "sessionHistoryDrawer": {
+    "title": "Session History",
+    "description": "Review your completed Pomodoro sessions.",
+    "noSessions": "No sessions recorded yet.",
+    "statusCompleted": "Completed",
+    "statusSkipped": "Skipped/Interrupted"
+  },
+  "settingsDialog": {
+    "title": "Timer Settings",
+    "description": "Adjust your Pomodoro timer settings and preferences.",
+    "showInitialGuide": "Show Initial Guide",
+    "showInitialGuideDescription": "Display a helpful guided tour on first visit.",
+    "workMinutes": "Work (min)",
+    "shortBreakMinutes": "Short Break (min)",
+    "longBreakMinutes": "Long Break (min)",
+    "longBreakInterval": "Long Break Interval",
+    "longBreakIntervalDescription": "Number of work sessions before a long break.",
+    "autoStartBreaks": "Auto-start Breaks",
+    "autoStartPomodoros": "Auto-start Pomodoros",
+    "enableNotifications": "Enable Notifications",
+    "mouseTrailEffect": "Mouse Trail Effect",
+    "soundscapeWork": "Work Soundscape",
+    "soundscapeBreak": "Break Soundscape",
+    "selectSoundscapePlaceholder": "Select soundscape",
+    "volume": "Volume: {{percentage}}%",
+    "backgroundAnimation": "Background Animation",
+    "selectAnimationPlaceholder": "Select animation"
+  },
+  "userGuideDialog": {
+    "title": "RS Timer User Guide",
+    "description": "Learn how to make the most of your focus sessions.",
+    "sections": {
+      "gettingStarted": {
+        "title": "Getting Started with Pomodoro"
+      },
+      "timerControls": {
+        "title": "Timer Controls"
+      },
+      "customization": {
+        "title": "Customization (Settings)"
+      },
+      "tasksAndNotes": {
+        "title": "Tasks & Notes"
+      },
+      "sessionContext": {
+        "title": "Session Context"
+      },
+      "aiAnalysis": {
+        "title": "AI Session Analysis"
+      },
+      "sessionHistory": {
+        "title": "Session History"
+      },
+      "themeAndAppearance": {
+        "title": "Theme & Appearance"
+      }
+    }
+  },
+  "interactiveTourDialog": {
+    "stepProgress": "Step {{currentStep}} of {{totalSteps}}",
+    "welcomeTitle": "Welcome to RS Timer!",
+    "timerTitle": "The Timer",
+    "timerControlsTitle": "Timer Controls",
+    "pomodoroDotsTitle": "Pomodoro Dots",
+    "tasksTitle": "Tasks",
+    "notesContextTitle": "Session Notes & Context",
+    "aiAnalysisTitle": "AI Analysis",
+    "headerToolsTitle": "Header Tools",
+    "settingsTitle": "Settings (Gear Icon ⚙️)",
+    "allSetTitle": "You're All Set!"
+  },
+  "notifications": {
+    "disabled": "Notifications Disabled",
+    "disabledDescription": "You won't receive interval alerts.",
+    "workSessionEnded": "Work session ended!",
+    "breakTimeOver": "Break time is over!",
+    "timeForWork": "Time for work.",
+    "timeForShortBreak": "Time for a short break.",
+    "timeForLongBreak": "Time for a long break."
+  },
+  "ai": {
+    "noDataForSummary": "Not enough session data, tasks, or notes to generate a summary.",
+    "errorTitle": "AI Summary Error",
+    "errorDescription": "Could not generate session summary.",
+    "errorSummary": "Error generating summary.",
+    "errorImprovements": "Please try again later."
+  },
+  "sessionTypes": {
+    "general": "General Reflection",
+    "work": "Work Focus",
+    "learning": "Learning Focus"
+  },
+  "soundscapes": {
+    "none": "None",
+    "whiteNoise": "White Noise",
+    "pinkNoise": "Pink Noise",
+    "brownNoise": "Brown Noise",
+    "gentleRain": "Gentle Rain (Simulated)",
+    "focusTone": "Focus Tone (440Hz Sine)",
+    "deepDrone": "Deep Drone (80Hz Sine)",
+    "windyAmbience": "Windy Ambience",
+    "alphaBinaural": "Alpha Binaural (8Hz Beat)",
+    "ambientPad": "Ambient Pad",
+    "calmingChimes": "Calming Chimes",
+    "gentlePianoChord": "Gentle Piano Chord",
+    "lofiBeat": "Lofi Beat (Synth)",
+    "classicalExcerpt": "Classical Snippet (Synth)"
+  },
+  "backgroundAnimations": {
+    "none": "None",
+    "gradientFlow": "Gradient Flow",
+    "rain": "Rain Effect",
+    "snow": "Snow Effect",
+    "starfield": "Starfield Effect",
+    "bubbles": "Floating Bubbles Effect"
+  }
+}

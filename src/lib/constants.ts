@@ -1,5 +1,5 @@
 
-import type { Settings, SoundscapeOption, BackgroundAnimationOption, SessionType } from '@/lib/types';
+import type { Settings, SoundscapeOption, BackgroundAnimationOption, SessionType, SelectOptionWithTranslation } from '@/lib/types';
 
 export const DEFAULT_SETTINGS: Settings = {
   workMinutes: 25,
@@ -14,69 +14,70 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsEnabled: true,
   backgroundAnimation: 'gradientFlow',
   mouseTrailEffectEnabled: false,
-  showCoachMarks: true, // Default to true for first-time users, can be turned off
+  showCoachMarks: true,
 };
 
-export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
-  { id: 'none', name: 'None', type: 'noise', params: { type: 'off' } },
-  { id: 'whiteNoise', name: 'White Noise', type: 'noise', params: { type: 'white', volume: -6 } },
-  { id: 'pinkNoise', name: 'Pink Noise', type: 'noise', params: { type: 'pink', volume: -6 } },
-  { id: 'brownNoise', name: 'Brown Noise', type: 'noise', params: { type: 'brown', volume: -6 } },
-  { id: 'gentleRain', name: 'Gentle Rain (Simulated)', type: 'noise', params: { type: 'pink', volume: -18 } }, // Simulating rain with heavily filtered pink noise
-  { id: 'focusTone', name: 'Focus Tone (440Hz Sine)', type: 'tone', params: { frequency: 440, type: 'sine' } },
-  { id: 'deepDrone', name: 'Deep Drone (80Hz Sine)', type: 'tone', params: { frequency: 80, type: 'sine', volume: -10 } },
-  { id: 'windyAmbience', name: 'Windy Ambience', type: 'noise', params: { type: 'pink', volume: -20 } }, // Using pink noise with low volume for wind
-  { id: 'alphaBinaural', name: 'Alpha Binaural (8Hz Beat)', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volume: -15 } },
+// Note: 'name' properties are now translation keys
+export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
+  { id: 'none', nameKey: 'soundscapes.none', type: 'noise', params: { type: 'off' } },
+  { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volume: -6 } },
+  { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volume: -6 } },
+  { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volume: -6 } },
+  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volume: -18 } },
+  { id: 'focusTone', nameKey: 'soundscapes.focusTone', type: 'tone', params: { frequency: 440, type: 'sine' } },
+  { id: 'deepDrone', nameKey: 'soundscapes.deepDrone', type: 'tone', params: { frequency: 80, type: 'sine', volume: -10 } },
+  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volume: -20 } },
+  { id: 'alphaBinaural', nameKey: 'soundscapes.alphaBinaural', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volume: -15 } },
   {
     id: 'ambientPad',
-    name: 'Ambient Pad',
-    type: 'tone', 
+    nameKey: 'soundscapes.ambientPad',
+    type: 'tone',
     params: {
-      notes: ['C3', 'E3', 'G3', 'B4'], 
-      oscillator: 'fatsine', 
-      envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 }, 
-      volume: -20, 
+      notes: ['C3', 'E3', 'G3', 'B4'],
+      oscillator: 'fatsine',
+      envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 },
+      volume: -20,
     }
   },
   {
     id: 'calmingChimes',
-    name: 'Calming Chimes',
-    type: 'tone', 
+    nameKey: 'soundscapes.calmingChimes',
+    type: 'tone',
     params: {
-      notes: ['C6', 'E6', 'G6', 'A6'], 
-      oscillator: 'triangle', 
-      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 }, 
+      notes: ['C6', 'E6', 'G6', 'A6'],
+      oscillator: 'triangle',
+      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 },
       volume: -18,
     }
   },
   {
     id: 'gentlePianoChord',
-    name: 'Gentle Piano Chord',
-    type: 'tone', 
+    nameKey: 'soundscapes.gentlePianoChord',
+    type: 'tone',
     params: {
-      notes: ['C4', 'G4', 'E5'], 
-      oscillator: 'triangle', 
-      envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 }, 
+      notes: ['C4', 'G4', 'E5'],
+      oscillator: 'triangle',
+      envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 },
       volume: -16,
     }
   },
   {
     id: 'lofiBeat',
-    name: 'Lofi Beat (Synth)',
+    nameKey: 'soundscapes.lofiBeat',
     type: 'patternLoop',
     params: {
       bpm: 85,
-      volumeAdjustment: -18, // Overall gain adjustment for this pattern in dB
+      volumeAdjustment: -18,
       instruments: [
-        { 
-          name: 'chords', 
-          synthType: 'PolySynth', 
+        {
+          name: 'chords',
+          synthType: 'PolySynth',
           synthOptions: { oscillator: { type: 'fmsquare' }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.3, release: 1 } },
-          sequence: [ { time: '0:0', notes: ['A#2', 'D3', 'F3', 'G#3'], duration: '1m' }, { time: '1:0', notes: ['G2', 'C3', 'D#3', 'F3'], duration: '1m' } ], // Am7, Gm7 vibe
+          sequence: [ { time: '0:0', notes: ['A#2', 'D3', 'F3', 'G#3'], duration: '1m' }, { time: '1:0', notes: ['G2', 'C3', 'D#3', 'F3'], duration: '1m' } ],
         },
-        { 
-          name: 'kick', 
-          synthType: 'MembraneSynth', 
+        {
+          name: 'kick',
+          synthType: 'MembraneSynth',
           synthOptions: { octaves: 4, pitchDecay: 0.1, envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.2 } },
           pattern: ['C1', null, 'C1', null, 'C1', 'C1', null, 'C1'],
           subdivision: '8n',
@@ -91,7 +92,7 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
         {
           name: 'hihat',
           synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, // hihats quieter
+          synthOptions: { noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 },
           pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'],
           subdivision: '8n',
         }
@@ -100,7 +101,7 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   },
   {
     id: 'classicalExcerpt',
-    name: 'Classical Snippet (Synth)',
+    nameKey: 'soundscapes.classicalExcerpt',
     type: 'patternLoop',
     params: {
       bpm: 70,
@@ -109,15 +110,15 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
         {
           name: 'stringsPad',
           synthType: 'PolySynth',
-          synthOptions: { 
-            oscillator: { type: 'fatsawtooth', count: 3, spread: 30 }, 
-            envelope: { attack: 1.5, decay: 0.5, sustain: 1, release: 2.5 } 
+          synthOptions: {
+            oscillator: { type: 'fatsawtooth', count: 3, spread: 30 },
+            envelope: { attack: 1.5, decay: 0.5, sustain: 1, release: 2.5 }
           },
           sequence: [
-            { time: '0:0', notes: ['C3', 'E3', 'G3'], duration: '2m' },    // C Major
-            { time: '2:0', notes: ['A2', 'C3', 'E3'], duration: '2m' },    // A minor
-            { time: '4:0', notes: ['F2', 'A2', 'C3'], duration: '2m' },    // F Major
-            { time: '6:0', notes: ['G2', 'B2', 'D3'], duration: '2m' },    // G Major
+            { time: '0:0', notes: ['C3', 'E3', 'G3'], duration: '2m' },
+            { time: '2:0', notes: ['A2', 'C3', 'E3'], duration: '2m' },
+            { time: '4:0', notes: ['F2', 'A2', 'C3'], duration: '2m' },
+            { time: '6:0', notes: ['G2', 'B2', 'D3'], duration: '2m' },
           ]
         }
       ],
@@ -128,21 +129,19 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   }
 ];
 
-export const BACKGROUND_ANIMATION_OPTIONS: BackgroundAnimationOption[] = [
-  { id: 'none', name: 'None' },
-  { id: 'gradientFlow', name: 'Gradient Flow' },
-  { id: 'rain', name: 'Rain Effect' },
-  { id: 'snow', name: 'Snow Effect' },
-  { id: 'starfield', name: 'Starfield Effect' },
-  { id: 'bubbles', name: 'Floating Bubbles Effect' },
+export const BACKGROUND_ANIMATION_OPTIONS: SelectOptionWithTranslation[] = [
+  { id: 'none', nameKey: 'backgroundAnimations.none' },
+  { id: 'gradientFlow', nameKey: 'backgroundAnimations.gradientFlow' },
+  { id: 'rain', nameKey: 'backgroundAnimations.rain' },
+  { id: 'snow', nameKey: 'backgroundAnimations.snow' },
+  { id: 'starfield', nameKey: 'backgroundAnimations.starfield' },
+  { id: 'bubbles', nameKey: 'backgroundAnimations.bubbles' },
 ];
 
-export const SESSION_TYPE_OPTIONS: { id: SessionType; name: string }[] = [
-  { id: 'general', name: 'General Reflection' },
-  { id: 'work', name: 'Work Focus' },
-  { id: 'learning', name: 'Learning Focus' },
+export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
+  { id: 'general', nameKey: 'sessionTypes.general' },
+  { id: 'work', nameKey: 'sessionTypes.work' },
+  { id: 'learning', nameKey: 'sessionTypes.learning' },
 ];
 
-export const APP_NAME = "RS"; // Changed from "Rissets"
-
-
+export const APP_NAME = "RS";

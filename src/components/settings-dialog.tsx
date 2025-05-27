@@ -38,6 +38,7 @@ import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS, DEFAULT_SETTINGS } fr
 import type { Settings, BackgroundAnimationType } from "@/lib/types";
 import { Settings as SettingsIcon, HelpCircle } from "lucide-react";
 import React from "react";
+import { useLanguageContext } from "@/contexts/language-context"; // Added
 
 const settingsSchema = z.object({
   workMinutes: z.coerce.number().min(1).max(120),
@@ -61,6 +62,7 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 export function SettingsDialog() {
   const { settings, setSettings, isSettingsLoaded } = useSettingsContext();
+  const { t } = useLanguageContext(); // Added
   const [isOpen, setIsOpen] = React.useState(false);
 
   const form = useForm<SettingsFormValues>({
@@ -87,7 +89,7 @@ export function SettingsDialog() {
 
   if (!isSettingsLoaded) {
     return (
-      <Button variant="ghost" size="icon" disabled>
+      <Button variant="ghost" size="icon" disabled title={t('tooltips.settings') || 'Open settings'}>
         <SettingsIcon className="h-5 w-5" />
       </Button>
     );
@@ -96,15 +98,15 @@ export function SettingsDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Open settings">
+        <Button variant="ghost" size="icon" aria-label={t('tooltips.settings') || 'Open settings'}>
           <SettingsIcon className="h-5 w-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Timer Settings</DialogTitle>
+          <DialogTitle>{t('settingsDialog.title')}</DialogTitle>
           <DialogDescription>
-            Adjust your Pomodoro timer settings and preferences.
+            {t('settingsDialog.description')}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -117,17 +119,17 @@ export function SettingsDialog() {
                   <div className="space-y-0.5">
                     <FormLabel className="flex items-center">
                       <HelpCircle className="mr-2 h-4 w-4 text-muted-foreground" />
-                      Show Initial Guide
+                      {t('settingsDialog.showInitialGuide')}
                     </FormLabel>
                     <FormDescription>
-                      Display a helpful guided tour on first visit.
+                      {t('settingsDialog.showInitialGuideDescription')}
                     </FormDescription>
                   </div>
                   <FormControl>
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      aria-label="Toggle initial guided tour"
+                      aria-label={t('settingsDialog.showInitialGuide')}
                     />
                   </FormControl>
                 </FormItem>
@@ -139,7 +141,7 @@ export function SettingsDialog() {
                 name="workMinutes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Work (min)</FormLabel>
+                    <FormLabel>{t('settingsDialog.workMinutes')}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -152,7 +154,7 @@ export function SettingsDialog() {
                 name="shortBreakMinutes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Short Break (min)</FormLabel>
+                    <FormLabel>{t('settingsDialog.shortBreakMinutes')}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -165,7 +167,7 @@ export function SettingsDialog() {
                 name="longBreakMinutes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Long Break (min)</FormLabel>
+                    <FormLabel>{t('settingsDialog.longBreakMinutes')}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -179,12 +181,12 @@ export function SettingsDialog() {
               name="longBreakInterval"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Long Break Interval</FormLabel>
+                  <FormLabel>{t('settingsDialog.longBreakInterval')}</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Number of work sessions before a long break.
+                    {t('settingsDialog.longBreakIntervalDescription')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -197,7 +199,7 @@ export function SettingsDialog() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel>Auto-start Breaks</FormLabel>
+                      <FormLabel>{t('settingsDialog.autoStartBreaks')}</FormLabel>
                     </div>
                     <FormControl>
                       <Switch
@@ -214,7 +216,7 @@ export function SettingsDialog() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel>Auto-start Pomodoros</FormLabel>
+                      <FormLabel>{t('settingsDialog.autoStartPomodoros')}</FormLabel>
                     </div>
                     <FormControl>
                       <Switch
@@ -231,7 +233,7 @@ export function SettingsDialog() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel>Enable Notifications</FormLabel>
+                      <FormLabel>{t('settingsDialog.enableNotifications')}</FormLabel>
                     </div>
                     <FormControl>
                       <Switch
@@ -248,7 +250,7 @@ export function SettingsDialog() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel>Mouse Trail Effect</FormLabel>
+                      <FormLabel>{t('settingsDialog.mouseTrailEffect')}</FormLabel>
                     </div>
                     <FormControl>
                       <Switch
@@ -266,16 +268,16 @@ export function SettingsDialog() {
               name="soundscapeWork"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Work Soundscape</FormLabel>
+                  <FormLabel>{t('settingsDialog.soundscapeWork')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select soundscape" />
+                        <SelectValue placeholder={t('settingsDialog.selectSoundscapePlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {SOUNDSCAPE_OPTIONS.map(opt => (
-                        <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                        <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -288,16 +290,16 @@ export function SettingsDialog() {
               name="soundscapeBreak"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Break Soundscape</FormLabel>
+                  <FormLabel>{t('settingsDialog.soundscapeBreak')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select soundscape" />
+                        <SelectValue placeholder={t('settingsDialog.selectSoundscapePlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {SOUNDSCAPE_OPTIONS.map(opt => (
-                        <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                        <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -310,7 +312,7 @@ export function SettingsDialog() {
                 name="volume"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Volume: {Math.round(field.value * 100)}%</FormLabel>
+                    <FormLabel>{t('settingsDialog.volume', { percentage: Math.round(field.value * 100).toString() })}</FormLabel>
                     <FormControl>
                        <Slider
                         defaultValue={[field.value]}
@@ -328,16 +330,16 @@ export function SettingsDialog() {
               name="backgroundAnimation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Background Animation</FormLabel>
+                  <FormLabel>{t('settingsDialog.backgroundAnimation')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select animation" />
+                        <SelectValue placeholder={t('settingsDialog.selectAnimationPlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {BACKGROUND_ANIMATION_OPTIONS.map(opt => (
-                        <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                        <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -346,7 +348,7 @@ export function SettingsDialog() {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit">{t('buttons.saveChanges')}</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -354,5 +356,3 @@ export function SettingsDialog() {
     </Dialog>
   );
 }
-
-    

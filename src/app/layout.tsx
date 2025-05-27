@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
+import { LanguageProvider } from '@/contexts/language-context'; // Added
 import { Toaster } from "@/components/ui/toaster";
 import { APP_NAME } from '@/lib/constants';
 
@@ -20,7 +21,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: `${APP_NAME} Timer`,
   description: `A Pomodoro timer to enhance focus and productivity, now called ${APP_NAME} Timer.`,
-  manifest: '/manifest.json', // Added for PWA
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -41,21 +42,14 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#2B5797" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="hsl(169, 20%, 56%)" />
-        {/* 
-          Note: For actual icons for favicon, apple-touch-icon, etc., 
-          you would typically place them in the /public/icons directory
-          and link them here. For this exercise, we are focusing on manifest.json
-          which uses placehold.co for icons.
-          Example:
-          <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-          <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
-        */}
       </head>
       <body>
         <ThemeProvider>
           <SettingsProvider>
-            {children}
-            <Toaster />
+            <LanguageProvider> {/* Added LanguageProvider */}
+              {children}
+              <Toaster />
+            </LanguageProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>

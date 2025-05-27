@@ -1,0 +1,151 @@
+
+{
+  "appName": "RS Timer",
+  "loading": "Memuat RS Timer...",
+  "footerCopyright": "© {{year}} RS Timer. Tetap fokus!",
+  "timerModes": {
+    "work": "Kerja",
+    "shortBreak": "Istirahat Pendek",
+    "longBreak": "Istirahat Panjang",
+    "focus": "Fokus"
+  },
+  "buttons": {
+    "start": "Mulai",
+    "pause": "Jeda",
+    "skip": "Lewati interval saat ini",
+    "reset": "Atur Ulang Timer",
+    "mute": "Bisukan suara",
+    "unmute": "Aktifkan suara",
+    "analyzeData": "Analisis Data",
+    "add": "Tambah",
+    "clearCompletedTasks": "Hapus Tugas Selesai",
+    "close": "Tutup",
+    "saveChanges": "Simpan Perubahan",
+    "gotIt": "Mengerti!",
+    "skipTour": "Lewati Tur",
+    "next": "Lanjut",
+    "finish": "Selesai",
+    "clearHistory": "Hapus Riwayat"
+  },
+  "tooltips": {
+    "aiSummary": "Dapatkan Ringkasan Sesi AI (jika data tersedia)",
+    "sessionHistory": "Buka riwayat sesi",
+    "userGuide": "Buka Panduan Pengguna",
+    "settings": "Buka pengaturan",
+    "themeToggle": "Ganti tema",
+    "analyzeCurrentData": "Analisis catatan sesi, tugas, dan log saat ini dengan konteks yang dipilih",
+    "pomodoroProgress": "{{completed}} dari {{total}} pomodoro selesai dalam siklus ini."
+  },
+  "cards": {
+    "tasksTitle": "Tugas Hari Ini",
+    "notesTitle": "Catatan & Konteks Sesi",
+    "sessionContextLabel": "Konteks Sesi",
+    "sessionContextPlaceholder": "Pilih konteks sesi"
+  },
+  "tasks": {
+    "addTaskPlaceholder": "Tambah tugas baru...",
+    "noTasks": "Belum ada tugas. Tambahkan beberapa!",
+    "deleteTask": "Hapus tugas: {{taskText}}"
+  },
+  "notes": {
+    "textareaPlaceholder": "Tulis tugas, gangguan, atau pemikiran selama sesi Anda..."
+  },
+  "aiSummaryDialog": {
+    "title": "Analisis Sesi AI",
+    "description": "Berikut ringkasan sesi Anda dan saran perbaikan.",
+    "loading": "Menganalisis sesi Anda...",
+    "summaryTitle": "Ringkasan Sesi",
+    "improvementsTitle": "Saran Perbaikan",
+    "noData": "Tidak ada data ringkasan yang tersedia."
+  },
+  "sessionHistoryDrawer": {
+    "title": "Riwayat Sesi",
+    "description": "Tinjau sesi Pomodoro Anda yang telah selesai.",
+    "noSessions": "Belum ada sesi yang direkam.",
+    "statusCompleted": "Selesai",
+    "statusSkipped": "Dilewati/Terinterupsi"
+  },
+  "settingsDialog": {
+    "title": "Pengaturan Timer",
+    "description": "Sesuaikan pengaturan dan preferensi timer Pomodoro Anda.",
+    "showInitialGuide": "Tampilkan Panduan Awal",
+    "showInitialGuideDescription": "Tampilkan tur panduan yang membantu pada kunjungan pertama.",
+    "workMinutes": "Kerja (mnt)",
+    "shortBreakMinutes": "Istirahat Pendek (mnt)",
+    "longBreakMinutes": "Istirahat Panjang (mnt)",
+    "longBreakInterval": "Interval Istirahat Panjang",
+    "longBreakIntervalDescription": "Jumlah sesi kerja sebelum istirahat panjang.",
+    "autoStartBreaks": "Mulai Istirahat Otomatis",
+    "autoStartPomodoros": "Mulai Pomodoro Otomatis",
+    "enableNotifications": "Aktifkan Notifikasi",
+    "mouseTrailEffect": "Efek Jejak Mouse",
+    "soundscapeWork": "Suara Latar Kerja",
+    "soundscapeBreak": "Suara Latar Istirahat",
+    "selectSoundscapePlaceholder": "Pilih suara latar",
+    "volume": "Volume: {{percentage}}%",
+    "backgroundAnimation": "Animasi Latar Belakang",
+    "selectAnimationPlaceholder": "Pilih animasi"
+  },
+  "userGuideDialog": {
+    "title": "Panduan Pengguna RS Timer",
+    "description": "Pelajari cara memaksimalkan sesi fokus Anda."
+  },
+  "interactiveTourDialog": {
+    "stepProgress": "Langkah {{currentStep}} dari {{totalSteps}}",
+    "welcomeTitle": "Selamat Datang di RS Timer!",
+    "timerTitle": "Timer",
+    "timerControlsTitle": "Kontrol Timer",
+    "pomodoroDotsTitle": "Titik Pomodoro",
+    "tasksTitle": "Tugas",
+    "notesContextTitle": "Catatan & Konteks Sesi",
+    "aiAnalysisTitle": "Analisis AI",
+    "headerToolsTitle": "Alat Header",
+    "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
+    "allSetTitle": "Anda Sudah Siap!"
+  },
+  "notifications": {
+    "disabled": "Notifikasi Dinonaktifkan",
+    "disabledDescription": "Anda tidak akan menerima peringatan interval.",
+    "workSessionEnded": "Sesi kerja berakhir!",
+    "breakTimeOver": "Waktu istirahat habis!",
+    "timeForWork": "Waktunya untuk kerja.",
+    "timeForShortBreak": "Waktunya untuk istirahat pendek.",
+    "timeForLongBreak": "Waktunya untuk istirahat panjang."
+  },
+  "ai": {
+    "noDataForSummary": "Data sesi, tugas, atau catatan tidak cukup untuk menghasilkan ringkasan.",
+    "errorTitle": "Kesalahan Ringkasan AI",
+    "errorDescription": "Tidak dapat menghasilkan ringkasan sesi.",
+    "errorSummary": "Kesalahan menghasilkan ringkasan.",
+    "errorImprovements": "Silakan coba lagi nanti."
+  },
+  "sessionTypes": {
+    "general": "Refleksi Umum",
+    "work": "Fokus Kerja",
+    "learning": "Fokus Belajar"
+  },
+  "soundscapes": {
+    "none": "Tidak Ada",
+    "whiteNoise": "White Noise",
+    "pinkNoise": "Pink Noise",
+    "brownNoise": "Brown Noise",
+    "gentleRain": "Hujan Lembut (Simulasi)",
+    "focusTone": "Nada Fokus (440Hz Sinus)",
+    "deepDrone": "Drone Dalam (80Hz Sinus)",
+    "windyAmbience": "Suasana Berangin",
+    "alphaBinaural": "Binaural Alpha (8Hz Beat)",
+    "ambientPad": "Ambient Pad",
+    "calmingChimes": "Lonceng Menenangkan",
+    "gentlePianoChord": "Akord Piano Lembut",
+    "lofiBeat": "Lofi Beat (Synth)",
+    "classicalExcerpt": "Cuplikan Klasik (Synth)"
+  },
+  "backgroundAnimations": {
+    "none": "Tidak Ada",
+    "gradientFlow": "Aliran Gradien",
+    "rain": "Efek Hujan",
+    "snow": "Efek Salju",
+    "starfield": "Efek Langit Berbintang",
+    "bubbles": "Efek Gelembung Mengambang"
+  }
+}

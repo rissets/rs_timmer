@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trash2, Plus } from "lucide-react";
 import type { Task } from "@/lib/types";
+import { useLanguageContext } from "@/contexts/language-context"; // Added
 
 interface SimpleTaskListProps {
   tasks: Task[];
@@ -26,6 +27,7 @@ export function SimpleTaskList({
   onClearCompletedTasks
 }: SimpleTaskListProps) {
   const [newTaskText, setNewTaskText] = useState("");
+  const { t } = useLanguageContext(); // Added
 
   const handleAddTask = () => {
     if (newTaskText.trim()) {
@@ -43,25 +45,25 @@ export function SimpleTaskList({
   return (
     <Card className="w-full shadow-lg">
       <CardHeader>
-        <CardTitle className="text-lg">Today's Tasks</CardTitle>
+        <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2 sm:gap-0">
           <Input
             type="text"
-            placeholder="Add a new task..."
+            placeholder={t('tasks.addTaskPlaceholder')}
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyPress={handleKeyPress}
             className="focus:ring-accent"
           />
-          <Button onClick={handleAddTask} aria-label="Add task" className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" /> Add
+          <Button onClick={handleAddTask} aria-label={t('buttons.add')} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" /> {t('buttons.add')}
           </Button>
         </div>
         <ScrollArea className="h-[200px] pr-3">
           {tasks.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No tasks yet. Add some!</p>
+            <p className="text-sm text-muted-foreground text-center py-4">{t('tasks.noTasks')}</p>
           ) : (
             <ul className="space-y-2">
               {tasks.map((task) => (
@@ -84,7 +86,7 @@ export function SimpleTaskList({
                     size="icon"
                     onClick={() => onRemoveTask(task.id)}
                     className="h-7 w-7"
-                    aria-label={`Delete task: ${task.text}`}
+                    aria-label={t('tasks.deleteTask', { taskText: task.text })}
                   >
                     <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                   </Button>
@@ -97,7 +99,7 @@ export function SimpleTaskList({
       {tasks.some(task => task.completed) && (
          <CardFooter>
             <Button variant="outline" onClick={onClearCompletedTasks} className="w-full">
-                Clear Completed Tasks
+                {t('buttons.clearCompletedTasks')}
             </Button>
          </CardFooter>
       )}

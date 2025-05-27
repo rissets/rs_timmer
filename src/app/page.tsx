@@ -37,55 +37,14 @@ import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2,
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguageContext } from "@/contexts/language-context"; // Added
+import { LanguageSwitcher } from "@/components/language-switcher"; // Added
 
-const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed"; 
-
-const tourSteps = [
-  {
-    title: `Welcome to ${APP_NAME} Timer!`,
-    content: <p>Let's take a quick tour of the main features to get you started.</p>,
-  },
-  {
-    title: "The Timer",
-    content: <p>This is the core of the app. It shows the time remaining for your current session (Work, Short Break, or Long Break). The ring around it shows your progress.</p>,
-  },
-  {
-    title: "Timer Controls",
-    content: <p>Use these buttons to <strong>Start/Pause</strong>, <strong>Skip</strong> to the next interval, or <strong>Reset</strong> the current one. You can also <strong>Mute/Unmute</strong> sounds.</p>,
-  },
-  {
-    title: "Pomodoro Dots",
-    content: <p>These dots indicate how many Pomodoro (work) sessions you've completed in the current cycle before a Long Break.</p>,
-  },
-  {
-    title: "Tasks",
-    content: <p>Manage your tasks for the session here. Add new tasks, mark them as complete, or remove them. This helps you stay focused.</p>,
-  },
-  {
-    title: "Session Notes & Context",
-    content: <p>Jot down any thoughts, distractions, or ideas. You can also select a <strong>Session Context</strong> (like 'Work' or 'Learning') to get tailored AI feedback.</p>,
-  },
-  {
-    title: "AI Analysis",
-    content: <p>Click the <strong>Sparkles icon</strong> (✨) or 'Analyze Data' button to get an AI-powered summary and improvement tips based on your session log, tasks, notes, and context.</p>,
-  },
-  {
-    title: "Header Tools",
-    content: <p>In the top right, you'll find quick access to: <br/>- AI Analysis (✨) <br/>- Session History (📜) <br/>- This User Guide (📖) <br/>- Settings (⚙️) <br/>- Theme Toggle (☀️/🌙)</p>,
-  },
-  {
-    title: "Settings (Gear Icon ⚙️)",
-    content: <p>Customize everything! Adjust timer durations, auto-start behavior, soundscapes, volume, background animations, and more.</p>,
-  },
-  {
-    title: "You're All Set!",
-    content: <p>That's a quick overview. Explore the settings to personalize your experience. Happy focusing!</p>,
-  }
-];
-
+const INTERACTIVE_TOUR_STORAGE_KEY = "rs-timer-interactive-tour-completed";
 
 export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
+  const { t } = useLanguageContext(); // Added
   const { toast } = useToast();
   const [currentNotes, setCurrentNotes] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -99,6 +58,50 @@ export default function PomodoroPage() {
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
   const isMobile = useIsMobile();
+
+  const tourSteps = React.useMemo(() => [ // Wrapped in useMemo for t
+    {
+      title: t('interactiveTourDialog.welcomeTitle', { appName: APP_NAME }),
+      content: <p>{t('interactiveTourDialog.welcomeContent', { appName: APP_NAME })}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.timerTitle'),
+      content: <p>{t('interactiveTourDialog.timerContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.timerControlsTitle'),
+      content: <p>{t('interactiveTourDialog.timerControlsContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.pomodoroDotsTitle'),
+      content: <p>{t('interactiveTourDialog.pomodoroDotsContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.tasksTitle'),
+      content: <p>{t('interactiveTourDialog.tasksContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.notesContextTitle'),
+      content: <p>{t('interactiveTourDialog.notesContextContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.aiAnalysisTitle'),
+      content: <p>{t('interactiveTourDialog.aiAnalysisContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.headerToolsTitle'),
+      content: <p>{t('interactiveTourDialog.headerToolsContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.settingsTitle'),
+      content: <p>{t('interactiveTourDialog.settingsContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.allSetTitle'),
+      content: <p>{t('interactiveTourDialog.allSetContent')}</p>,
+    }
+  ], [t]);
+
 
   useEffect(() => {
     if (isSettingsLoaded) {
@@ -122,7 +125,6 @@ export default function PomodoroPage() {
     setIsInteractiveTourActive(false);
     localStorage.setItem(INTERACTIVE_TOUR_STORAGE_KEY, "true");
   };
-
 
   const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume });
 
@@ -148,16 +150,16 @@ export default function PomodoroPage() {
   
   const getModeDisplayName = (mode: TimerMode) => {
     switch(mode) {
-      case 'work': return 'Work';
-      case 'shortBreak': return 'Short Break';
-      case 'longBreak': return 'Long Break';
-      default: return 'Focus';
+      case 'work': return t('timerModes.work');
+      case 'shortBreak': return t('timerModes.shortBreak');
+      case 'longBreak': return t('timerModes.longBreak');
+      default: return t('timerModes.focus');
     }
   };
 
   const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType) => {
     if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
-      toast({ title: "AI Summary", description: "Not enough session data, tasks, or notes to generate a summary.", variant: "destructive" });
+      toast({ title: t('ai.noDataForSummary'), variant: "destructive" });
       return;
     }
     setIsAiLoading(true);
@@ -165,12 +167,12 @@ export default function PomodoroPage() {
     setAiSummary(null);
 
     const sessionDetailsString = logForSummary.map(s => 
-      `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? 'completed' : 'skipped'})`
+      `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? t('sessionHistoryDrawer.statusCompleted') : t('sessionHistoryDrawer.statusSkipped')})`
     ).join('\n');
     
     const tasksString = tasks.length > 0 
-      ? "Tasks:\n" + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
-      : "No specific tasks listed for this analysis.";
+      ? `${t('cards.tasksTitle')}:\n` + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
+      : t('tasks.noTasks'); // Or a more specific "no tasks for this analysis"
 
     const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : "No pomodoro session log for this analysis."}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || "No additional notes provided."}`;
 
@@ -179,12 +181,12 @@ export default function PomodoroPage() {
       setAiSummary(result);
     } catch (error) {
       console.error("AI Summary Error:", error);
-      toast({ title: "AI Summary Error", description: "Could not generate session summary.", variant: "destructive" });
-      setAiSummary({ summary: "Error generating summary.", improvements: "Please try again later."});
+      toast({ title: t('ai.errorTitle'), description: t('ai.errorDescription'), variant: "destructive" });
+      setAiSummary({ summary: t('ai.errorSummary'), improvements: t('ai.errorImprovements')});
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType]); // Removed sessionLog from dependencies, ensure it's not needed or passed correctly
+  }, [currentNotes, tasks, toast, currentSessionType, t]);
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -225,7 +227,6 @@ export default function PomodoroPage() {
     } else {
       soundscapePlayer.stopSound();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     timer.mode,
     timer.isRunning,
@@ -288,7 +289,7 @@ export default function PomodoroPage() {
       className={`inline-block h-3 w-3 rounded-full mx-1 ${
         i < timer.currentCyclePomodoros ? 'bg-primary' : 'bg-muted'
       }`}
-      title={`Pomodoro ${i+1}${ i < timer.currentCyclePomodoros ? ' completed' : ''}`}
+      title={t('tooltips.pomodoroProgress', { completed: (i+1).toString(), total: timer.currentCyclePomodoros.toString() })}
     ></span>
   ));
 
@@ -316,11 +317,12 @@ export default function PomodoroPage() {
             </div>
           )}
           <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
+            <LanguageSwitcher /> {/* Added */}
+            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
               <SparklesIcon className="h-5 w-5" />
             </Button>
             <SessionHistoryDrawer />
-            <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title="Open User Guide">
+            <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
                 <BookOpen className="h-5 w-5" />
             </Button>
             <SettingsDialog />
@@ -334,7 +336,7 @@ export default function PomodoroPage() {
                 <CardTitle className="text-2xl font-medium text-primary">
                   {getModeDisplayName(timer.mode)}
                 </CardTitle>
-              <div className="flex justify-center mt-2" aria-label={`Completed ${timer.currentCyclePomodoros} of ${settings.longBreakInterval} pomodoros in this cycle.`}>
+              <div className="flex justify-center mt-2" aria-label={t('tooltips.pomodoroProgress', { completed: timer.currentCyclePomodoros.toString(), total: settings.longBreakInterval.toString() })}>
                   {pomodoroDots}
               </div>
             </CardHeader>
@@ -357,18 +359,18 @@ export default function PomodoroPage() {
                   size="lg" 
                   onClick={timer.isRunning ? timer.pauseTimer : timer.startTimer}
                   className="w-32 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  aria-label={timer.isRunning ? "Pause timer" : "Start timer"}
+                  aria-label={timer.isRunning ? t('buttons.pause') : t('buttons.start')}
                 >
                   {timer.isRunning ? <Pause className="mr-2 h-5 w-5" /> : <Play className="mr-2 h-5 w-5" />}
-                  {timer.isRunning ? 'Pause' : 'Start'}
+                  {timer.isRunning ? t('buttons.pause') : t('buttons.start')}
                 </Button>
-                <Button variant="outline" size="icon" onClick={timer.skipTimer} aria-label="Skip current interval">
+                <Button variant="outline" size="icon" onClick={timer.skipTimer} aria-label={t('buttons.skip')}>
                   <SkipForward className="h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="icon" onClick={() => timer.resetTimer()} aria-label="Reset timer">
+                <Button variant="outline" size="icon" onClick={() => timer.resetTimer()} aria-label={t('buttons.reset')}>
                   <RotateCcw className="h-5 w-5" />
                 </Button>
-                 <Button variant="outline" size="icon" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
+                 <Button variant="outline" size="icon" onClick={handleToggleMute} aria-label={isMuted ? t('buttons.unmute') : t('buttons.mute')}>
                   {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
                 </Button>
               </div>
@@ -385,29 +387,29 @@ export default function PomodoroPage() {
           
           <Card className="w-full shadow-lg">
             <CardHeader>
-                <CardTitle className="text-lg">Session Notes & Context</CardTitle>
+                <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="mb-4">
                 <div>
-                  <Label htmlFor="session-type-select" className="text-sm font-medium">Session Context</Label>
+                  <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
                   <Select
                       value={currentSessionType}
                       onValueChange={(value) => setCurrentSessionType(value as SessionType)}
                     >
                       <SelectTrigger id="session-type-select" className="w-full mt-1">
-                        <SelectValue placeholder="Select session context" />
+                        <SelectValue placeholder={t('cards.sessionContextPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {SESSION_TYPE_OPTIONS.map(opt => (
-                          <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                          <SelectItem key={opt.id} value={opt.id}>{t(opt.nameKey)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                 </div>
               </div>
               <Textarea
-                placeholder="Jot down tasks, distractions, or thoughts during your session..."
+                placeholder={t('notes.textareaPlaceholder')}
                 value={currentNotes}
                 onChange={(e) => setCurrentNotes(e.target.value)}
                 className="min-h-[100px] focus:ring-accent"
@@ -420,9 +422,9 @@ export default function PomodoroPage() {
                     currentSessionType
                   )} 
                   disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
-                  title="Analyze current session notes, tasks and log with selected context"
+                  title={t('tooltips.analyzeCurrentData')}
                 >
-                  <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Data
+                  <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
                 </Button>
             </CardContent>
           </Card>
@@ -451,15 +453,9 @@ export default function PomodoroPage() {
         />
         
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
-          <p>&copy; {new Date().getFullYear()} {APP_NAME} Timer. Stay focused!</p>
+          <p>{t('footerCopyright', { year: new Date().getFullYear().toString() })}</p>
         </footer>
       </div>
     </>
   );
 }
-
-    
-
-    
-
-    

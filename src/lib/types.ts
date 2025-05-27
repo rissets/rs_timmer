@@ -7,43 +7,55 @@ export interface Settings {
   workMinutes: number;
   shortBreakMinutes: number;
   longBreakMinutes: number;
-  longBreakInterval: number; // Number of work intervals before a long break
+  longBreakInterval: number;
   autoStartBreaks: boolean;
   autoStartPomodoros: boolean;
-  soundscapeWork?: string; // ID of the soundscape
-  soundscapeBreak?: string; // ID of the soundscape
-  volume: number; // 0 to 1
+  soundscapeWork?: string;
+  soundscapeBreak?: string;
+  volume: number;
   notificationsEnabled: boolean;
   backgroundAnimation: BackgroundAnimationType;
   mouseTrailEffectEnabled: boolean;
-  showCoachMarks: boolean; // New setting for coach marks
+  showCoachMarks: boolean;
 }
 
 export interface SessionRecord {
   id: string;
-  startTime: number; // timestamp
-  endTime: number; // timestamp
+  startTime: number;
+  endTime: number;
   mode: TimerMode;
-  durationMinutes: number; // Actual duration in case it was skipped
-  completed: boolean; // Was it completed or skipped?
+  durationMinutes: number;
+  completed: boolean;
 }
 
+// Updated to use nameKey for translation
+export interface SelectOptionWithTranslation {
+  id: string;
+  nameKey: string; // Key for translation
+  type?: string; // For soundscapes
+  params?: any; // For soundscapes
+}
+
+// Kept original SoundscapeOption for internal use if needed, though SelectOptionWithTranslation is preferred for UI
 export interface SoundscapeOption {
   id: string;
-  name: string;
+  name: string; // This would ideally be a translation key or handled by i18n
   type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop';
   params?: any;
 }
+
 
 export interface AiSessionSummary {
   summary: string;
   improvements: string;
 }
 
+// Kept original BackgroundAnimationOption for internal use if needed
 export interface BackgroundAnimationOption {
   id: BackgroundAnimationType;
-  name: string;
+  name: string; // This would ideally be a translation key or handled by i18n
 }
+
 
 export interface Task {
   id: string;
@@ -55,4 +67,3 @@ export interface SummarizeSessionInput {
   sessionDetails: string;
   sessionType?: SessionType;
 }
-
