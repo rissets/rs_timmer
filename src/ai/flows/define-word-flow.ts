@@ -45,11 +45,23 @@ const defineWordFlow = ai.defineFlow(
     outputSchema: DefineWordOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    if (!output) {
-        // Fallback or error handling if output is null/undefined
-        return { definition: "Sorry, I couldn't define that word." };
+    try {
+      const {output} = await prompt(input);
+      if (!output) {
+        // This case handles if the AI successfully responds but output is unexpectedly null/undefined
+        throw new Error("The AI returned an empty definition. Please try again.");
+      }
+      return output;
+    } catch (e: any) {
+      console.error("Error in defineWordFlow during prompt execution:", e);
+      if (e.message && (e.message.includes('SERVICE_DISABLED') || e.message.includes('API has not been used') || e.message.includes('forbidden'))) {
+        throw new Error(
+          'The AI service for definitions is currently unavailable or not enabled for your project. Please check your Google Cloud project settings or try again later.'
+        );
+      }
+      // Re-throw a more generic error or the original one if it's already informative
+      throw new Error(e.message || "Could not get definition from AI. Please try again.");
     }
-    return output;
   }
 );
+

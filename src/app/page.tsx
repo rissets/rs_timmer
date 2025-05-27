@@ -177,6 +177,7 @@ export default function PomodoroPage() {
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
+    // Decoupled soundscape from background animation - always use settings.
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
   
@@ -211,14 +212,14 @@ export default function PomodoroPage() {
     try {
       const result = await summarizeSession({ sessionDetails: fullDetails, sessionType });
       setAiSummary(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Summary Error:", error);
-      toast({ title: t('ai.errorTitle'), description: t('ai.errorDescription'), variant: "destructive" });
+      toast({ title: t('ai.errorTitle'), description: error.message || t('ai.errorDescription'), variant: "destructive" });
       setAiSummary({ summary: t('ai.errorSummary'), improvements: t('ai.errorImprovements')});
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
+  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]); // Removed sessionLog from dependencies
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -338,9 +339,9 @@ export default function PomodoroPage() {
       };
       setChatMessages(prev => [...prev, aiResponse]);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Chat Error:", error);
-      toast({ title: t('ai.errorTitle'), description: t('ai.errorDescription'), variant: "destructive" });
+      toast({ title: t('ai.errorTitle'), description: error.message || t('ai.errorDescription'), variant: "destructive" });
       const errorResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
@@ -369,11 +370,11 @@ export default function PomodoroPage() {
         indonesianDefinition: indResult.definition,
       };
       setDefinedWordsList(prev => [newEntry, ...prev]); 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error defining word:", error);
       toast({
         title: t('dictionaryCard.errorDefiningTitle'),
-        description: t('dictionaryCard.errorDefiningDescription'),
+        description: error.message || t('dictionaryCard.errorDefiningDescription'),
         variant: "destructive",
       });
     } finally {
@@ -411,7 +412,7 @@ export default function PomodoroPage() {
 
 
   if (authLoading || (!currentUser && pathname !== '/auth/login' && pathname !== '/auth/register' && pathname !== '/auth/forgot-password')) {
-    return (
+     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
@@ -662,3 +663,4 @@ export default function PomodoroPage() {
     </>
   );
 }
+
