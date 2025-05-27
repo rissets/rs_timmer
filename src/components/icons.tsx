@@ -1,11 +1,10 @@
 
 import type { SVGProps } from 'react';
-import { Timer } from 'lucide-react'; // Using Lucide's Timer as a placeholder
+import { Focus } from 'lucide-react'; // Changed from Timer to Focus
 
 export const LogoIcon = (props: SVGProps<SVGSVGElement>) => (
-  // Replace with actual SVG for a custom logo if available
-  // This is a placeholder using Lucide's Timer icon
-  <Timer {...props} />
+  // Using Lucide's Focus icon
+  <Focus {...props} />
 );
 
 // Example of a custom SVG icon if needed:
