@@ -23,15 +23,15 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volumeAdjustment: -6 } },
   { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volumeAdjustment: -6 } },
   { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volumeAdjustment: -6 } },
-  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volumeAdjustment: -18 } }, // Simulated rain
+  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volumeAdjustment: -18 } },
   { 
     id: 'oceanWaves', 
     nameKey: 'soundscapes.oceanWaves', 
     type: 'ocean', 
     params: { 
       volumeAdjustment: -12,
-      autoFilter: { // Parameters for Tone.AutoFilter for the ocean sound
-        frequency: "4m", // Speed of the filter sweep (LFO of AutoFilter)
+      autoFilter: {
+        frequency: "2m", // Speed of the filter sweep (LFO of AutoFilter)
         baseFrequency: 200, // Starting frequency of the filter
         octaves: 4, // Range of the filter sweep in octaves
         filter: { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 },
@@ -52,7 +52,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   },
   { id: 'focusTone', nameKey: 'soundscapes.focusTone', type: 'tone', params: { frequency: 440, type: 'sine' } },
   { id: 'deepDrone', nameKey: 'soundscapes.deepDrone', type: 'tone', params: { frequency: 80, type: 'sine', volumeAdjustment: -10 } },
-  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volumeAdjustment: -20 } }, // Simulated wind
+  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volumeAdjustment: -20 } },
   { id: 'alphaBinaural', nameKey: 'soundscapes.alphaBinaural', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volumeAdjustment: -15 } },
   {
     id: 'ambientPad',
@@ -60,7 +60,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     type: 'tone', 
     params: {
       notes: ['C3', 'E3', 'G3', 'B4'],
-      oscillator: 'fatsine',
+      oscillator: { type: 'fatsine' as const },
       envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 },
       volumeAdjustment: -20,
     }
@@ -71,7 +71,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     type: 'tone', 
     params: {
       notes: ['C6', 'E6', 'G6', 'A6'],
-      oscillator: 'triangle',
+      oscillator: { type: 'triangle' as const },
       envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 },
       volumeAdjustment: -18,
     }
@@ -82,7 +82,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     type: 'tone', 
     params: {
       notes: ['C4', 'G4', 'E5'],
-      oscillator: 'triangle', // Simplification for piano-like
+      oscillator: { type: 'triangle' as const },
       envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 },
       volumeAdjustment: -16,
     }
@@ -112,8 +112,8 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     }
   },
   {
-    id: 'lofiBeat',
-    nameKey: 'soundscapes.lofiBeat',
+    id: 'lofiBeatSynth', // Renamed to avoid confusion with URL based
+    nameKey: 'soundscapes.lofiBeatSynth',
     type: 'patternLoop',
     params: {
       bpm: 85,
@@ -142,7 +142,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         {
           name: 'hihat',
           synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'white' as const }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, // volume relative to other instruments in pattern
+          synthOptions: { noise: { type: 'white' as const }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 },
           pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'],
           subdivision: '8n',
         }
@@ -150,8 +150,8 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     }
   },
   {
-    id: 'classicalExcerpt',
-    nameKey: 'soundscapes.classicalExcerpt',
+    id: 'classicalExcerptSynth', // Renamed
+    nameKey: 'soundscapes.classicalExcerptSynth',
     type: 'patternLoop',
     params: {
       bpm: 70,
@@ -178,8 +178,8 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     }
   },
   {
-    id: 'dreamyLullaby',
-    nameKey: 'soundscapes.dreamyLullaby',
+    id: 'dreamyLullabySynth', // Renamed
+    nameKey: 'soundscapes.dreamyLullabySynth',
     type: 'patternLoop',
     params: {
       bpm: 60,
@@ -210,7 +210,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
           synthOptions: {
             oscillator: { type: 'fatsine' as const, count: 3, spread: 40 },
             envelope: { attack: 2, decay: 1, sustain: 1, release: 3 },
-            volume: -6 // volume relative to other instruments in pattern
+            volume: -6
           },
           sequence: [
             { time: '0:0:0', notes: ['C3', 'G3', 'E4'], duration: '1m' },
@@ -223,7 +223,35 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         reverb: { wet: 0.4, decay: 4 } 
       }
     }
-  }
+  },
+  // New URL-based soundscapes
+  {
+    id: 'lofiVibesUrl',
+    nameKey: 'soundscapes.lofiVibesUrl',
+    type: 'url',
+    params: {
+      audioSrc: '/sounds/placeholder_lofi.mp3', // Replace with actual URL
+      volumeAdjustment: 0,
+    }
+  },
+  {
+    id: 'smoothJazzUrl',
+    nameKey: 'soundscapes.smoothJazzUrl',
+    type: 'url',
+    params: {
+      audioSrc: '/sounds/placeholder_jazz.mp3', // Replace with actual URL
+      volumeAdjustment: 0,
+    }
+  },
+  {
+    id: 'playfulTuneUrl',
+    nameKey: 'soundscapes.playfulTuneUrl',
+    type: 'url',
+    params: {
+      audioSrc: '/sounds/placeholder_child.mp3', // Replace with actual URL
+      volumeAdjustment: 0,
+    }
+  },
 ];
 
 export const BACKGROUND_ANIMATION_OPTIONS: SelectOptionWithTranslation[] = [
@@ -243,4 +271,3 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
 ];
 
 export const APP_NAME = "RS";
-

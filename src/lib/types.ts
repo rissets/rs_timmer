@@ -40,8 +40,27 @@ export interface SelectOptionWithTranslation {
 export interface SoundscapeOption {
   id: string;
   name: string; // This would ideally be a translation key or handled by i18n
-  type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace';
-  params?: any;
+  type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace' | 'url'; // Added 'url' type
+  params?: {
+    type?: 'white' | 'pink' | 'brown' | 'off' | Tone.ToneOscillatorType;
+    frequency?: number;
+    notes?: string[];
+    oscillator?: Tone.ToneOscillatorType | Partial<Tone.OscillatorOptions>;
+    envelope?: Partial<Tone.EnvelopeOptions>;
+    baseFrequency?: number;
+    beatFrequency?: number;
+    volumeAdjustment?: number;
+    autoFilter?: any;
+    synthOptions?: any;
+    bpm?: number;
+    instruments?: any[];
+    effects?: any;
+    audioSrc?: string; // Added for 'url' type
+    sequence?: any[]; // Ensure sequence is part of params if used by patternLoop
+    subdivision?: string; // Ensure subdivision is part of params if used by patternLoop
+    duration?: string; // Ensure duration is part of params if used by patternLoop
+    loopEnd?: string; // Ensure loopEnd is part of params if used by patternLoop
+  };
 }
 
 

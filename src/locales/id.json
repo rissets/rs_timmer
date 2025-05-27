@@ -207,9 +207,12 @@
     "calmingChimes": "Lonceng Menenangkan",
     "gentlePianoChord": "Akord Piano Lembut",
     "simplePianoMelody": "Melodi Piano Sederhana (Synth)",
-    "lofiBeat": "Lofi Beat (Synth)",
-    "classicalExcerpt": "Cuplikan Klasik (Synth)",
-    "dreamyLullaby": "Nina Bobo Melamun (Synth)"
+    "lofiBeatSynth": "Lofi Beat (Synth)",
+    "classicalExcerptSynth": "Cuplikan Klasik (Synth)",
+    "dreamyLullabySynth": "Nina Bobo Melamun (Synth)",
+    "lofiVibesUrl": "Nuansa Lofi (URL)",
+    "smoothJazzUrl": "Jazz Halus (URL)",
+    "playfulTuneUrl": "Lagu Ceria (Anak - URL)"
   },
   "backgroundAnimations": {
     "none": "Tidak Ada",
