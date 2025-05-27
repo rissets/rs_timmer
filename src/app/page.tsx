@@ -15,6 +15,9 @@ import { SessionHistoryDrawer, addSessionToHistory } from "@/components/session-
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
 import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
+import StarfieldEffect from "@/components/effects/StarfieldEffect";
+import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
+import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { summarizeSession } from "@/ai/flows/summarize-session";
 import type { TimerMode, AiSessionSummary, SessionRecord } from "@/lib/types";
 import { APP_NAME } from "@/lib/constants";
@@ -42,11 +45,14 @@ export default function PomodoroPage() {
         return 'gentleRain';
       case 'snow':
         return 'pinkNoise'; 
+      case 'starfield':
+        return 'ambientPad'; // Example: spacey sound for starfield
+      case 'bubbles':
+        return 'calmingChimes'; // Example: light sound for bubbles
       case 'gradientFlow':
         return 'whiteNoise';
       case 'none':
       default:
-        // Fallback to work/break specific sounds if no animation sound is defined
         return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
     }
   }, [isMuted, settings.backgroundAnimation, settings.soundscapeWork, settings.soundscapeBreak]);
@@ -69,8 +75,7 @@ export default function PomodoroPage() {
     try {
       const result = await summarizeSession({ sessionDetails: fullDetails });
       setAiSummary(result);
-      setCurrentNotes(""); // Clear notes after successful summary based on them
-      // timer.setSessionLog([]); // Optionally clear log after summary, or keep for history drawer
+      setCurrentNotes(""); 
     } catch (error) {
       console.error("AI Summary Error:", error);
       toast({ title: "AI Summary Error", description: "Could not generate session summary.", variant: "destructive" });
@@ -88,28 +93,23 @@ export default function PomodoroPage() {
     }
     
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-      if (endedMode === 'longBreak' && sessionLogFromHook.length > 0) { // only trigger if there's log data
+      if (endedMode === 'longBreak' && sessionLogFromHook.length > 0) { 
          triggerAiSummary(sessionLogFromHook); 
       }
     }
-    // Sound playing is handled by the main useEffect based on timer.mode and timer.isRunning updates
   }, [settings.longBreakInterval, triggerAiSummary]);
 
   const timer = useTimerCore({ 
     settings, 
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: () => {
-      // Sound playing is handled by the main useEffect
-    },
+    onTimerStart: () => {},
     onTimerPause: () => {
       soundscapePlayer.stopSound();
     },
     onTimerReset: () => {
       soundscapePlayer.stopSound();
     },
-    onTimerSkip: () => {
-       // Sound playing is handled by the main useEffect
-    }
+    onTimerSkip: () => {}
   });
   
   useEffect(() => {
@@ -158,7 +158,6 @@ export default function PomodoroPage() {
   
   const handleToggleMute = () => {
     setIsMuted(prevMuted => !prevMuted);
-    // Sound adjustment is handled by the main useEffect reacting to isMuted change
   };
 
 
@@ -184,6 +183,7 @@ export default function PomodoroPage() {
 
   return (
     <>
+      {settings.mouseTrailEffectEnabled && <MouseTrailEffect />}
       <div className={cn(
           "relative flex flex-col min-h-screen text-foreground items-center p-4 selection:bg-primary/30",
           settings.backgroundAnimation === 'gradientFlow' && "animated-gradient-background"
@@ -191,11 +191,13 @@ export default function PomodoroPage() {
 
         {settings.backgroundAnimation === 'rain' && <RainEffect />}
         {settings.backgroundAnimation === 'snow' && <SnowEffect />}
+        {settings.backgroundAnimation === 'starfield' && <StarfieldEffect />}
+        {settings.backgroundAnimation === 'bubbles' && <FloatingBubblesEffect />}
         
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           <div className="flex items-center space-x-2">
             <LogoIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-semibold">{APP_NAME}</h1>
+            <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME}</h1>
           </div>
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog)} title="Get AI Session Summary (if data available)">
@@ -293,5 +295,3 @@ export default function PomodoroPage() {
     </>
   );
 }
-
-    

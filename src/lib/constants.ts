@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
   volume: 0.5,
   notificationsEnabled: true,
   backgroundAnimation: 'gradientFlow',
+  mouseTrailEffectEnabled: false, // Default for new mouse trail setting
 };
 
 export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
@@ -28,33 +29,33 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   {
     id: 'ambientPad',
     name: 'Ambient Pad',
-    type: 'tone', // Internally uses PolySynth if 'notes' param is present
+    type: 'tone', 
     params: {
-      notes: ['C3', 'E3', 'G3', 'B4'], // C Major 7 chord, spread out
-      oscillator: 'fatsine', // Richer sine wave
-      envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 }, // Slow attack, long release
-      volume: -20, // dB adjustment, quite soft
+      notes: ['C3', 'E3', 'G3', 'B4'], 
+      oscillator: 'fatsine', 
+      envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 }, 
+      volume: -20, 
     }
   },
   {
     id: 'calmingChimes',
     name: 'Calming Chimes',
-    type: 'tone', // Internally uses PolySynth
+    type: 'tone', 
     params: {
-      notes: ['C6', 'E6', 'G6', 'A6'], // High, consonant notes
-      oscillator: 'triangle', // Softer, purer tone for chimes
-      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 }, // Short attack, long decay/release
+      notes: ['C6', 'E6', 'G6', 'A6'], 
+      oscillator: 'triangle', 
+      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 }, 
       volume: -18,
     }
   },
   {
     id: 'gentlePianoChord',
     name: 'Gentle Piano Chord',
-    type: 'tone', // Internally uses PolySynth
+    type: 'tone', 
     params: {
-      notes: ['C4', 'G4', 'E5'], // Simple C Major triad
-      oscillator: 'triangle', // Using triangle for a softer, less harsh tone than square/saw
-      envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 }, // Piano-like envelope
+      notes: ['C4', 'G4', 'E5'], 
+      oscillator: 'triangle', 
+      envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 }, 
       volume: -16,
     }
   },
@@ -65,6 +66,8 @@ export const BACKGROUND_ANIMATION_OPTIONS: BackgroundAnimationOption[] = [
   { id: 'gradientFlow', name: 'Gradient Flow' },
   { id: 'rain', name: 'Rain Effect' },
   { id: 'snow', name: 'Snow Effect' },
+  { id: 'starfield', name: 'Starfield Effect' },
+  { id: 'bubbles', name: 'Floating Bubbles Effect' },
 ];
 
 export const APP_NAME = "Zenith Timer";

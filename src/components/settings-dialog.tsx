@@ -24,7 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -35,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useSettingsContext } from "@/contexts/settings-context";
-import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS } from "@/lib/constants";
+import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import type { Settings, BackgroundAnimationType } from "@/lib/types";
 import { Settings as SettingsIcon } from "lucide-react";
 import React from "react";
@@ -53,7 +52,8 @@ const settingsSchema = z.object({
   notificationsEnabled: z.boolean(),
   backgroundAnimation: z.custom<BackgroundAnimationType>((val) => 
     BACKGROUND_ANIMATION_OPTIONS.some(opt => opt.id === val)
-  ).default('gradientFlow'),
+  ).default(DEFAULT_SETTINGS.backgroundAnimation),
+  mouseTrailEffectEnabled: z.boolean().default(DEFAULT_SETTINGS.mouseTrailEffectEnabled),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -64,16 +64,17 @@ export function SettingsDialog() {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: settings, // Initialized with context settings
+    defaultValues: {
+        ...DEFAULT_SETTINGS, // Start with all defaults
+        ...settings, // Override with current settings
+      },
   });
 
   React.useEffect(() => {
     if (isSettingsLoaded) {
-      // Ensure form is reset with potentially updated settings from context/localStorage
-      // including the new backgroundAnimation setting
       form.reset({
-        ...settings,
-        backgroundAnimation: settings.backgroundAnimation || 'gradientFlow', // Ensure default if undefined
+        ...DEFAULT_SETTINGS, // Ensure all defaults are present
+        ...settings, // Then apply current settings
       });
     }
   }, [settings, form, isSettingsLoaded]);
@@ -206,6 +207,23 @@ export function SettingsDialog() {
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
                       <FormLabel>Enable Notifications</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="mouseTrailEffectEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>Mouse Trail Effect</FormLabel>
                     </div>
                     <FormControl>
                       <Switch

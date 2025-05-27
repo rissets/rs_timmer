@@ -23,8 +23,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const storedSettings = localStorage.getItem("zenith-timer-settings");
       if (storedSettings) {
         const parsedSettings = JSON.parse(storedSettings);
-        // Merge with defaults to ensure all keys are present if new settings are added
-        // and to apply new default values for settings not previously stored
+        // Merge with defaults to ensure all keys are present, including new ones like mouseTrailEffectEnabled
         setSettings(prev => ({ ...DEFAULT_SETTINGS, ...prev, ...parsedSettings }));
       } else {
         // If no stored settings, initialize with defaults

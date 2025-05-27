@@ -1,6 +1,6 @@
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
-export type BackgroundAnimationType = 'none' | 'gradientFlow' | 'rain' | 'snow';
+export type BackgroundAnimationType = 'none' | 'gradientFlow' | 'rain' | 'snow' | 'starfield' | 'bubbles';
 
 export interface Settings {
   workMinutes: number;
@@ -14,6 +14,7 @@ export interface Settings {
   volume: number; // 0 to 1
   notificationsEnabled: boolean;
   backgroundAnimation: BackgroundAnimationType;
+  mouseTrailEffectEnabled: boolean; // New setting for mouse trail
 }
 
 export interface SessionRecord {
@@ -41,3 +42,4 @@ export interface BackgroundAnimationOption {
   id: BackgroundAnimationType;
   name: string;
 }
+

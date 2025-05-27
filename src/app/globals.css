@@ -97,67 +97,148 @@ body {
     }
   }
 
-  /* Particle Effects */
+  /* Particle Effects Base Container */
   .particle-container {
-    position: absolute; /* Changed from fixed to be relative to the page's root div if it's `position: relative` */
+    position: absolute; 
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0; /* Behind main content which should be z-1 or higher */
+    z-index: 0; 
     overflow: hidden;
   }
 
+  /* Raindrop */
   .raindrop {
     position: absolute;
-    bottom: 100%; /* Start above screen */
-    width: 1.5px; /* Slightly thicker */
-    height: 60px; /* Length of raindrop */
+    bottom: 100%; 
+    width: 1.5px; 
+    height: 60px; 
     background: linear-gradient(to bottom, hsl(var(--foreground) / 0), hsl(var(--foreground) / 0.3));
     animation: fall linear infinite;
     will-change: transform;
   }
-
   .dark .raindrop {
      background: linear-gradient(to bottom, hsl(var(--foreground) / 0), hsl(var(--foreground) / 0.2));
   }
-
   @keyframes fall {
     to {
       transform: translateY(100vh) translateY(100%);
     }
   }
 
+  /* Snowflake */
   .snowflake {
     position: absolute;
-    bottom: 100%; /* Start above screen */
-    /* width and height set dynamically */
+    bottom: 100%; 
     background-color: hsl(var(--card) / 0.8);
     border-radius: 50%;
     animation: snowfall linear infinite;
-    opacity: 0; /* Fade in via animation */
+    opacity: 0; 
     will-change: transform, opacity;
   }
-
   .dark .snowflake {
     background-color: hsl(var(--muted-foreground) / 0.6);
   }
-
   @keyframes snowfall {
     0% {
       transform: translateY(0) translateX(0px) rotate(0deg);
       opacity: 0;
     }
-    10% { /* Start appearing */
+    10% { 
       opacity: 0.8;
     }
-    90% { /* Still visible while falling */
+    90% { 
       opacity: 0.8;
     }
     100% {
       transform: translateY(100vh) translateY(100%) translateX(calc(var(--snow-drift, 0px))) rotate(360deg);
       opacity: 0;
+    }
+  }
+
+  /* Starfield */
+  .star {
+    position: absolute;
+    background-color: hsl(var(--accent) / 0.7); /* Using accent color for stars */
+    border-radius: 50%;
+    animation: twinkle linear infinite;
+    will-change: opacity, transform;
+  }
+  .dark .star {
+    background-color: hsl(var(--accent) / 0.9);
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: var(--star-opacity-start, 0.5); transform: scale(0.8); }
+    50% { opacity: var(--star-opacity-end, 1); transform: scale(1); }
+  }
+
+  /* Floating Bubbles */
+  .bubble {
+    position: absolute;
+    background-color: hsl(var(--primary) / 0.2);
+    border: 1px solid hsl(var(--primary) / 0.4);
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+    will-change: transform, opacity;
+  }
+  .dark .bubble {
+    background-color: hsl(var(--primary) / 0.3);
+    border: 1px solid hsl(var(--primary) / 0.5);
+  }
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) translateX(0px) scale(var(--bubble-scale-start, 0.8));
+      opacity: var(--bubble-opacity-start, 0);
+    }
+    10% {
+      opacity: var(--bubble-opacity-mid, 0.7);
+    }
+    90% {
+      opacity: var(--bubble-opacity-mid, 0.7);
+    }
+    100% {
+      transform: translateY(-100vh) translateY(-100%) translateX(var(--bubble-drift, 0px)) scale(var(--bubble-scale-end, 1.2));
+      opacity: 0;
+    }
+  }
+
+  /* Mouse Trail Particle */
+  .mouse-trail-particle {
+    position: fixed; /* Use fixed to follow mouse anywhere on screen */
+    border-radius: 50%;
+    background-color: hsl(var(--accent));
+    pointer-events: none;
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    animation: fadeAndShrink 0.7s forwards;
+    z-index: 9999; /* Ensure it's above most other content */
+  }
+  .dark .mouse-trail-particle {
+    background-color: hsl(var(--accent) / 0.8);
+  }
+
+  @keyframes fadeAndShrink {
+    to {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+  }
+  
+  /* Text Animation - Title */
+  .animate-title-reveal {
+    animation: title-reveal 1s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes title-reveal {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }
