@@ -33,6 +33,7 @@
     "userGuide": "Open User Guide",
     "settings": "Open settings",
     "themeToggle": "Toggle theme",
+    "languageSwitcher": "Switch language",
     "analyzeCurrentData": "Analyze current session notes, tasks and log with selected context",
     "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle."
   },
@@ -69,7 +70,7 @@
     "title": "Timer Settings",
     "description": "Adjust your Pomodoro timer settings and preferences.",
     "showInitialGuide": "Show Initial Guide",
-    "showInitialGuideDescription": "Display a helpful guided tour on first visit.",
+    "showInitialGuideDescription": "Display a helpful guided tour on first visit or if not completed.",
     "workMinutes": "Work (min)",
     "shortBreakMinutes": "Short Break (min)",
     "longBreakMinutes": "Long Break (min)",
@@ -108,6 +109,9 @@
       "aiAnalysis": {
         "title": "AI Session Analysis"
       },
+      "chatWidget": {
+        "title": "AI Chat Assistant"
+      },
       "sessionHistory": {
         "title": "Session History"
       },
@@ -119,15 +123,27 @@
   "interactiveTourDialog": {
     "stepProgress": "Step {{currentStep}} of {{totalSteps}}",
     "welcomeTitle": "Welcome to RS Timer!",
+    "welcomeContent": "{{appName}} is a Pomodoro timer designed to boost your focus and productivity. This quick tour will show you around.",
     "timerTitle": "The Timer",
+    "timerContent": "This is your main countdown timer. It switches between Work, Short Break, and Long Break modes automatically or manually.",
     "timerControlsTitle": "Timer Controls",
+    "timerControlsContent": "Use these buttons to Start/Pause, Skip to the next interval, Reset the current interval, or Mute/Unmute sounds.",
     "pomodoroDotsTitle": "Pomodoro Dots",
+    "pomodoroDotsContent": "These dots track your progress through a Pomodoro cycle. A full cycle (usually 4 work sessions) earns you a Long Break.",
     "tasksTitle": "Tasks",
+    "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks can be included in the AI Analysis.",
     "notesContextTitle": "Session Notes & Context",
+    "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback.",
     "aiAnalysisTitle": "AI Analysis",
+    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips.",
+    "chatWidgetTitle": "AI Chat Assistant",
+    "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant for quick questions or support related to your focus session.",
     "headerToolsTitle": "Header Tools",
+    "headerToolsContent": "Access AI Summary (✨), Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
-    "allSetTitle": "You're All Set!"
+    "settingsContent": "Customize timer durations, auto-start behavior, sounds, background animations, and more to fit your workflow.",
+    "allSetTitle": "You're All Set!",
+    "allSetContent": "You've learned the basics of {{appName}}. Time to start your first focus session!"
   },
   "notifications": {
     "disabled": "Notifications Disabled",
@@ -140,6 +156,8 @@
   },
   "ai": {
     "noDataForSummary": "Not enough session data, tasks, or notes to generate a summary.",
+    "noSessionLog": "No session log entries for this period.",
+    "noNotes": "No notes taken.",
     "errorTitle": "AI Summary Error",
     "errorDescription": "Could not generate session summary.",
     "errorSummary": "Error generating summary.",
@@ -173,5 +191,12 @@
     "snow": "Snow Effect",
     "starfield": "Starfield Effect",
     "bubbles": "Floating Bubbles Effect"
+  },
+  "chatWidget": {
+    "toggleButtonLabel": "Open AI Chat",
+    "popupTitle": "AI Assistant",
+    "inputPlaceholder": "Ask something...",
+    "sendButtonLabel": "Send",
+    "aiPlaceholderResponse": "Echo: {{userMessage}}"
   }
 }

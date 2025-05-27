@@ -33,6 +33,7 @@
     "userGuide": "Buka Panduan Pengguna",
     "settings": "Buka pengaturan",
     "themeToggle": "Ganti tema",
+    "languageSwitcher": "Ganti bahasa",
     "analyzeCurrentData": "Analisis catatan sesi, tugas, dan log saat ini dengan konteks yang dipilih",
     "pomodoroProgress": "{{completed}} dari {{total}} pomodoro selesai dalam siklus ini."
   },
@@ -69,7 +70,7 @@
     "title": "Pengaturan Timer",
     "description": "Sesuaikan pengaturan dan preferensi timer Pomodoro Anda.",
     "showInitialGuide": "Tampilkan Panduan Awal",
-    "showInitialGuideDescription": "Tampilkan tur panduan yang membantu pada kunjungan pertama.",
+    "showInitialGuideDescription": "Tampilkan tur panduan yang membantu pada kunjungan pertama atau jika belum selesai.",
     "workMinutes": "Kerja (mnt)",
     "shortBreakMinutes": "Istirahat Pendek (mnt)",
     "longBreakMinutes": "Istirahat Panjang (mnt)",
@@ -88,20 +89,61 @@
   },
   "userGuideDialog": {
     "title": "Panduan Pengguna RS Timer",
-    "description": "Pelajari cara memaksimalkan sesi fokus Anda."
+    "description": "Pelajari cara memaksimalkan sesi fokus Anda.",
+    "sections": {
+      "gettingStarted": {
+        "title": "Memulai dengan Pomodoro"
+      },
+      "timerControls": {
+        "title": "Kontrol Timer"
+      },
+      "customization": {
+        "title": "Kustomisasi (Pengaturan)"
+      },
+      "tasksAndNotes": {
+        "title": "Tugas & Catatan"
+      },
+      "sessionContext": {
+        "title": "Konteks Sesi"
+      },
+      "aiAnalysis": {
+        "title": "Analisis Sesi AI"
+      },
+      "chatWidget": {
+        "title": "Asisten Chat AI"
+      },
+      "sessionHistory": {
+        "title": "Riwayat Sesi"
+      },
+      "themeAndAppearance": {
+        "title": "Tema & Tampilan"
+      }
+    }
   },
   "interactiveTourDialog": {
     "stepProgress": "Langkah {{currentStep}} dari {{totalSteps}}",
     "welcomeTitle": "Selamat Datang di RS Timer!",
+    "welcomeContent": "{{appName}} adalah timer Pomodoro yang dirancang untuk meningkatkan fokus dan produktivitas Anda. Tur singkat ini akan memandu Anda.",
     "timerTitle": "Timer",
+    "timerContent": "Ini adalah timer hitung mundur utama Anda. Ini beralih antara mode Kerja, Istirahat Pendek, dan Istirahat Panjang secara otomatis atau manual.",
     "timerControlsTitle": "Kontrol Timer",
+    "timerControlsContent": "Gunakan tombol ini untuk Mulai/Jeda, Lewati ke interval berikutnya, Atur Ulang interval saat ini, atau Bisukan/Aktifkan suara.",
     "pomodoroDotsTitle": "Titik Pomodoro",
+    "pomodoroDotsContent": "Titik-titik ini melacak kemajuan Anda melalui siklus Pomodoro. Satu siklus penuh (biasanya 4 sesi kerja) memberi Anda Istirahat Panjang.",
     "tasksTitle": "Tugas",
+    "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas dapat disertakan dalam Analisis AI.",
     "notesContextTitle": "Catatan & Konteks Sesi",
+    "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan.",
     "aiAnalysisTitle": "Analisis AI",
+    "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan.",
+    "chatWidgetTitle": "Asisten Chat AI",
+    "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "headerToolsTitle": "Alat Header",
+    "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
-    "allSetTitle": "Anda Sudah Siap!"
+    "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara, animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda.",
+    "allSetTitle": "Anda Sudah Siap!",
+    "allSetContent": "Anda telah mempelajari dasar-dasar {{appName}}. Saatnya memulai sesi fokus pertama Anda!"
   },
   "notifications": {
     "disabled": "Notifikasi Dinonaktifkan",
@@ -114,6 +156,8 @@
   },
   "ai": {
     "noDataForSummary": "Data sesi, tugas, atau catatan tidak cukup untuk menghasilkan ringkasan.",
+    "noSessionLog": "Tidak ada entri log sesi untuk periode ini.",
+    "noNotes": "Tidak ada catatan yang dibuat.",
     "errorTitle": "Kesalahan Ringkasan AI",
     "errorDescription": "Tidak dapat menghasilkan ringkasan sesi.",
     "errorSummary": "Kesalahan menghasilkan ringkasan.",
@@ -147,5 +191,12 @@
     "snow": "Efek Salju",
     "starfield": "Efek Langit Berbintang",
     "bubbles": "Efek Gelembung Mengambang"
+  },
+  "chatWidget": {
+    "toggleButtonLabel": "Buka Chat AI",
+    "popupTitle": "Asisten AI",
+    "inputPlaceholder": "Tanyakan sesuatu...",
+    "sendButtonLabel": "Kirim",
+    "aiPlaceholderResponse": "Gema: {{userMessage}}"
   }
 }

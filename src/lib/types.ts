@@ -67,3 +67,10 @@ export interface SummarizeSessionInput {
   sessionDetails: string;
   sessionType?: SessionType;
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: 'user' | 'ai';
+  text: string;
+  timestamp: Date;
+}

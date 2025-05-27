@@ -30,7 +30,7 @@ import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { SimpleTaskList } from "@/components/simple-task-list";
 import { summarizeSession } from "@/ai/flows/summarize-session";
-import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType } from "@/lib/types";
+import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage } from "@/lib/types";
 import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen } from "lucide-react";
@@ -39,6 +39,8 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguageContext } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ChatWidgetButton } from '@/components/chat-widget-button';
+import { ChatPopup } from '@/components/chat-popup';
 
 const INTERACTIVE_TOUR_STORAGE_KEY = "rs-timer-interactive-tour-completed";
 
@@ -58,6 +60,13 @@ export default function PomodoroPage() {
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
   const isMobile = useIsMobile();
+
+  // Chat State
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInputValue, setChatInputValue] = useState("");
+  const [isAiChatLoading, setIsAiChatLoading] = useState(false);
+
 
   const tourSteps = React.useMemo(() => [
     {
@@ -87,6 +96,10 @@ export default function PomodoroPage() {
     {
       title: t('interactiveTourDialog.aiAnalysisTitle'),
       content: <p>{t('interactiveTourDialog.aiAnalysisContent')}</p>,
+    },
+     {
+      title: t('interactiveTourDialog.chatWidgetTitle'),
+      content: <p>{t('interactiveTourDialog.chatWidgetContent')}</p>,
     },
     {
       title: t('interactiveTourDialog.headerToolsTitle'),
@@ -213,7 +226,7 @@ export default function PomodoroPage() {
       soundscapePlayer.stopSound();
     },
     onTimerSkip: () => {},
-    getTranslatedText: t, // Pass the t function here
+    getTranslatedText: t,
   });
   
   useEffect(() => {
@@ -275,6 +288,33 @@ export default function PomodoroPage() {
     setTasks(prevTasks => prevTasks.filter(task => !task.completed));
   };
 
+  const handleSendChatMessage = async () => {
+    if (!chatInputValue.trim()) return;
+
+    const newUserMessage: ChatMessage = {
+      id: Date.now().toString(),
+      sender: 'user',
+      text: chatInputValue.trim(),
+      timestamp: new Date(),
+    };
+    setChatMessages(prev => [...prev, newUserMessage]);
+    setChatInputValue("");
+    setIsAiChatLoading(true);
+
+    // Placeholder for actual AI call
+    // TODO: Replace with Genkit flow call
+    setTimeout(() => {
+      const aiResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        text: t('chatWidget.aiPlaceholderResponse', { userMessage: newUserMessage.text }),
+        timestamp: new Date(),
+      };
+      setChatMessages(prev => [...prev, aiResponse]);
+      setIsAiChatLoading(false);
+    }, 1500);
+  };
+
 
   if (!isSettingsLoaded) {
     return (
@@ -331,7 +371,7 @@ export default function PomodoroPage() {
           </div>
         </header>
 
-        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1] space-y-6">
+        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1] space-y-6 pb-20"> {/* Added pb-20 for chat button */}
           <Card className="w-full shadow-xl">
             <CardHeader className="text-center">
                 <CardTitle className="text-2xl font-medium text-primary">
@@ -452,6 +492,17 @@ export default function PomodoroPage() {
           onNext={handleNextTourStep}
           onSkip={handleFinishTour}
         />
+
+        <ChatWidgetButton onClick={() => setIsChatOpen(prev => !prev)} />
+        <ChatPopup
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          messages={chatMessages}
+          inputValue={chatInputValue}
+          onInputChange={setChatInputValue}
+          onSendMessage={handleSendChatMessage}
+          isLoadingAiResponse={isAiChatLoading}
+        />
         
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
           <p>{t('footerCopyright', { year: new Date().getFullYear().toString() })}</p>
@@ -460,5 +511,3 @@ export default function PomodoroPage() {
     </>
   );
 }
-
-    
