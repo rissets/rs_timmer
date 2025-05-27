@@ -2,6 +2,8 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation'; // usePathname added
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -33,7 +35,7 @@ import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
 import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
-import FirefliesEffect from "@/components/effects/FirefliesEffect"; // Added
+import FirefliesEffect from "@/components/effects/FirefliesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { SimpleTaskList } from "@/components/simple-task-list";
 import { DictionaryCard } from "@/components/dictionary-card";
@@ -44,7 +46,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -59,6 +61,10 @@ export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
   const { t } = useLanguageContext();
   const { toast } = useToast();
+  const { currentUser, loading: authLoading, logoutUser } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname(); // Get current path
+
   const [currentNotes, setCurrentNotes] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
@@ -72,18 +78,21 @@ export default function PomodoroPage() {
   const [currentTourStep, setCurrentTourStep] = useState(0);
   const isMobile = useIsMobile();
 
-  // Chat State
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInputValue, setChatInputValue] = useState("");
   const [isAiChatLoading, setIsAiChatLoading] = useState(false);
 
-  // Dictionary Card State
   const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
   const [isDefiningWord, setIsDefiningWord] = useState(false);
 
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
 
+  useEffect(() => {
+    if (!authLoading && !currentUser) {
+      router.push('/auth/login');
+    }
+  }, [currentUser, authLoading, router]);
 
   const tourSteps = React.useMemo(() => [
     {
@@ -142,14 +151,14 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (isSettingsLoaded) {
+    if (isSettingsLoaded && currentUser) { // Only show tour if logged in
       const tourCompleted = localStorage.getItem(INTERACTIVE_TOUR_STORAGE_KEY);
       if (!tourCompleted && settings.showCoachMarks) {
         setIsInteractiveTourActive(true);
         setCurrentTourStep(0);
       }
     }
-  }, [isSettingsLoaded, settings.showCoachMarks]);
+  }, [isSettingsLoaded, settings.showCoachMarks, currentUser]);
 
   const handleNextTourStep = () => {
     if (currentTourStep < tourSteps.length - 1) {
@@ -168,7 +177,6 @@ export default function PomodoroPage() {
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
-    // Decoupled from backgroundAnimation. Always use selected soundscape.
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
   
@@ -396,9 +404,33 @@ export default function PomodoroPage() {
     toast({ title: t('dictionaryCard.exportSuccessfulTitle'), description: t('dictionaryCard.exportSuccessfulDescription') });
   };
 
+  const handleLogout = async () => {
+    await logoutUser();
+    router.push('/auth/login');
+  };
 
-  if (!isSettingsLoaded) {
+
+  if (authLoading || (!currentUser && pathname !== '/auth/login' && pathname !== '/auth/register' && pathname !== '/auth/forgot-password')) {
     return (
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+   // If user is authenticated but on an auth page, redirect to home
+  if (!authLoading && currentUser && (pathname === '/auth/login' || pathname === '/auth/register' || pathname === '/auth/forgot-password')) {
+    router.push('/');
+    return ( // Render loading spinner during redirection
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // If no user and not an auth page, redirect to login (already handled by first condition, but good to be explicit if structure changes)
+  if (!authLoading && !currentUser && !pathname.startsWith('/auth')) {
+     router.push('/auth/login');
+     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
@@ -450,6 +482,11 @@ export default function PomodoroPage() {
             </Button>
             <SettingsDialog />
             <ThemeToggleButton />
+            {currentUser && (
+              <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
+                <LogOut className="h-5 w-5" />
+              </Button>
+            )}
           </div>
         </header>
 
@@ -619,11 +656,9 @@ export default function PomodoroPage() {
         />
         
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
-          <p>{t('footerCopyright', { year: new Date().getFullYear().toString() })}</p>
+          <p>{t('footerCopyright', { year: new Date().getFullYear().toString(), appName: APP_NAME })}</p>
         </footer>
       </div>
     </>
   );
 }
-
-    

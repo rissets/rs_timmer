@@ -2,7 +2,7 @@
 {
   "appName": "RS Timer",
   "loading": "Memuat RS Timer...",
-  "footerCopyright": "© {{year}} RS Timer. Tetap fokus!",
+  "footerCopyright": "© {{year}} {{appName}}. Tetap fokus!",
   "timerModes": {
     "work": "Kerja",
     "shortBreak": "Istirahat Pendek",
@@ -89,12 +89,12 @@
     "selectAnimationPlaceholder": "Pilih animasi"
   },
   "userGuideDialog": {
-    "title": "Panduan Pengguna RS Timer",
+    "title": "Panduan Pengguna {{appName}}",
     "description": "Pelajari cara memaksimalkan sesi fokus Anda.",
     "sections": {
       "gettingStarted": {
         "title": "Memulai dengan Pomodoro",
-        "content": "Teknik Pomodoro adalah metode manajemen waktu yang menggunakan timer untuk membagi pekerjaan menjadi interval, biasanya 25 menit, dipisahkan oleh istirahat pendek.\\n{{appName}} Timer membantu Anda menerapkan teknik ini. Setiap interval kerja adalah \"Pomodoro.\" Setelah sejumlah Pomodoro tertentu (biasanya 4), Anda mengambil istirahat yang lebih panjang.\\nManfaatnya termasuk peningkatan fokus, pengurangan kelelahan, dan perkiraan waktu yang lebih baik."
+        "content": "Teknik Pomodoro adalah metode manajemen waktu yang menggunakan timer untuk membagi pekerjaan menjadi interval, biasanya 25 menit, dipisahkan oleh istirahat pendek.\\n{{appName}} membantu Anda menerapkan teknik ini. Setiap interval kerja adalah \"Pomodoro.\" Setelah sejumlah Pomodoro tertentu (biasanya 4), Anda mengambil istirahat yang lebih panjang.\\nManfaatnya termasuk peningkatan fokus, pengurangan kelelahan, dan perkiraan waktu yang lebih baik."
       },
       "timerControls": {
         "title": "Kontrol Timer",
@@ -118,7 +118,7 @@
       },
       "aiAnalysis": {
         "title": "Analisis Sesi AI",
-        "content": "{{appName}} Timer memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas."
+        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas."
       },
       "chatWidget": {
         "title": "Asisten Chat AI",
@@ -271,6 +271,27 @@
     "sendResetLinkButton": "Kirim Tautan Pengaturan Ulang",
     "sendingButton": "Mengirim...",
     "backToLoginLink": "Kembali ke Halaman Masuk",
-    "resetLinkSentPlaceholder": "Jika akun ada untuk email ini, tautan pengaturan ulang telah dikirim."
+    "resetLinkSentPlaceholder": "Jika akun ada untuk email ini, tautan pengaturan ulang telah dikirim.",
+    "logoutButtonLabel": "Keluar",
+    "logoutSuccessTitle": "Berhasil Keluar",
+    "loginSuccessTitle": "Login Berhasil",
+    "loginSuccessDescription": "Selamat datang kembali!",
+    "registerSuccessTitle": "Registrasi Berhasil",
+    "registerSuccessDescription": "Selamat datang di {{appName}}!",
+    "passwordResetSentTitle": "Email Pengaturan Ulang Kata Sandi Terkirim",
+    "passwordResetSentDescription": "Periksa email Anda untuk instruksi pengaturan ulang kata sandi.",
+    "errors": {
+      "title": "Kesalahan Otentikasi",
+      "invalidEmail": "Alamat email tidak valid.",
+      "userDisabled": "Akun pengguna ini telah dinonaktifkan.",
+      "userNotFound": "Tidak ada pengguna yang ditemukan dengan email ini.",
+      "wrongPassword": "Kata sandi salah. Silakan coba lagi.",
+      "emailAlreadyInUse": "Alamat email ini sudah digunakan oleh akun lain.",
+      "weakPassword": "Kata sandi terlalu lemah. Silakan pilih kata sandi yang lebih kuat.",
+      "registrationFailed": "Registrasi gagal. Silakan coba lagi.",
+      "loginFailed": "Login gagal. Silakan periksa kredensial Anda.",
+      "logoutFailed": "Logout gagal. Silakan coba lagi.",
+      "passwordResetFailed": "Gagal mengirim email pengaturan ulang kata sandi. Silakan coba lagi."
+    }
   }
 }

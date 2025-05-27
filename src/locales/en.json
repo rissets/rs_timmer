@@ -2,7 +2,7 @@
 {
   "appName": "RS Timer",
   "loading": "Loading RS Timer...",
-  "footerCopyright": "© {{year}} RS Timer. Stay focused!",
+  "footerCopyright": "© {{year}} {{appName}}. Stay focused!",
   "timerModes": {
     "work": "Work",
     "shortBreak": "Short Break",
@@ -94,7 +94,7 @@
     "sections": {
       "gettingStarted": {
         "title": "Getting Started with Pomodoro",
-        "content": "The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.\\n{{appName}} Timer helps you implement this technique. Each work interval is a \"Pomodoro.\" After a set number of Pomodoros (usually 4), you take a longer break.\\nBenefits include improved focus, reduced burnout, and better time estimation."
+        "content": "The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.\\n{{appName}} helps you implement this technique. Each work interval is a \"Pomodoro.\" After a set number of Pomodoros (usually 4), you take a longer break.\\nBenefits include improved focus, reduced burnout, and better time estimation."
       },
       "timerControls": {
         "title": "Timer Controls",
@@ -118,7 +118,7 @@
       },
       "aiAnalysis": {
         "title": "AI Session Analysis",
-        "content": "{{appName}} Timer features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks."
+        "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks."
       },
       "chatWidget": {
         "title": "AI Chat Assistant",
@@ -271,6 +271,27 @@
     "sendResetLinkButton": "Send Password Reset Link",
     "sendingButton": "Sending...",
     "backToLoginLink": "Back to Login",
-    "resetLinkSentPlaceholder": "If an account exists for this email, a reset link has been sent."
+    "resetLinkSentPlaceholder": "If an account exists for this email, a reset link has been sent.",
+    "logoutButtonLabel": "Logout",
+    "logoutSuccessTitle": "Logged Out",
+    "loginSuccessTitle": "Login Successful",
+    "loginSuccessDescription": "Welcome back!",
+    "registerSuccessTitle": "Registration Successful",
+    "registerSuccessDescription": "Welcome to {{appName}}!",
+    "passwordResetSentTitle": "Password Reset Email Sent",
+    "passwordResetSentDescription": "Check your email for instructions to reset your password.",
+    "errors": {
+      "title": "Authentication Error",
+      "invalidEmail": "The email address is not valid.",
+      "userDisabled": "This user account has been disabled.",
+      "userNotFound": "No user found with this email.",
+      "wrongPassword": "Incorrect password. Please try again.",
+      "emailAlreadyInUse": "This email address is already in use by another account.",
+      "weakPassword": "Password is too weak. Please choose a stronger password.",
+      "registrationFailed": "Registration failed. Please try again.",
+      "loginFailed": "Login failed. Please check your credentials.",
+      "logoutFailed": "Logout failed. Please try again.",
+      "passwordResetFailed": "Failed to send password reset email. Please try again."
+    }
   }
 }

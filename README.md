@@ -1,10 +1,12 @@
 
 # RS Timer - A PWA Pomodoro Focus App
 
-RS Timer is a Progressive Web App (PWA) built with Next.js, React, ShadCN UI, Tailwind CSS, and Genkit. It's designed to help you enhance focus and productivity using the Pomodoro Technique, with AI-powered session analysis and customizable features.
+RS Timer is a Progressive Web App (PWA) built with Next.js, React, ShadCN UI, Tailwind CSS, and Genkit. It's designed to help you enhance focus and productivity using the Pomodoro Technique, with AI-powered session analysis and customizable features. It now includes Firebase authentication for user management.
 
 ## Features
 
+*   User Authentication: Registration, Login, Forgot Password.
+*   Protected main application page, accessible only after login.
 *   Customizable Pomodoro, Short Break, and Long Break timers.
 *   Selectable soundscapes for work and break periods.
 *   AI-powered session summarization and improvement suggestions (using Genkit).
@@ -12,32 +14,53 @@ RS Timer is a Progressive Web App (PWA) built with Next.js, React, ShadCN UI, Ta
 *   Session notes with context selection (Work, Learning, General) for tailored AI feedback.
 *   Session history tracking.
 *   Themeable (Light/Dark mode).
-*   Multiple background animations (Rain, Snow, Starfield, Bubbles, Gradient).
+*   Multiple background animations (Rain, Snow, Starfield, Bubbles, Gradient, Fireflies).
 *   Mouse trail effect (optional).
 *   Interactive user guide and initial coach marks.
 *   PWA-ready for offline use and app-like installation.
 *   Multi-language support (English, Indonesian).
 *   Dockerized for easy deployment.
+*   AI Chat Widget for quick assistance.
+*   Session Dictionary feature with Markdown export.
 
 ## Prerequisites (for Local Development)
 
 *   **Node.js**: Version 18.x or 20.x recommended.
 *   **npm** (usually comes with Node.js).
 *   **Git** (for cloning the repository).
+*   **Firebase Project**: You need to set up a Firebase project and enable Email/Password authentication.
 
 ## Environment Setup (Local Development)
 
-This application uses Genkit with Google AI (Gemini). You'll need a Google AI API key.
+This application uses Genkit with Google AI (Gemini) and Firebase for authentication.
 
-1.  Create a `.env` file in the root of your project:
+1.  **Firebase Setup**:
+    *   Go to the [Firebase Console](https://console.firebase.google.com/).
+    *   Create a new Firebase project (or use an existing one).
+    *   In your project, navigate to "Authentication" (under Build menu) and enable the "Email/Password" sign-in method on the "Sign-in method" tab.
+    *   Go to Project Settings (click the gear icon next to "Project Overview").
+    *   Under the "General" tab, scroll down to "Your apps". If you don't have a web app, click "Add app" and select the web platform (</> icon).
+    *   Register your app (you can give it a nickname). Firebase Hosting setup is optional for now.
+    *   After registering, you'll see your web app's Firebase configuration (it will look like `const firebaseConfig = { apiKey: "...", authDomain: "...", ... };`). You'll need these values.
+
+2.  Create a `.env` file in the root of your project:
     ```bash
     touch .env
     ```
-2.  Add your Google AI API key to the `.env` file:
+3.  Add your Google AI API key and Firebase configuration to the `.env` file. Replace placeholders with your actual credentials:
     ```env
-    GOOGLE_API_KEY="your_actual_google_api_key_here"
+    # Genkit Google AI API Key
+    GOOGLE_API_KEY="your_actual_google_ai_api_key_here"
+
+    # Firebase Configuration
+    NEXT_PUBLIC_FIREBASE_API_KEY="your_firebase_api_key"
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your_firebase_auth_domain"
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID="your_firebase_project_id"
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your_firebase_storage_bucket"
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your_firebase_messaging_sender_id"
+    NEXT_PUBLIC_FIREBASE_APP_ID="your_firebase_app_id"
+    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="your_firebase_measurement_id" # Optional, for Analytics
     ```
-    Replace `"your_actual_google_api_key_here"` with your actual API key.
 
 ## Installation and Running (Local Development - Manual)
 
@@ -72,7 +95,7 @@ This application uses Genkit with Google AI (Gemini). You'll need a Google AI AP
     ```
     The Genkit UI typically runs on `http://localhost:4000`.
 
-6.  **Access the application**: Open your browser and go to `http://localhost:9002`.
+6.  **Access the application**: Open your browser and go to `http://localhost:9002`. You will be redirected to the login page if not authenticated.
 
 ## Deployment
 
@@ -105,10 +128,22 @@ This method involves building the Next.js application and running its standalone
     *   Your `package.json` (the standalone output should include necessary `node_modules`, but `package.json` might be needed by some process managers or for context).
 
 3.  **Set Up Environment Variables on Server:**
-    Create a `.env` file in the root of your deployed application directory (e.g., `/var/www/rs-timer/.env`) with your production `GOOGLE_API_KEY`:
+    Create a `.env` file in the root of your deployed application directory (e.g., `/var/www/rs-timer/.env`) with your production `GOOGLE_API_KEY` and Firebase configuration:
     ```env
     NODE_ENV=production
-    GOOGLE_API_KEY="your_production_google_api_key"
+    
+    # Genkit Google AI API Key
+    GOOGLE_API_KEY="your_production_google_ai_api_key"
+
+    # Firebase Configuration
+    NEXT_PUBLIC_FIREBASE_API_KEY="your_production_firebase_api_key"
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your_production_firebase_auth_domain"
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID="your_production_firebase_project_id"
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your_production_firebase_storage_bucket"
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your_production_firebase_messaging_sender_id"
+    NEXT_PUBLIC_FIREBASE_APP_ID="your_production_firebase_app_id"
+    NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="your_production_firebase_measurement_id"
+    
     # You might need to set the PORT if your reverse proxy expects a specific port
     # PORT=3000 
     ```
@@ -149,7 +184,7 @@ This method involves building the Next.js application and running its standalone
         listen [::]:80; # For IPv6
         server_name yourdomain.com www.yourdomain.com; # Replace with your domain
 
-        # Redirect HTTP to HTTPS (optional, if using SSL)
+        # Redirect HTTP to HTTPS (if using SSL)
         # return 301 https://$host$request_uri;
 
         # For SSL (recommended, use Certbot for free certificates)
@@ -178,15 +213,6 @@ This method involves building the Next.js application and running its standalone
             root /var/www/rs-timer/public; # Path to your public directory
             try_files $uri =404;
         }
-
-        # Next.js static assets (if not handled by proxy_pass to Next.js server itself)
-        location /_next/static {
-            # This path needs to correctly point to where Next.js serves its static files
-            # If using the standalone server, it handles its own static assets.
-            # If you're serving static assets directly from Nginx for optimization,
-            # you might need to adjust paths or ensure the Next.js server handles them.
-            # The proxy_pass above should generally cover this.
-        }
     }
     ```
     Enable the site and restart Nginx:
@@ -211,13 +237,8 @@ This application includes a `Dockerfile` and `docker-compose.yml` for containeri
     Copy your entire project directory (or clone it from Git) to your server.
 
 2.  **Set Up Environment Variables:**
-    Create a `.env` file in the project root on your server:
-    ```env
-    NODE_ENV=production
-    GOOGLE_API_KEY="your_production_google_api_key"
-    # PORT=3000 # The Dockerfile exposes port 3000, docker-compose maps it
-    ```
-    The `docker-compose.yml` is configured to pick up environment variables. For sensitive keys like `GOOGLE_API_KEY`, ensure your `.env` file is correctly configured if `docker-compose.yml` is set to read it (it currently expects them to be set in the environment it runs in, or you can uncomment the volume mount for `.env` in `docker-compose.yml`). **Do not commit `.env` files with secrets to Git.**
+    Create a `.env` file in the project root on your server with your production credentials (see example in Manual Deployment Step 3).
+    The `docker-compose.yml` is configured to use variables set in the environment it runs in. You can also directly specify an `env_file` in `docker-compose.yml` or pass variables via `docker run --env-file .env ...`. **Do not commit `.env` files with secrets to Git.**
 
 3.  **Build the Docker Image:**
     From the project root directory on your server:
@@ -236,6 +257,7 @@ This application includes a `Dockerfile` and `docker-compose.yml` for containeri
     ```
     Or, if you built with `docker build` directly:
     ```bash
+    # Ensure your .env file is in the current directory or provide the full path
     docker run -d -p 3000:3000 --env-file .env --name rs-timer-container rs-timer-app
     ```
     This maps port 3000 of the host to port 3000 in the container.
@@ -244,7 +266,7 @@ This application includes a `Dockerfile` and `docker-compose.yml` for containeri
     Open your browser and go to `http://your_server_ip:3000`.
 
 6.  **Reverse Proxy (Optional but Recommended):**
-    Even with Docker, it's often beneficial to use a reverse proxy like Nginx on the host machine to handle SSL termination, custom domains, and potentially serve static assets or load balance if you scale. The Nginx configuration would be similar to the manual deployment, proxying requests to the port exposed by Docker (e.g., `http://localhost:3000`).
+    Even with Docker, use a reverse proxy like Nginx on the host machine for SSL, custom domains, etc. The Nginx configuration would proxy requests to the port exposed by Docker (e.g., `http://localhost:3000`).
 
 ### Setting Up a Custom Domain with Cloudflare
 
@@ -269,35 +291,25 @@ Cloudflare can provide DNS management, SSL, CDN, and security for your deployed 
     *   DNS propagation can take some time (minutes to hours).
 
 3.  **Configure DNS Records in Cloudflare:**
-    *   Once your domain is active on Cloudflare, go to the "DNS" settings for your domain in Cloudflare.
+    *   Once your domain is active on Cloudflare, go to the "DNS" settings for your domain.
     *   Add an `A` record:
         *   **Type:** `A`
         *   **Name:** `@` (for the root domain, e.g., `yourdomain.com`) or `www` (for `www.yourdomain.com`)
         *   **IPv4 address:** Your server's public IP address.
         *   **Proxy status:** "Proxied" (orange cloud icon) is recommended for Cloudflare's benefits (CDN, SSL, DDoS protection). If you want Cloudflare to only act as DNS, set it to "DNS only" (grey cloud).
     *   If you have an IPv6 address, add an `AAAA` record similarly.
-    *   Add any other necessary records (e.g., `MX` for email).
 
 4.  **Configure SSL/TLS:**
     *   In Cloudflare, go to "SSL/TLS" settings.
     *   **Overview Tab:** Choose an SSL/TLS encryption mode:
-        *   **Flexible:** Encrypts traffic between the browser and Cloudflare (not recommended for sensitive data as traffic between Cloudflare and your origin server is unencrypted).
-        *   **Full:** Encrypts traffic end-to-end, but Cloudflare doesn't validate the SSL certificate on your origin server. You can use a self-signed certificate on your server.
-        *   **Full (Strict):** Encrypts traffic end-to-end, and Cloudflare validates the SSL certificate on your origin server. This is the most secure option. You'll need a valid SSL certificate on your server (e.g., from Let's Encrypt).
+        *   **Full (Strict):** Most secure. Encrypts traffic end-to-end, and Cloudflare validates the SSL certificate on your origin server. You'll need a valid SSL certificate on your server (e.g., from Let's Encrypt, often handled by your Nginx setup).
     *   **Edge Certificates Tab:** Ensure "Always Use HTTPS" is enabled to redirect HTTP traffic to HTTPS.
 
 5.  **Wait for Propagation:**
-    Changes to DNS and SSL can take some time to propagate globally.
+    DNS and SSL changes can take time.
 
 6.  **Verify:**
-    Once propagated, you should be able to access your RS Timer application via `https://yourdomain.com`.
-
-**Optional Cloudflare Settings:**
-
-*   **Caching:** Configure caching rules to improve performance.
-*   **Firewall:** Set up WAF rules for security.
-*   **Page Rules:** Customize behavior for specific URLs (e.g., redirects, caching levels).
-*   **Workers:** Deploy serverless functions at the edge.
+    Access your RS Timer application via `https://yourdomain.com`.
 
 ## Available Scripts (for Local Development)
 
@@ -315,4 +327,3 @@ This application is configured as a PWA.
 *   **Manifest:** `public/manifest.json`
 *   **Service Worker:** Handled by `next-pwa`.
 *   Modern browsers will automatically offer an "Install" or "Add to Home Screen" option if the PWA criteria are met when accessed over HTTPS.
-

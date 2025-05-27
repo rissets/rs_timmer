@@ -4,7 +4,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
-import { LanguageProvider } from '@/contexts/language-context'; // Added
+import { LanguageProvider } from '@/contexts/language-context';
+import { AuthProvider } from '@/contexts/auth-context'; // Added AuthProvider
 import { Toaster } from "@/components/ui/toaster";
 import { APP_NAME } from '@/lib/constants';
 
@@ -46,9 +47,11 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <SettingsProvider>
-            <LanguageProvider> {/* Added LanguageProvider */}
-              {children}
-              <Toaster />
+            <LanguageProvider>
+              <AuthProvider> {/* Added AuthProvider */}
+                {children}
+                <Toaster />
+              </AuthProvider>
             </LanguageProvider>
           </SettingsProvider>
         </ThemeProvider>
