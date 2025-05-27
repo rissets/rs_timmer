@@ -117,17 +117,17 @@ export function SettingsDialog() {
                   <div className="space-y-0.5">
                     <FormLabel className="flex items-center">
                       <HelpCircle className="mr-2 h-4 w-4 text-muted-foreground" />
-                      Show Coach Marks
+                      Show Initial Guide
                     </FormLabel>
                     <FormDescription>
-                      Display helpful tooltips on UI elements.
+                      Display a helpful guided tour on first visit.
                     </FormDescription>
                   </div>
                   <FormControl>
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      aria-label="Toggle coach marks"
+                      aria-label="Toggle initial guided tour"
                     />
                   </FormControl>
                 </FormItem>
@@ -354,3 +354,5 @@ export function SettingsDialog() {
     </Dialog>
   );
 }
+
+    
