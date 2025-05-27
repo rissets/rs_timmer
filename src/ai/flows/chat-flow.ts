@@ -53,23 +53,39 @@ Do not provide overly long responses. Aim for 1-3 helpful sentences.
 Current date: ${new Date().toLocaleDateString()}`;
 
     // Ensure history format matches Genkit's MessageData[]
-    // The input 'history' (from ChatInputSchema) is already compatible.
     const genkitHistory: MessageData[] | undefined = history?.map(h => ({
       role: h.role,
       parts: h.parts.map(p => ({ text: p.text })) as Part[], // Cast to Part[]
     }));
 
-    const response = await ai.generate({
-      model: ai.model, // Uses the default model configured in genkit.ts
-      system: systemInstruction,
-      history: genkitHistory,
-      prompt: userInput, // Current user input as a string
-      config: {
-        // You can add specific config for the model if needed, e.g., temperature
-      },
-    });
+    try {
+      const response = await ai.generate({
+        model: ai.model, // Uses the default model configured in genkit.ts
+        system: systemInstruction,
+        history: genkitHistory,
+        prompt: userInput, // Current user input as a string
+        config: {
+          // You can add specific config for the model if needed, e.g., temperature
+        },
+      });
 
-    return {aiResponse: response.text || "I'm sorry, I couldn't generate a response right now."};
+      return {aiResponse: response.text || "I'm sorry, I couldn't generate a response right now."};
+    } catch (e: any) {
+      console.error("Error in chatFlow during ai.generate:", e);
+      let errorMessage = "An unexpected error occurred while I was thinking. Please try again.";
+      if (e.message) {
+        // Avoid leaking potentially sensitive internal error details directly to the user
+        // You might want to log e.message for debugging but provide a generic message.
+        // For now, we'll provide a slightly more direct but still user-friendly message if one exists.
+        // In a production app, you'd map common errors to user-friendly messages.
+        if (e.message.includes('API key not valid') || e.message.includes('UNAUTHENTICATED')) {
+            errorMessage = "There seems to be an issue with the AI service configuration. Please contact support.";
+        } else if (e.message.length < 150) { // Keep error message relatively short
+            errorMessage = `Sorry, I encountered an issue: ${e.message}`;
+        }
+      }
+      return { aiResponse: errorMessage };
+    }
   }
 );
 
