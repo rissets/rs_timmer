@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,43 +20,56 @@ import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { useLanguageContext } from "@/contexts/language-context";
+import { loadSessionLogForDay, deleteSessionLogForDay } from '@/lib/firebase/firestore-service'; // Import Firestore service
+import { useToast } from '@/hooks/use-toast';
 
-// The old SESSION_HISTORY_KEY is no longer the primary source for the drawer.
-// The drawer will now load based on the currentDateKey passed as a prop.
 
 interface SessionHistoryDrawerProps {
-  currentDateKey: string; // To load today's history
-  // We might add functionality later to view other dates
+  currentDateKey: string;
+  userId: string | undefined; // User ID to fetch data for
 }
 
-export function SessionHistoryDrawer({ currentDateKey }: SessionHistoryDrawerProps) {
+export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryDrawerProps) {
   const [history, setHistory] = useState<SessionRecord[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const { t } = useLanguageContext();
+  const { toast } = useToast();
+
+  const fetchHistory = useCallback(async () => {
+    if (!userId) {
+      setHistory([]);
+      return;
+    }
+    setIsLoadingHistory(true);
+    try {
+      const loadedHistory = await loadSessionLogForDay(userId, currentDateKey);
+      setHistory(loadedHistory);
+    } catch (error) {
+      console.error("Failed to load session history from Firestore:", error);
+      toast({ title: "Error", description: "Could not load session history.", variant: "destructive" });
+      setHistory([]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [userId, currentDateKey, toast]);
 
   useEffect(() => {
-    if (isOpen && currentDateKey) {
-      try {
-        const storedHistory = localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`);
-        if (storedHistory) {
-          setHistory(JSON.parse(storedHistory));
-        } else {
-          setHistory([]); // No history for today yet
-        }
-      } catch (error) {
-        console.error("Failed to load session history from localStorage:", error);
-        setHistory([]);
-      }
+    if (isOpen && userId) {
+      fetchHistory();
     }
-  }, [isOpen, currentDateKey]);
+  }, [isOpen, userId, fetchHistory]); // fetchHistory is now stable
 
-  const clearTodaysHistory = () => {
+  const clearTodaysHistory = async () => {
+    if (!userId) return;
     if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) return;
     try {
-      localStorage.removeItem(`rs-timer-sessionHistory-${currentDateKey}`);
-      setHistory([]);
+      await deleteSessionLogForDay(userId, currentDateKey);
+      setHistory([]); // Clear local state
+      toast({ title: "History Cleared", description: "Today's session history has been cleared." });
     } catch (error) {
-      console.error("Failed to clear today's session history from localStorage:", error);
+      console.error("Failed to clear today's session history from Firestore:", error);
+      toast({ title: "Error", description: "Could not clear session history.", variant: "destructive" });
     }
   };
   
@@ -85,10 +98,14 @@ export function SessionHistoryDrawer({ currentDateKey }: SessionHistoryDrawerPro
             <SheetDescription>{t('sessionHistoryDrawer.description')}</SheetDescription>
           </SheetHeader>
           <div className="p-4 pb-0">
-            {history.length === 0 ? (
+            {isLoadingHistory ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : history.length === 0 ? (
               <p className="text-center text-muted-foreground">{t('sessionHistoryDrawer.noSessionsToday')}</p>
             ) : (
-              <ScrollArea className="h-[calc(100vh-250px)] sm:h-[calc(70vh-150px)]"> {/* Adjusted height */}
+              <ScrollArea className="h-[calc(100vh-250px)] sm:h-[calc(70vh-150px)]">
                 <div className="space-y-2">
                   {history.slice().reverse().map((session) => (
                     <React.Fragment key={session.id}>
@@ -109,7 +126,7 @@ export function SessionHistoryDrawer({ currentDateKey }: SessionHistoryDrawerPro
           </div>
           <SheetFooter className="pt-4">
             {history.length > 0 && (
-              <Button variant="destructive" onClick={clearTodaysHistory} className="mb-2">
+              <Button variant="destructive" onClick={clearTodaysHistory} className="mb-2" disabled={isLoadingHistory}>
                 <Trash2 className="mr-2 h-4 w-4" /> {t('buttons.clearTodaysHistory')}
               </Button>
             )}
@@ -122,18 +139,3 @@ export function SessionHistoryDrawer({ currentDateKey }: SessionHistoryDrawerPro
     </Sheet>
   );
 }
-
-// This function is now less critical for displaying today's history in the drawer,
-// as PomodoroPage.tsx handles saving the daily log.
-// It might still be useful if other parts of the app need to add to a global, non-daily log.
-// For now, it's left as is, but its usage for the daily drawer is superseded.
-export const addSessionToHistory = (session: SessionRecord) => {
-  const LEGACY_SESSION_HISTORY_KEY = "rs-timer-session-history"; // Old key
-  try {
-    const storedHistory = localStorage.getItem(LEGACY_SESSION_HISTORY_KEY);
-    const historyArray: SessionRecord[] = storedHistory ? JSON.parse(storedHistory) : [];
-    localStorage.setItem(LEGACY_SESSION_HISTORY_KEY, JSON.stringify([...historyArray, session]));
-  } catch (error) {
-    console.error("Failed to save session to legacy localStorage:", error);
-  }
-};

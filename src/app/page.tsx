@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation'; // Removed usePathname as it wasn't used
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,12 +48,20 @@ import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constant
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { cn, getCurrentDateString } from '@/lib/utils'; // Added getCurrentDateString
+import { cn, getCurrentDateString } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguageContext } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ChatWidgetButton } from '@/components/chat-widget-button';
 import { ChatPopup } from '@/components/chat-popup';
+import {
+  saveTasksForDay, loadTasksForDay,
+  saveNotesForDay, loadNotesForDay,
+  saveDictionaryForDay, loadDictionaryForDay,
+  saveSessionContextForDay, loadSessionContextForDay,
+  saveSessionLogForDay // We will use timer.setSessionLog to update, then this effect will save
+} from '@/lib/firebase/firestore-service';
+
 
 const INTERACTIVE_TOUR_STORAGE_KEY = "rs-timer-interactive-tour-completed";
 
@@ -66,10 +74,16 @@ export default function PomodoroPage() {
 
   const [currentDateKey, setCurrentDateKey] = useState(getCurrentDateString());
 
-  const [currentNotes, setCurrentNotes] = useState("");
+  // States for daily data
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [currentNotes, setCurrentNotes] = useState("");
   const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
   const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
+  // Note: sessionLog is managed by useTimerCore, but we'll persist it from here
+
+  // Loading states for daily data
+  const [isLoadingDailyData, setIsLoadingDailyData] = useState(true);
+
 
   const [aiSummary, setAiSummary] = useState<AiSessionSummary | null>(null);
   const [isAiSummaryOpen, setIsAiSummaryOpen] = useState(false);
@@ -91,85 +105,90 @@ export default function PomodoroPage() {
 
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
-    settings: settings, // Pass the full settings object
-    isSettingsLoaded,
+    settings: settings,
+    isSettingsLoaded: isSettingsLoaded,
   });
 
-  // Effect to update currentDateKey if the day changes while the app is open
+  // Effect to update currentDateKey if the day changes
   useEffect(() => {
     const interval = setInterval(() => {
       const newDateKey = getCurrentDateString();
       if (newDateKey !== currentDateKey) {
         setCurrentDateKey(newDateKey);
-        // Data for new day will be loaded by individual useEffects below due to currentDateKey change
       }
     }, 60000); // Check every minute
     return () => clearInterval(interval);
   }, [currentDateKey]);
 
-  // Load/Save Tasks
+  // Load all daily data from Firestore when date or user changes
   useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return; // Ensure settings and user are loaded
-    const storedTasks = localStorage.getItem(`rs-timer-tasks-${currentDateKey}`);
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
-    } else {
-      setTasks([]); // Start with empty tasks for a new day or if no data
-    }
-  }, [currentDateKey, isSettingsLoaded, currentUser]);
+    if (!currentUser || !isSettingsLoaded) return;
 
-  useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    localStorage.setItem(`rs-timer-tasks-${currentDateKey}`, JSON.stringify(tasks));
-  }, [tasks, currentDateKey, isSettingsLoaded, currentUser]);
+    const loadData = async () => {
+      setIsLoadingDailyData(true);
+      try {
+        const [loadedTasks, loadedNotes, loadedDict, loadedContext] = await Promise.all([
+          loadTasksForDay(currentUser.uid, currentDateKey),
+          loadNotesForDay(currentUser.uid, currentDateKey),
+          loadDictionaryForDay(currentUser.uid, currentDateKey),
+          loadSessionContextForDay(currentUser.uid, currentDateKey),
+          // SessionLog will be loaded by useTimerCore if needed or we manage it separately
+        ]);
+        setTasks(loadedTasks);
+        setCurrentNotes(loadedNotes);
+        setDefinedWordsList(loadedDict);
+        setCurrentSessionType(loadedContext);
+      } catch (error) {
+        console.error("Error loading daily data from Firestore:", error);
+        toast({ title: "Error", description: "Could not load daily data.", variant: "destructive" });
+        // Reset to defaults if loading fails
+        setTasks([]);
+        setCurrentNotes("");
+        setDefinedWordsList([]);
+        setCurrentSessionType('general');
+      } finally {
+        setIsLoadingDailyData(false);
+      }
+    };
+    loadData();
+  }, [currentDateKey, currentUser, isSettingsLoaded, toast]);
 
-  // Load/Save Notes
-  useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    const storedNotes = localStorage.getItem(`rs-timer-notes-${currentDateKey}`);
-    if (storedNotes) {
-      setCurrentNotes(storedNotes);
-    } else {
-      setCurrentNotes("");
-    }
-  }, [currentDateKey, isSettingsLoaded, currentUser]);
 
+  // Save Tasks to Firestore
   useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    localStorage.setItem(`rs-timer-notes-${currentDateKey}`, currentNotes);
-  }, [currentNotes, currentDateKey, isSettingsLoaded, currentUser]);
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return; // Don't save while loading initial data
+    saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
+      console.error("Error saving tasks to Firestore:", error);
+      toast({ title: "Save Error", description: "Could not save tasks.", variant: "destructive" });
+    });
+  }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
 
-  // Load/Save Dictionary
+  // Save Notes to Firestore
   useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    const storedDictionary = localStorage.getItem(`rs-timer-dictionary-${currentDateKey}`);
-    if (storedDictionary) {
-      setDefinedWordsList(JSON.parse(storedDictionary));
-    } else {
-      setDefinedWordsList([]);
-    }
-  }, [currentDateKey, isSettingsLoaded, currentUser]);
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
+      console.error("Error saving notes to Firestore:", error);
+      toast({ title: "Save Error", description: "Could not save notes.", variant: "destructive" });
+    });
+  }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
 
+  // Save Dictionary to Firestore
   useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    localStorage.setItem(`rs-timer-dictionary-${currentDateKey}`, JSON.stringify(definedWordsList));
-  }, [definedWordsList, currentDateKey, isSettingsLoaded, currentUser]);
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
+      console.error("Error saving dictionary to Firestore:", error);
+      toast({ title: "Save Error", description: "Could not save dictionary.", variant: "destructive" });
+    });
+  }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
 
-  // Load/Save Session Type
+  // Save Session Type to Firestore
   useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    const storedSessionType = localStorage.getItem(`rs-timer-sessionType-${currentDateKey}`);
-    if (storedSessionType) {
-      setCurrentSessionType(storedSessionType as SessionType);
-    } else {
-      setCurrentSessionType('general');
-    }
-  }, [currentDateKey, isSettingsLoaded, currentUser]);
-
-  useEffect(() => {
-    if (!isSettingsLoaded || !currentUser) return;
-    localStorage.setItem(`rs-timer-sessionType-${currentDateKey}`, currentSessionType);
-  }, [currentSessionType, currentDateKey, isSettingsLoaded, currentUser]);
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
+      console.error("Error saving session context to Firestore:", error);
+      toast({ title: "Save Error", description: "Could not save session context.", variant: "destructive" });
+    });
+  }, [currentSessionType, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
 
 
   useEffect(() => {
@@ -316,11 +335,22 @@ export default function PomodoroPage() {
     getTranslatedText: t,
   });
 
-  // Save Session History (Pomodoro Logs) per day
+  // Save Session History (Pomodoro Logs) to Firestore
   useEffect(() => {
-    if (!isSettingsLoaded || !currentUser || timer.sessionLog.length === 0) return;
-    localStorage.setItem(`rs-timer-sessionHistory-${currentDateKey}`, JSON.stringify(timer.sessionLog));
-  }, [timer.sessionLog, currentDateKey, isSettingsLoaded, currentUser]);
+    if (!currentUser || !isSettingsLoaded || timer.sessionLog.length === 0) {
+      // Only save if there's actual log data to prevent overwriting an empty log
+      // if the component re-renders before timer.sessionLog is populated.
+      return;
+    }
+    // Check if isLoadingDailyData is false to ensure we don't save while initial data is still loading
+    // or if the session log is empty due to a new day or initial load.
+    if (!isLoadingDailyData && timer.sessionLog.length > 0) {
+      saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
+        console.error("Error saving session log to Firestore:", error);
+        toast({ title: "Save Error", description: "Could not save session log.", variant: "destructive" });
+      });
+    }
+  }, [timer.sessionLog, currentDateKey, currentUser, isSettingsLoaded, isLoadingDailyData, toast]);
 
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
@@ -347,11 +377,11 @@ export default function PomodoroPage() {
     timer.isRunning, 
     isSettingsLoaded, 
     isSoundPlayerReady, 
-    getActiveSoundscapeId, // This is now stable
-    playSound, // This is now stable
-    stopSound, // This is now stable
-    isMuted, // Added isMuted here
-    settings.soundscapeWork, // Explicitly include these if getActiveSoundscapeId depends on them directly
+    getActiveSoundscapeId,
+    playSound,
+    stopSound,
+    isMuted,
+    settings.soundscapeWork,
     settings.soundscapeBreak
   ]);
 
@@ -484,7 +514,7 @@ export default function PomodoroPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `rs_timer_dictionary_session_${currentDateKey}.md`; // Include date in filename
+    a.download = `rs_timer_dictionary_session_${currentDateKey}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -497,13 +527,22 @@ export default function PomodoroPage() {
     router.push('/auth/login');
   };
 
-
-  if (authLoading || !currentUser || !isSettingsLoaded) {
+  // Updated loading state to include daily data loading
+  if (authLoading || !isSettingsLoaded || (!currentUser && !authLoading) || (currentUser && isLoadingDailyData)) {
      return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
+  }
+  // If not authenticated after loading, AuthContext will redirect, but this is an extra check
+  if (!currentUser) {
+      router.push('/auth/login'); // Should be handled by AuthContext, but good for robustness
+      return ( // Return loading or null to prevent rendering the main page
+          <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+            <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+      );
   }
 
 
@@ -545,7 +584,7 @@ export default function PomodoroPage() {
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
               <SparklesIcon className="h-5 w-5" />
             </Button>
-            <SessionHistoryDrawer currentDateKey={currentDateKey} /> {/* Pass currentDateKey */}
+            <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
             <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
                 <BookOpen className="h-5 w-5" />
             </Button>
