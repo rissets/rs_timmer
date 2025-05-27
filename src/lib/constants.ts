@@ -1,5 +1,5 @@
 
-import type { Settings, SoundscapeOption, BackgroundAnimationOption } from '@/lib/types';
+import type { Settings, SoundscapeOption, BackgroundAnimationOption, SessionType } from '@/lib/types';
 
 export const DEFAULT_SETTINGS: Settings = {
   workMinutes: 25,
@@ -68,6 +68,12 @@ export const BACKGROUND_ANIMATION_OPTIONS: BackgroundAnimationOption[] = [
   { id: 'snow', name: 'Snow Effect' },
   { id: 'starfield', name: 'Starfield Effect' },
   { id: 'bubbles', name: 'Floating Bubbles Effect' },
+];
+
+export const SESSION_TYPE_OPTIONS: { id: SessionType; name: string }[] = [
+  { id: 'general', name: 'General Reflection' },
+  { id: 'work', name: 'Work Focus' },
+  { id: 'learning', name: 'Learning Focus' },
 ];
 
 export const APP_NAME = "Zenith Timer";

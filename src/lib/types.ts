@@ -1,6 +1,7 @@
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 export type BackgroundAnimationType = 'none' | 'gradientFlow' | 'rain' | 'snow' | 'starfield' | 'bubbles';
+export type SessionType = 'general' | 'work' | 'learning';
 
 export interface Settings {
   workMinutes: number;
@@ -47,4 +48,11 @@ export interface Task {
   id: string;
   text: string;
   completed: boolean;
+}
+
+// This type is defined in src/ai/flows/summarize-session.ts
+// but also useful here for page.tsx
+export interface SummarizeSessionInput {
+  sessionDetails: string;
+  sessionType?: SessionType;
 }

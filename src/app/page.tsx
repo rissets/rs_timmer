@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { useTimerCore } from "@/hooks/use-timer-core";
 import { useSoundscapePlayer } from "@/hooks/use-soundscape-player";
@@ -18,10 +26,10 @@ import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
 import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
-import { SimpleTaskList } from "@/components/simple-task-list"; // Added import
+import { SimpleTaskList } from "@/components/simple-task-list";
 import { summarizeSession } from "@/ai/flows/summarize-session";
-import type { TimerMode, AiSessionSummary, SessionRecord, Task } from "@/lib/types"; // Added Task
-import { APP_NAME } from "@/lib/constants";
+import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType } from "@/lib/types";
+import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +39,8 @@ export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
   const { toast } = useToast();
   const [currentNotes, setCurrentNotes] = useState("");
-  const [tasks, setTasks] = useState<Task[]>([]); // Added tasks state
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
   const [aiSummary, setAiSummary] = useState<AiSessionSummary | null>(null);
   const [isAiSummaryOpen, setIsAiSummaryOpen] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -51,7 +60,7 @@ export default function PomodoroPage() {
         return 'ambientPad';
       case 'bubbles':
         return 'calmingChimes';
-      case 'gradientFlow':
+      case 'gradientFlow': 
         return 'whiteNoise';
       case 'none':
       default:
@@ -59,7 +68,16 @@ export default function PomodoroPage() {
     }
   }, [isMuted, settings.backgroundAnimation, settings.soundscapeWork, settings.soundscapeBreak]);
   
-  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[]) => {
+  const getModeDisplayName = (mode: TimerMode) => {
+    switch(mode) {
+      case 'work': return 'Work';
+      case 'shortBreak': return 'Short Break';
+      case 'longBreak': return 'Long Break';
+      default: return 'Focus';
+    }
+  };
+
+  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType) => {
     if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
       toast({ title: "AI Summary", description: "Not enough session data, tasks, or notes to generate a summary.", variant: "destructive" });
       return;
@@ -76,14 +94,11 @@ export default function PomodoroPage() {
       ? "Tasks:\n" + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
       : "No specific tasks listed for this session.";
 
-    const fullDetails = `Session Log:\n${sessionDetailsString}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || "No additional notes provided."}`;
+    const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : "No pomodoro session log for this analysis."}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || "No additional notes provided."}`;
 
     try {
-      const result = await summarizeSession({ sessionDetails: fullDetails });
+      const result = await summarizeSession({ sessionDetails: fullDetails, sessionType });
       setAiSummary(result);
-      // Optionally clear notes and tasks after summary, or leave them for user to clear
-      // setCurrentNotes(""); 
-      // setTasks([]);
     } catch (error) {
       console.error("AI Summary Error:", error);
       toast({ title: "AI Summary Error", description: "Could not generate session summary.", variant: "destructive" });
@@ -91,7 +106,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast]); // Added tasks to dependencies
+  }, [currentNotes, tasks, toast, getModeDisplayName, summarizeSession, setIsAiLoading, setIsAiSummaryOpen, setAiSummary]); 
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -102,10 +117,10 @@ export default function PomodoroPage() {
     
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
       if (endedMode === 'longBreak' && (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes)) { 
-         triggerAiSummary(sessionLogFromHook); 
+         triggerAiSummary(sessionLogFromHook, currentSessionType); 
       }
     }
-  }, [settings.longBreakInterval, triggerAiSummary, tasks, currentNotes]); // Added tasks and currentNotes
+  }, [settings.longBreakInterval, triggerAiSummary, tasks, currentNotes, currentSessionType]);
 
   const timer = useTimerCore({ 
     settings, 
@@ -148,15 +163,6 @@ export default function PomodoroPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getModeDisplayName = (mode: TimerMode) => {
-    switch(mode) {
-      case 'work': return 'Work';
-      case 'shortBreak': return 'Short Break';
-      case 'longBreak': return 'Long Break';
-      default: return 'Focus';
-    }
-  };
-
   const currentModeDuration = 
     timer.mode === 'work' ? settings.workMinutes * 60 :
     timer.mode === 'shortBreak' ? settings.shortBreakMinutes * 60 :
@@ -168,7 +174,6 @@ export default function PomodoroPage() {
     setIsMuted(prevMuted => !prevMuted);
   };
 
-  // Task management functions
   const handleAddTask = (taskText: string) => {
     const newTask: Task = { id: Date.now().toString(), text: taskText, completed: false };
     setTasks(prevTasks => [...prevTasks, newTask]);
@@ -230,7 +235,7 @@ export default function PomodoroPage() {
             <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME}</h1>
           </div>
           <div className="flex items-center space-x-1">
-            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog)} title="Get AI Session Summary (if data available)">
+            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
               <SparklesIcon className="h-5 w-5" />
             </Button>
             <SessionHistoryDrawer />
@@ -296,9 +301,25 @@ export default function PomodoroPage() {
           
           <Card className="w-full shadow-lg">
             <CardHeader>
-              <CardTitle className="text-lg">Session Notes</CardTitle>
+              <CardTitle className="text-lg">Session Notes & Context</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-4">
+                <Label htmlFor="session-type-select" className="text-sm font-medium">Session Context</Label>
+                 <Select
+                    value={currentSessionType}
+                    onValueChange={(value) => setCurrentSessionType(value as SessionType)}
+                  >
+                    <SelectTrigger id="session-type-select" className="w-full mt-1">
+                      <SelectValue placeholder="Select session context" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SESSION_TYPE_OPTIONS.map(opt => (
+                        <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+              </div>
               <Textarea
                 placeholder="Jot down tasks, distractions, or thoughts during your session..."
                 value={currentNotes}
@@ -307,10 +328,14 @@ export default function PomodoroPage() {
               />
               <Button 
                   variant="outline" 
-                  className="mt-2"
-                  onClick={() => triggerAiSummary(timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []))} 
+                  className="mt-3"
+                  onClick={() => triggerAiSummary(
+                    // Provide an empty log entry if only notes/tasks exist, so AI knows it's not a full session
+                    timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
+                    currentSessionType
+                  )} 
                   disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
-                  title="Analyze current session notes, tasks and log"
+                  title="Analyze current session notes, tasks and log with selected context"
                 >
                   <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Data
                 </Button>
@@ -333,3 +358,4 @@ export default function PomodoroPage() {
     </>
   );
 }
+
