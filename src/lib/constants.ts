@@ -24,16 +24,29 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volumeAdjustment: -6 } },
   { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volumeAdjustment: -6 } },
   { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volumeAdjustment: -18 } }, // Simulated rain
-  { id: 'oceanWaves', nameKey: 'soundscapes.oceanWaves', type: 'ocean', params: { volumeAdjustment: -12 } },
+  { 
+    id: 'oceanWaves', 
+    nameKey: 'soundscapes.oceanWaves', 
+    type: 'ocean', 
+    params: { 
+      volumeAdjustment: -12,
+      autoFilter: { // Parameters for Tone.AutoFilter for the ocean sound
+        frequency: "4m", // Speed of the filter sweep (LFO of AutoFilter)
+        baseFrequency: 200, // Starting frequency of the filter
+        octaves: 4, // Range of the filter sweep in octaves
+        filter: { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 },
+      }
+    } 
+  },
   { 
     id: 'cracklingFireplace', 
     nameKey: 'soundscapes.cracklingFireplace', 
     type: 'fireplace', 
     params: { 
       volumeAdjustment: -15,
-      synthOptions: { // Envelope for individual crackles
-        noise: { type: 'pink' }, // Pink noise often sounds more natural for crackles
-        envelope: { attack: 0.001, decay: 0.015, sustain: 0, release: 0.02 } // Very short
+      synthOptions: { 
+        noise: { type: 'pink' as const }, 
+        envelope: { attack: 0.001, decay: 0.015, sustain: 0, release: 0.02 } 
       }
     } 
   },
@@ -85,7 +98,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         {
           name: 'pianoMelody',
           synthType: 'Synth',
-          synthOptions: { oscillator: { type: 'triangle8' }, envelope: { attack: 0.01, decay: 0.6, sustain: 0.1, release: 1 } },
+          synthOptions: { oscillator: { type: 'triangle8' as const }, envelope: { attack: 0.01, decay: 0.6, sustain: 0.1, release: 1 } },
           sequence: [
             { time: '0:0', notes: 'C4', duration: '4n' }, { time: '0:1', notes: 'E4', duration: '4n' },
             { time: '0:2', notes: 'G4', duration: '4n' }, { time: '0:3', notes: 'C5', duration: '4n' },
@@ -109,7 +122,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         {
           name: 'chords',
           synthType: 'PolySynth',
-          synthOptions: { oscillator: { type: 'fmsquare' }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.3, release: 1 } },
+          synthOptions: { oscillator: { type: 'fmsquare' as const }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.3, release: 1 } },
           sequence: [ { time: '0:0', notes: ['A#2', 'D3', 'F3', 'G#3'], duration: '1m' }, { time: '1:0', notes: ['G2', 'C3', 'D#3', 'F3'], duration: '1m' } ],
         },
         {
@@ -122,14 +135,14 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         {
           name: 'snare',
           synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'pink' }, envelope: { attack: 0.005, decay: 0.15, sustain: 0, release: 0.1 } },
+          synthOptions: { noise: { type: 'pink' as const }, envelope: { attack: 0.005, decay: 0.15, sustain: 0, release: 0.1 } },
           pattern: [null, null, 'C2', null, null, null, 'C2', null],
           subdivision: '8n',
         },
         {
           name: 'hihat',
           synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, // volume relative to other instruments in pattern
+          synthOptions: { noise: { type: 'white' as const }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, // volume relative to other instruments in pattern
           pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'],
           subdivision: '8n',
         }
@@ -148,7 +161,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
           name: 'stringsPad',
           synthType: 'PolySynth',
           synthOptions: {
-            oscillator: { type: 'fatsawtooth', count: 3, spread: 30 },
+            oscillator: { type: 'fatsawtooth' as const, count: 3, spread: 30 },
             envelope: { attack: 1.5, decay: 0.5, sustain: 1, release: 2.5 }
           },
           sequence: [
@@ -176,7 +189,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
           name: 'melody',
           synthType: 'Synth', 
           synthOptions: {
-            oscillator: { type: 'triangle' }, 
+            oscillator: { type: 'triangle' as const }, 
             envelope: { attack: 0.1, decay: 0.5, sustain: 0.3, release: 1 },
           },
           sequence: [
@@ -195,7 +208,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
           name: 'pad',
           synthType: 'PolySynth',
           synthOptions: {
-            oscillator: { type: 'fatsine', count: 3, spread: 40 },
+            oscillator: { type: 'fatsine' as const, count: 3, spread: 40 },
             envelope: { attack: 2, decay: 1, sustain: 1, release: 3 },
             volume: -6 // volume relative to other instruments in pattern
           },
@@ -230,3 +243,4 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
 ];
 
 export const APP_NAME = "RS";
+
