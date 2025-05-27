@@ -43,3 +43,8 @@ export interface BackgroundAnimationOption {
   name: string;
 }
 
+export interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+}

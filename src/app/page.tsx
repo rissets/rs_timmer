@@ -18,8 +18,9 @@ import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
 import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
+import { SimpleTaskList } from "@/components/simple-task-list"; // Added import
 import { summarizeSession } from "@/ai/flows/summarize-session";
-import type { TimerMode, AiSessionSummary, SessionRecord } from "@/lib/types";
+import type { TimerMode, AiSessionSummary, SessionRecord, Task } from "@/lib/types"; // Added Task
 import { APP_NAME } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX } from "lucide-react";
@@ -30,6 +31,7 @@ export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
   const { toast } = useToast();
   const [currentNotes, setCurrentNotes] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]); // Added tasks state
   const [aiSummary, setAiSummary] = useState<AiSessionSummary | null>(null);
   const [isAiSummaryOpen, setIsAiSummaryOpen] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -46,9 +48,9 @@ export default function PomodoroPage() {
       case 'snow':
         return 'pinkNoise'; 
       case 'starfield':
-        return 'ambientPad'; // Example: spacey sound for starfield
+        return 'ambientPad';
       case 'bubbles':
-        return 'calmingChimes'; // Example: light sound for bubbles
+        return 'calmingChimes';
       case 'gradientFlow':
         return 'whiteNoise';
       case 'none':
@@ -58,8 +60,8 @@ export default function PomodoroPage() {
   }, [isMuted, settings.backgroundAnimation, settings.soundscapeWork, settings.soundscapeBreak]);
   
   const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[]) => {
-    if (!logForSummary || logForSummary.length === 0) {
-      toast({ title: "AI Summary", description: "Not enough session data to generate a summary.", variant: "destructive" });
+    if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
+      toast({ title: "AI Summary", description: "Not enough session data, tasks, or notes to generate a summary.", variant: "destructive" });
       return;
     }
     setIsAiLoading(true);
@@ -70,12 +72,18 @@ export default function PomodoroPage() {
       `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? 'completed' : 'skipped'})`
     ).join('\n');
     
-    const fullDetails = `Session Log:\n${sessionDetailsString}\n\nSession Notes:\n${currentNotes || "No notes provided."}`;
+    const tasksString = tasks.length > 0 
+      ? "Tasks:\n" + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
+      : "No specific tasks listed for this session.";
+
+    const fullDetails = `Session Log:\n${sessionDetailsString}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || "No additional notes provided."}`;
 
     try {
       const result = await summarizeSession({ sessionDetails: fullDetails });
       setAiSummary(result);
-      setCurrentNotes(""); 
+      // Optionally clear notes and tasks after summary, or leave them for user to clear
+      // setCurrentNotes(""); 
+      // setTasks([]);
     } catch (error) {
       console.error("AI Summary Error:", error);
       toast({ title: "AI Summary Error", description: "Could not generate session summary.", variant: "destructive" });
@@ -83,7 +91,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, toast]);
+  }, [currentNotes, tasks, toast]); // Added tasks to dependencies
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -93,11 +101,11 @@ export default function PomodoroPage() {
     }
     
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-      if (endedMode === 'longBreak' && sessionLogFromHook.length > 0) { 
+      if (endedMode === 'longBreak' && (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes)) { 
          triggerAiSummary(sessionLogFromHook); 
       }
     }
-  }, [settings.longBreakInterval, triggerAiSummary]);
+  }, [settings.longBreakInterval, triggerAiSummary, tasks, currentNotes]); // Added tasks and currentNotes
 
   const timer = useTimerCore({ 
     settings, 
@@ -160,6 +168,28 @@ export default function PomodoroPage() {
     setIsMuted(prevMuted => !prevMuted);
   };
 
+  // Task management functions
+  const handleAddTask = (taskText: string) => {
+    const newTask: Task = { id: Date.now().toString(), text: taskText, completed: false };
+    setTasks(prevTasks => [...prevTasks, newTask]);
+  };
+
+  const handleToggleTask = (taskId: string) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  const handleRemoveTask = (taskId: string) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+  };
+  
+  const handleClearCompletedTasks = () => {
+    setTasks(prevTasks => prevTasks.filter(task => !task.completed));
+  };
+
 
   if (!isSettingsLoaded) {
     return (
@@ -209,7 +239,7 @@ export default function PomodoroPage() {
           </div>
         </header>
 
-        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1]">
+        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1] space-y-6">
           <Card className="w-full shadow-xl">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-medium text-primary">
@@ -255,8 +285,16 @@ export default function PomodoroPage() {
               </div>
             </CardContent>
           </Card>
+
+          <SimpleTaskList 
+            tasks={tasks}
+            onAddTask={handleAddTask}
+            onToggleTask={handleToggleTask}
+            onRemoveTask={handleRemoveTask}
+            onClearCompletedTasks={handleClearCompletedTasks}
+          />
           
-          <Card className="w-full mt-6 shadow-lg">
+          <Card className="w-full shadow-lg">
             <CardHeader>
               <CardTitle className="text-lg">Session Notes</CardTitle>
             </CardHeader>
@@ -270,11 +308,11 @@ export default function PomodoroPage() {
               <Button 
                   variant="outline" 
                   className="mt-2"
-                  onClick={() => triggerAiSummary(timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes ? [{id: 'notes-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []))} 
-                  disabled={timer.sessionLog.length === 0 && !currentNotes}
-                  title="Analyze current session notes and log"
+                  onClick={() => triggerAiSummary(timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []))} 
+                  disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
+                  title="Analyze current session notes, tasks and log"
                 >
-                  <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Notes & Log
+                  <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Data
                 </Button>
             </CardContent>
           </Card>
