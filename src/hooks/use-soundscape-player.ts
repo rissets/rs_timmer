@@ -46,20 +46,20 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
 
     activePatternElements.current.loops.forEach(loop => {
       if (loop && !loop.disposed) {
-        loop.stop(0); // Ensure loop is stopped before disposal
+        loop.stop(0);
         loop.dispose();
       }
     });
     activePatternElements.current.parts.forEach(part => {
       if (part && !part.disposed) {
-        part.stop(0); // Ensure part is stopped
+        part.stop(0); 
         part.clear(); 
         part.dispose();
       }
     });
     activePatternElements.current.sequences.forEach(seq => {
       if (seq && !seq.disposed) {
-        seq.stop(0); // Ensure sequence is stopped
+        seq.stop(0); 
         seq.clear(); 
         seq.dispose();
       }
@@ -82,9 +82,8 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
     }
     activePatternElements.current.effects.forEach(effect => {
       if (effect && typeof effect.dispose === 'function' && !(effect as any).disposed) {
-        if (typeof (effect as Tone.LFO).stop === 'function') (effect as Tone.LFO).stop(0); // Stop LFOs
-        if (typeof (effect as Tone.AutoFilter).stop === 'function') (effect as Tone.AutoFilter).stop(0); // Stop AutoFilters
-
+        if (typeof (effect as Tone.LFO).stop === 'function') (effect as Tone.LFO).stop(0);
+        if (typeof (effect as Tone.AutoFilter).stop === 'function') (effect as Tone.AutoFilter).stop(0);
         effect.dispose();
       }
     });
@@ -107,7 +106,7 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
 
     if (typeof window !== 'undefined') {
       if (Tone.context.state !== 'running') {
-        initTone().catch(err => console.warn("Initial Tone.start() attempt might need user gesture:", err));
+        // No need to call initTone() here, Tone.start() will be called on first playSound
       } else {
         setIsReady(true);
       }
@@ -135,6 +134,11 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         tonePlayerRight.current.dispose();
       }
       
+      activePatternElements.current.effects.forEach(effect => {
+        if (effect && !effect.disposed && typeof (effect as any).dispose === 'function') {
+          effect.dispose();
+        }
+      });
       cleanupPattern();
       
       generalNoisePlayer.current = null;
@@ -197,6 +201,7 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         try {
           await Tone.start();
         } catch (e) {
+          console.warn("Tone.start() in playSound needed user gesture:", e);
           setIsReady(false); 
           return;
         }
@@ -291,50 +296,58 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         setIsPlaying(true);
         break;
       case 'ocean':
-        const oceanNoise = new Tone.Noise("brown"); // Don't start immediately
-        const autoFilter = new Tone.AutoFilter({
-            frequency: "4m", 
-            baseFrequency: 100, 
-            octaves: 3, 
-            filter: { type: "lowpass", rolloff: -12, Q: 1 }
-        });
+        try {
+            const oceanNoise = new Tone.Noise("brown");
+            const autoFilter = new Tone.AutoFilter({
+                frequency: "4m", // Modulating frequency for the filter's LFO
+                baseFrequency: 100, // Starting base frequency of the filter
+                octaves: 3, // Range of the filter sweep
+                filter: { type: "lowpass", rolloff: -12, Q: 1 }
+            });
 
-        if (activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
-            autoFilter.connect(activePatternElements.current.masterVolumeNode);
-        } else {
-             autoFilter.toDestination();
+            const lfo = new Tone.LFO({
+                frequency: "8m", // LFO frequency - how fast the baseFrequency of AutoFilter sweeps
+                min: 200,        // Min value for the AutoFilter's baseFrequency
+                max: 1000,       // Max value for the AutoFilter's baseFrequency
+                amplitude: 0.5   // Modulation depth for the LFO
+            });
+
+            // Connect the audio graph
+            oceanNoise.connect(autoFilter);
+            if (activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
+                autoFilter.connect(activePatternElements.current.masterVolumeNode);
+            } else {
+                autoFilter.toDestination(); // Fallback if masterVolumeNode is not available
+            }
+            
+            // Critical: Ensure autoFilter.baseFrequency is a valid Signal object before connecting LFO
+            if (autoFilter.baseFrequency && typeof autoFilter.baseFrequency.connect === 'function') {
+                 lfo.connect(autoFilter.baseFrequency);
+            } else {
+                console.error("autoFilter.baseFrequency is not a connectable Signal for LFO.");
+                // Fallback or skip LFO connection if baseFrequency is not a valid Signal.
+                // This prevents the error but the LFO modulation won't occur.
+            }
+
+            // Store nodes for cleanup
+            activePatternElements.current.noiseSource = oceanNoise;
+            activePatternElements.current.effects.push(autoFilter, lfo);
+
+            // Start nodes
+            autoFilter.start(); // Start the AutoFilter's internal LFO (if any) and make it process audio
+            lfo.start();      // Start the external LFO
+            oceanNoise.start(); // Start producing noise
+
+            if (Tone.Transport.state !== "started") {
+                Tone.Transport.start(); // Ensure transport is running for LFOs/AutoFilters that might sync to it
+            }
+            setIsPlaying(true);
+        } catch (e) {
+            console.error("Error setting up ocean soundscape:", e);
+            // Ensure cleanup if setup fails
+            cleanupPattern();
+            setIsPlaying(false);
         }
-        
-        const lfo = new Tone.LFO({
-            frequency: "8m", 
-            min: 200,
-            max: 1000,
-            amplitude: 0.5
-        });
-
-        // Schedule connections and starts to ensure the audio graph is stable
-        Tone.Transport.scheduleOnce(time => {
-            // Check if nodes are disposed before operating, in case stopSound was called
-            if (autoFilter && !autoFilter.disposed) {
-                autoFilter.start(time);
-            }
-            if (lfo && !lfo.disposed && autoFilter && !autoFilter.disposed && autoFilter.baseFrequency) {
-                lfo.connect(autoFilter.baseFrequency);
-                lfo.start(time);
-            }
-            if (oceanNoise && !oceanNoise.disposed && autoFilter && !autoFilter.disposed) {
-                oceanNoise.connect(autoFilter);
-                oceanNoise.start(time);
-            }
-        }, "+0.05"); // Small delay relative to transport start
-
-        activePatternElements.current.noiseSource = oceanNoise;
-        activePatternElements.current.effects.push(autoFilter, lfo); // Ensure LFO is added for cleanup
-        
-        if (Tone.Transport.state !== "started") {
-            Tone.Transport.start();
-        }
-        setIsPlaying(true);
         break;
       case 'fireplace':
         const fireNoiseSynth = new Tone.NoiseSynth(selectedSoundscape.params.synthOptions);
@@ -348,7 +361,6 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         const crackleLoop = new Tone.Loop(time => {
             if (fireNoiseSynth && !fireNoiseSynth.disposed) {
                 fireNoiseSynth.volume.value = finalGainValue - (Math.random() * 6); 
-                // Ensure randomOffset is always positive and non-zero
                 const randomOffset = 0.001 + (Math.random() * 0.049); // e.g. 0.001s to 0.05s
                 fireNoiseSynth.triggerAttackRelease("32n", time + randomOffset);
             }
