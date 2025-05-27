@@ -84,7 +84,7 @@ export default function RegisterPage() {
             <LogoIcon className="h-16 w-16 text-primary" />
           </div>
           <CardTitle className="text-2xl">{t('auth.registerTitle', { appName: APP_NAME })}</CardTitle>
-          <CardDescription>{t('auth.registerDescription')}</CardDescription>
+          <CardDescription>{t('auth.registerDescription', { appName: APP_NAME })}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
