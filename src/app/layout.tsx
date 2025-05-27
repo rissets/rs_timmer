@@ -38,8 +38,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content={`${APP_NAME} Timer`} />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-config" content="/icons/browserconfig.xml" /> 
-        <meta name="msapplication-TileColor" content="#2B5797" />
+        {/* <meta name="msapplication-config" content="/icons/browserconfig.xml" /> Removed as browserconfig.xml is not provided */}
+        <meta name="msapplication-TileColor" content="#7BA9A2" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="hsl(169, 20%, 56%)" />
       </head>
