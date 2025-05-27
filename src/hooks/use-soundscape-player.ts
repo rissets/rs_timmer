@@ -46,17 +46,20 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
 
     activePatternElements.current.loops.forEach(loop => {
       if (loop && !loop.disposed) {
+        loop.stop(0); // Ensure loop is stopped before disposal
         loop.dispose();
       }
     });
     activePatternElements.current.parts.forEach(part => {
       if (part && !part.disposed) {
+        part.stop(0); // Ensure part is stopped
         part.clear(); 
         part.dispose();
       }
     });
     activePatternElements.current.sequences.forEach(seq => {
       if (seq && !seq.disposed) {
+        seq.stop(0); // Ensure sequence is stopped
         seq.clear(); 
         seq.dispose();
       }
@@ -79,6 +82,9 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
     }
     activePatternElements.current.effects.forEach(effect => {
       if (effect && typeof effect.dispose === 'function' && !(effect as any).disposed) {
+        if (typeof (effect as Tone.LFO).stop === 'function') (effect as Tone.LFO).stop(0); // Stop LFOs
+        if (typeof (effect as Tone.AutoFilter).stop === 'function') (effect as Tone.AutoFilter).stop(0); // Stop AutoFilters
+
         effect.dispose();
       }
     });
@@ -128,13 +134,6 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         tonePlayerRight.current.triggerRelease();
         tonePlayerRight.current.dispose();
       }
-      
-      // Ensure Panners are disposed from effects array
-      activePatternElements.current.effects.forEach(effect => {
-        if (effect instanceof Tone.Panner && !effect.disposed) {
-          effect.dispose();
-        }
-      });
       
       cleanupPattern();
       
@@ -292,37 +291,49 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         setIsPlaying(true);
         break;
       case 'ocean':
-        const oceanNoise = new Tone.Noise("brown").start(); // Noise started
+        const oceanNoise = new Tone.Noise("brown"); // Don't start immediately
         const autoFilter = new Tone.AutoFilter({
             frequency: "4m", 
             baseFrequency: 100, 
             octaves: 3, 
             filter: { type: "lowpass", rolloff: -12, Q: 1 }
-        }); // Filter created
+        });
 
-        // Connect filter to its destination in the audio graph
         if (activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
             autoFilter.connect(activePatternElements.current.masterVolumeNode);
         } else {
-             autoFilter.toDestination(); // Fallback
+             autoFilter.toDestination();
         }
-        autoFilter.start(); // Start the filter now that it's connected
-
+        
         const lfo = new Tone.LFO({
             frequency: "8m", 
             min: 200,
             max: 1000,
             amplitude: 0.5
         });
-        lfo.connect(autoFilter.baseFrequency); // Connect LFO to the filter's parameter
-        lfo.start(); // Start the LFO
-        
-        oceanNoise.connect(autoFilter); // Connect noise to the filter
-        
+
+        // Schedule connections and starts to ensure the audio graph is stable
+        Tone.Transport.scheduleOnce(time => {
+            // Check if nodes are disposed before operating, in case stopSound was called
+            if (autoFilter && !autoFilter.disposed) {
+                autoFilter.start(time);
+            }
+            if (lfo && !lfo.disposed && autoFilter && !autoFilter.disposed && autoFilter.baseFrequency) {
+                lfo.connect(autoFilter.baseFrequency);
+                lfo.start(time);
+            }
+            if (oceanNoise && !oceanNoise.disposed && autoFilter && !autoFilter.disposed) {
+                oceanNoise.connect(autoFilter);
+                oceanNoise.start(time);
+            }
+        }, "+0.05"); // Small delay relative to transport start
+
         activePatternElements.current.noiseSource = oceanNoise;
-        activePatternElements.current.effects.push(autoFilter);
-        activePatternElements.current.effects.push(lfo); 
-        Tone.Transport.start();
+        activePatternElements.current.effects.push(autoFilter, lfo); // Ensure LFO is added for cleanup
+        
+        if (Tone.Transport.state !== "started") {
+            Tone.Transport.start();
+        }
         setIsPlaying(true);
         break;
       case 'fireplace':
@@ -337,14 +348,18 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         const crackleLoop = new Tone.Loop(time => {
             if (fireNoiseSynth && !fireNoiseSynth.disposed) {
                 fireNoiseSynth.volume.value = finalGainValue - (Math.random() * 6); 
-                const randomOffset = 0.001 + (Math.random() * 0.049); 
+                // Ensure randomOffset is always positive and non-zero
+                const randomOffset = 0.001 + (Math.random() * 0.049); // e.g. 0.001s to 0.05s
                 fireNoiseSynth.triggerAttackRelease("32n", time + randomOffset);
             }
         }, "16n").start(0); 
 
         crackleLoop.probability = 0.6; 
         activePatternElements.current.loops.push(crackleLoop);
-        Tone.Transport.start();
+        
+        if (Tone.Transport.state !== "started") {
+            Tone.Transport.start();
+        }
         setIsPlaying(true);
         break;
       case 'patternLoop':
@@ -389,12 +404,16 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
         
         if (patternEffectsParams?.reverb && activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
            const reverb = new Tone.Reverb(patternEffectsParams.reverb).toDestination();
-           activePatternElements.current.masterVolumeNode.disconnect(Tone.Destination);
-           activePatternElements.current.masterVolumeNode.connect(reverb);
+           if(activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
+             activePatternElements.current.masterVolumeNode.disconnect(Tone.Destination);
+             activePatternElements.current.masterVolumeNode.connect(reverb);
+           }
            activePatternElements.current.effects.push(reverb);
         }
 
-        Tone.Transport.start();
+        if (Tone.Transport.state !== "started") {
+             Tone.Transport.start();
+        }
         setIsPlaying(true);
         break;
       default:
