@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 // @ts-ignore next-pwa is not typed with ES Modules yet
 import withPWAInit from 'next-pwa';
@@ -13,7 +14,7 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'standalone', // Essential for optimized Docker builds
   typescript: {
     ignoreBuildErrors: true,
   },

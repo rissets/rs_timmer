@@ -1,25 +1,33 @@
+
 version: '3.8'
 
 services:
   app:
+    # Specifies the build context (current directory) and Dockerfile to use
     build:
       context: .
       dockerfile: Dockerfile
+    # Maps port 3000 on the host to port 3000 in the container
     ports:
-      - "3000:3000" # Map host port 3000 to container port 3000
+      - "3000:3000"
+    # Configures the container to restart automatically unless explicitly stopped
     restart: unless-stopped
+    # Defines environment variables for the container
+    # These can be overridden or supplemented by an .env file or your deployment environment
     environment:
-      NODE_ENV: production
-      # Add any other necessary runtime environment variables here.
-      # For example, for Genkit and Google AI:
+      NODE_ENV: production # Ensures Next.js runs in production mode
+      # --- IMPORTANT ---
+      # Add your GOOGLE_API_KEY here or in your deployment environment's secrets management
+      # For local development with docker-compose, you can create a .env file in the project root:
+      # GOOGLE_API_KEY=your_actual_google_api_key_here
+      #
+      # Example:
       # GOOGLE_API_KEY: "your_actual_google_api_key_here"
-      # GENKIT_ENV: "production" # If Genkit uses such a variable
+      # GENKIT_ENV: "production" # Set if Genkit uses such a variable for production behavior
 
-      # Example for NextAuth.js if you were using it:
-      # NEXTAUTH_URL: "http://localhost:3000" # Or your production domain
-      # NEXTAUTH_SECRET: "your_nextauth_secret_here"
+    # Optional: Define volumes if you need to persist data or mount configuration files
+    # For a typical Next.js frontend, this is often not needed unless handling file uploads
+    # directly to the server's filesystem (not recommended for scalable apps).
     # volumes:
-      # If you have data that needs to persist outside the container's lifecycle,
-      # you can define volumes here. For a typical Next.js frontend, this is often not needed
-      # unless you are handling file uploads directly to the server's filesystem (not recommended for scalable apps).
-      # - ./uploads:/app/uploads # Example volume mount
+    #   - ./uploads:/app/uploads # Example: Mounts a local ./uploads directory to /app/uploads in the container
+    #   - ./.env:/app/.env # Example: Mounts your local .env file into the container (use with caution for secrets)
