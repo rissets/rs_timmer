@@ -19,6 +19,7 @@ import { APP_NAME } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from '@/lib/utils';
 
 export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
@@ -30,23 +31,17 @@ export default function PomodoroPage() {
   const [isMuted, setIsMuted] = useState(false);
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
-    // sessionLogFromHook contains the log *before* the current interval that just ended.
-    // The last entry in sessionLogFromHook is the one that just finished.
     const lastSession = sessionLogFromHook[sessionLogFromHook.length - 1];
     if (lastSession) {
       addSessionToHistory(lastSession);
     }
     
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-      // Trigger AI summary after a full cycle (ending with a long break)
-      // Or if manually configured, after N pomodoros regardless of break type.
-      // For now, let's stick to after a long break.
       if (endedMode === 'longBreak') {
-         triggerAiSummary(sessionLogFromHook); // Pass the log of the completed cycle
+         triggerAiSummary(sessionLogFromHook); 
       }
     }
     
-    // Play sound for the new mode
     const nextSoundscapeId = timer.mode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
     if (!isMuted) {
       soundscapePlayer.playSound(nextSoundscapeId);
@@ -54,7 +49,7 @@ export default function PomodoroPage() {
       soundscapePlayer.stopSound();
     }
 
-  }, [settings.longBreakInterval, settings.soundscapeWork, settings.soundscapeBreak]);
+  }, [settings.longBreakInterval, settings.soundscapeWork, settings.soundscapeBreak, ]); // Removed soundscapePlayer and timer from deps as they are stable refs from hooks
 
   const timer = useTimerCore({ 
     settings, 
@@ -84,14 +79,14 @@ export default function PomodoroPage() {
   const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume });
 
   useEffect(() => {
-    // Stop sound if settings change to 'none' or if muted
     if (isMuted || (timer.mode === 'work' && settings.soundscapeWork === 'none') || (timer.mode !== 'work' && settings.soundscapeBreak === 'none')) {
         soundscapePlayer.stopSound();
     } else if (timer.isRunning) {
         const currentSoundscape = timer.mode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
         soundscapePlayer.playSound(currentSoundscape);
     }
-  }, [settings.soundscapeWork, settings.soundscapeBreak, timer.mode, timer.isRunning, isMuted, soundscapePlayer]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps 
+  }, [settings.soundscapeWork, settings.soundscapeBreak, timer.mode, timer.isRunning, isMuted]); // soundscapePlayer removed from deps
 
 
   const formatTime = (seconds: number) => {
@@ -134,7 +129,6 @@ export default function PomodoroPage() {
     try {
       const result = await summarizeSession({ sessionDetails: fullDetails });
       setAiSummary(result);
-      // Clear notes and session log for the next cycle after successful summary
       setCurrentNotes("");
       timer.setSessionLog([]); 
     } catch (error) {
@@ -179,7 +173,10 @@ export default function PomodoroPage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground items-center p-4 selection:bg-primary/30">
+    <div className={cn(
+        "flex flex-col min-h-screen text-foreground items-center p-4 selection:bg-primary/30",
+        "animated-gradient-background" // Added animation class
+      )}>
       <header className="w-full max-w-2xl flex justify-between items-center py-4">
         <div className="flex items-center space-x-2">
           <LogoIcon className="h-8 w-8 text-primary" />
@@ -207,7 +204,11 @@ export default function PomodoroPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-8">
             <div className="relative w-48 h-48 sm:w-60 sm:h-60" role="timer" aria-live="assertive">
-              <Progress value={progressPercentage} className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" indicatorClassName="bg-primary!" style={{clipPath: 'circle(50% at 50% 50%)'}} />
+              <Progress 
+                value={progressPercentage} 
+                className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" 
+                indicatorClassName="bg-primary!" 
+                style={{clipPath: 'circle(50% at 50% 50%)'}} />
               <div className="absolute inset-0 flex items-center justify-center">
                  <span className="text-5xl sm:text-7xl font-mono font-bold text-foreground tabular-nums">
                   {formatTime(timer.timeLeft)}

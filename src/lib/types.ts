@@ -26,7 +26,7 @@ export interface SessionRecord {
 export interface SoundscapeOption {
   id: string;
   name: string;
-  type: 'noise' | 'tone' | 'file'; // For Tone.js generation or file path
+  type: 'noise' | 'tone' | 'file' | 'binaural'; // Added 'binaural'
   params?: any; // For Tone.js specific parameters or file URL
 }
 

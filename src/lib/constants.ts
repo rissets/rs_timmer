@@ -1,3 +1,4 @@
+
 import type { Settings, SoundscapeOption } from '@/lib/types';
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -15,11 +16,14 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   { id: 'none', name: 'None', type: 'noise', params: { type: 'off' } },
-  { id: 'whiteNoise', name: 'White Noise', type: 'noise', params: { type: 'white' } },
-  { id: 'pinkNoise', name: 'Pink Noise', type: 'noise', params: { type: 'pink' } },
-  { id: 'brownNoise', name: 'Brown Noise', type: 'noise', params: { type: 'brown' } },
-  { id: 'gentleRain', name: 'Gentle Rain (placeholder)', type: 'noise', params: { type: 'pink', playbackRate: 0.5, volume: -12 } }, // Example of custom params
-  { id: 'focusTone', name: 'Focus Tone (440Hz)', type: 'tone', params: { frequency: 440, type: 'sine' } },
+  { id: 'whiteNoise', name: 'White Noise', type: 'noise', params: { type: 'white', volume: -6 } },
+  { id: 'pinkNoise', name: 'Pink Noise', type: 'noise', params: { type: 'pink', volume: -6 } },
+  { id: 'brownNoise', name: 'Brown Noise', type: 'noise', params: { type: 'brown', volume: -6 } },
+  { id: 'gentleRain', name: 'Gentle Rain (Simulated)', type: 'noise', params: { type: 'pink', volume: -18 } }, // Adjusted volume
+  { id: 'focusTone', name: 'Focus Tone (440Hz Sine)', type: 'tone', params: { frequency: 440, type: 'sine' } },
+  { id: 'deepDrone', name: 'Deep Drone (80Hz Sine)', type: 'tone', params: { frequency: 80, type: 'sine', volume: -10 } },
+  { id: 'windyAmbience', name: 'Windy Ambience', type: 'noise', params: { type: 'pink', volume: -20 } }, // Quieter pink noise
+  { id: 'alphaBinaural', name: 'Alpha Binaural (8Hz Beat)', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volume: -15 } },
 ];
 
 export const APP_NAME = "Zenith Timer";
