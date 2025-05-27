@@ -4,7 +4,7 @@
 import type { Settings, TimerMode, SessionRecord } from '@/lib/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import * as Tone from 'tone'; // Ensure Tone is imported for Tone.start()
+// import * as Tone from 'tone'; // Removed: Tone.start() will be handled by useSoundscapePlayer
 
 interface UseTimerCoreProps {
   settings: Settings;
@@ -70,7 +70,7 @@ export function useTimerCore({
 
   const sendNotification = useCallback((title: string, body: string) => {
     if (settings.notificationsEnabled && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body, icon: '/icons/icon-192x192.png' }); // Standard way to create notification
+      new Notification(title, { body, icon: '/icons/icon-192x192.png' });
     }
   }, [settings.notificationsEnabled]);
 
@@ -85,7 +85,7 @@ export function useTimerCore({
       default:
         return settings.workMinutes * 60;
     }
-  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes]); // Added dependencies
+  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes]);
 
   const addSessionLogEntry = useCallback((completed: boolean, actualDurationMinutes: number, currentMode: TimerMode) => {
     const newLogEntry: SessionRecord = {
@@ -97,14 +97,14 @@ export function useTimerCore({
       completed: completed,
     };
     setSessionLog(prevLog => [...prevLog, newLogEntry]);
-    return newLogEntry; // Return the new entry for immediate use
-  }, []); // Removed mode dependency, as it's passed in
+    return newLogEntry; 
+  }, []); 
   
   const moveToNextMode = useCallback((skipped = false) => {
-    const previousMode = mode; // Store current mode before changing
+    const previousMode = mode; 
     const currentDuration = getDurationForMode(previousMode);
     const actualDurationSeconds = skipped ? currentDuration - timeLeft : currentDuration;
-    const newLogEntry = addSessionLogEntry(!skipped, Math.round(actualDurationSeconds / 60), previousMode);
+    addSessionLogEntry(!skipped, Math.round(actualDurationSeconds / 60), previousMode);
 
     let nextMode: TimerMode;
     let completedPomodorosUpdate = currentCyclePomodoros;
@@ -127,13 +127,10 @@ export function useTimerCore({
     setTimeLeft(getDurationForMode(nextMode));
     setCurrentCyclePomodoros(completedPomodorosUpdate);
     
-    // Use the locally updated sessionLog for the callback
-    // This is more reliable than relying on the state which might not update immediately
-    setSessionLog(prev => {
-      onIntervalEnd(previousMode, completedPomodorosUpdate, [...prev]); // Pass the updated log
-      return prev; // The actual update to sessionLog state is already handled by addSessionLogEntry
+    setSessionLog(prev => { // Use functional update to ensure access to the latest sessionLog
+      onIntervalEnd(previousMode, completedPomodorosUpdate, prev); // Pass the latest log
+      return prev; 
     });
-
 
     const notificationTitle = previousMode === 'work' 
         ? getTranslatedText('notifications.workSessionEnded') 
@@ -174,7 +171,7 @@ export function useTimerCore({
         if (newTimeLeft <= 0) {
           if (intervalRef.current) clearInterval(intervalRef.current);
           moveToNextMode();
-          return 0; // Return 0 as timeLeft will be reset by moveToNextMode
+          return 0; 
         }
         if (onTick) onTick(newTimeLeft, mode);
         return newTimeLeft;
@@ -187,19 +184,14 @@ export function useTimerCore({
   }, [isRunning, mode, moveToNextMode, onTick]);
 
   useEffect(() => {
-    if (!isRunning) { // Only reset if not running
+    if (!isRunning) { 
       setTimeLeft(getDurationForMode(mode));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode]); // Removed isRunning from deps
+  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode]);
 
 
   const startTimer = () => {
-    if (Tone.context.state !== 'running') { 
-      Tone.start().then(() => {
-         console.log("AudioContext started by timer start.");
-      });
-    }
+    // Removed Tone.start() call from here; useSoundscapePlayer will handle it.
     setIsRunning(true);
     if (onTimerStart) onTimerStart(mode);
   };

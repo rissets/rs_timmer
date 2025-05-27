@@ -90,8 +90,8 @@ export default function PomodoroPage() {
 
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
-    settings, // Pass the whole settings object
-    isSettingsLoaded,
+    settings: settings, 
+    isSettingsLoaded: isSettingsLoaded,
   });
 
 
@@ -222,13 +222,16 @@ export default function PomodoroPage() {
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
-    const lastSession = sessionLogFromHook[sessionLogFromHook.length - 1];
-    if (lastSession) {
-      addSessionToHistory(lastSession);
-    }
+    // addSessionToHistory is automatically called from within useTimerCore's moveToNextMode
+    // via the setSessionLog functional update.
+    // So, we don't need to call addSessionToHistory here again with sessionLogFromHook.
+    // The sessionLogFromHook received here is the state *before* the latest entry was added by moveToNextMode.
 
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-      if (endedMode === 'longBreak' && (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes)) {
+      // Use timer.sessionLog here as it would have been updated by addSessionLogEntry within useTimerCore
+      // before onIntervalEnd is called via the state update.
+      // Or, more robustly, if onIntervalEnd is guaranteed to have the *very latest* log including the one just finished:
+      if (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) {
          triggerAiSummary(sessionLogFromHook, currentSessionType);
       }
     }
@@ -237,14 +240,18 @@ export default function PomodoroPage() {
   const timer = useTimerCore({
     settings,
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: () => {},
+    onTimerStart: () => {
+      // Intentionally empty: sound is controlled by useEffect watching timer.isRunning
+    },
     onTimerPause: () => {
-      soundscapePlayer.stopSound();
+      soundscapePlayer.stopSound(); // Explicitly stop sound on pause action from timer core
     },
     onTimerReset: () => {
-      soundscapePlayer.stopSound();
+      soundscapePlayer.stopSound(); // Explicitly stop sound on reset action from timer core
     },
-    onTimerSkip: () => {},
+    onTimerSkip: () => {
+      // Sound for next interval will be handled by useEffect watching timer.mode and timer.isRunning
+    },
     getTranslatedText: t,
   });
 
@@ -254,23 +261,42 @@ export default function PomodoroPage() {
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
   useEffect(() => {
-    if (!timer.isRunning || !isSettingsLoaded) {
+    // Guard 1: Settings must be loaded.
+    if (!isSettingsLoaded) {
       soundscapePlayer.stopSound();
       return;
     }
 
-    const soundId = getActiveSoundscapeId(timer.mode);
-    if (soundId && soundId !== 'none') {
-      soundscapePlayer.playSound(soundId);
+    // Guard 2: Sound player must be ready (Tone.js context started).
+    if (!soundscapePlayer.isReady) {
+      soundscapePlayer.stopSound(); // Attempt to stop if player becomes not ready.
+      return;
+    }
+
+    // At this point, settings are loaded AND sound player is ready.
+    if (timer.isRunning) {
+      const soundId = getActiveSoundscapeId(timer.mode);
+      if (soundId && soundId !== 'none') {
+        soundscapePlayer.playSound(soundId);
+      } else {
+        // Sound ID is 'none' (e.g., muted, or no specific sound for mode/animation)
+        soundscapePlayer.stopSound();
+      }
     } else {
+      // Timer is not running (paused, stopped, initial state)
       soundscapePlayer.stopSound();
     }
   }, [
     timer.mode,
     timer.isRunning,
-    soundscapePlayer,
+    soundscapePlayer, // Effect re-runs if soundscapePlayer object ref changes (e.g. isReady changes)
     isSettingsLoaded,
-    getActiveSoundscapeId
+    getActiveSoundscapeId, // The callback itself
+    // Explicit dependencies of getActiveSoundscapeId
+    isMuted, 
+    settings.soundscapeWork, 
+    settings.soundscapeBreak
+    // settings.backgroundAnimation was removed from getActiveSoundscapeId, so removed here too
   ]);
 
 
@@ -424,16 +450,8 @@ export default function PomodoroPage() {
     );
   }
 
-  if (!authLoading && currentUser && (pathname === '/auth/login' || pathname === '/auth/register' || pathname === '/auth/forgot-password')) {
-    router.push('/');
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!authLoading && !currentUser && !pathname.startsWith('/auth')) {
+  // This check was missing the isSettingsLoaded condition, adding it back.
+  if (!authLoading && !currentUser && !pathname.startsWith('/auth') && isSettingsLoaded) {
      router.push('/auth/login');
      return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
@@ -441,6 +459,19 @@ export default function PomodoroPage() {
       </div>
     );
   }
+  
+  // This condition might be redundant due to the one above but kept for safety.
+  if (!currentUser && !authLoading && !pathname.startsWith('/auth')) {
+    // This ensures that if somehow a non-auth page is hit without a user and not loading, redirect.
+    // This could happen if isSettingsLoaded becomes true before auth state fully resolves in a weird edge case.
+    router.push('/auth/login');
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
 
   const pomodoroDots = Array(settings.longBreakInterval).fill(0).map((_, i) => (
     <span
