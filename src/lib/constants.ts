@@ -143,5 +143,5 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; name: string }[] = [
   { id: 'learning', name: 'Learning Focus' },
 ];
 
-export const APP_NAME = "Zenith Timer";
+export const APP_NAME = "Rissets";
 

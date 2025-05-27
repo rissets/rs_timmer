@@ -62,7 +62,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
             <li><strong>Soundscapes:</strong> Choose different ambient sounds for work and break periods, and adjust the master volume.</li>
             <li><strong>Background Animation:</strong> Select a visual background effect or none.</li>
             <li><strong>Mouse Trail Effect:</strong> Enable or disable a particle effect that follows your mouse.</li>
-            <li><strong>Coach Marks:</strong> Toggle helpful tooltips that explain UI elements.</li>
+            <li><strong>Initial Guide:</strong> Toggle the helpful guided tour that appears on first visit.</li>
           </ul>
         </>
       ),

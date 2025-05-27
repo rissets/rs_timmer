@@ -37,7 +37,7 @@ import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2,
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 
-const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed";
+const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed"; // Keeping old key to not reset tour for existing users
 
 const tourSteps = [
   {
@@ -182,7 +182,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType]); // Added currentSessionType
+  }, [currentNotes, tasks, toast, currentSessionType]);
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {

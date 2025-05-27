@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: APP_NAME,
-  description: 'A Pomodoro timer to enhance focus and productivity.',
+  description: 'A Pomodoro timer to enhance focus and productivity, now called Rissets.',
 };
 
 export default function RootLayout({
