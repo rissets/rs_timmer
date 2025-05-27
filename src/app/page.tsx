@@ -65,7 +65,7 @@ import {
   saveNotesForDay, loadNotesForDay,
   saveDictionaryForDay, loadDictionaryForDay,
   saveSessionContextForDay, loadSessionContextForDay,
-  saveSessionLogForDay, deleteNotesForDay // Added deleteNotesForDay
+  saveSessionLogForDay, deleteNotesForDay 
 } from '@/lib/firebase/firestore-service';
 import { format } from 'date-fns';
 
@@ -115,6 +115,7 @@ export default function PomodoroPage() {
   const [pastDateNotes, setPastDateNotes] = useState<string | null>(null);
   const [isLoadingPastNotes, setIsLoadingPastNotes] = useState(false);
   const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
+  const [isDeletingPastNotes, setIsDeletingPastNotes] = useState(false);
 
 
   const soundscapePlayer = useSoundscapePlayer({
@@ -347,7 +348,11 @@ export default function PomodoroPage() {
   useEffect(() => {
     if (!currentUser || !isSettingsLoaded) return;
     if (!isLoadingDailyData && timer.sessionLog.length > 0) {
-      if (timer.sessionLog.length !== (JSON.parse(localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`) || '[]')).length) {
+      // Check if the log has actually changed to avoid unnecessary writes
+      const localStoredLog = JSON.parse(localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`) || '[]');
+      if (timer.sessionLog.length !== localStoredLog.length || 
+          JSON.stringify(timer.sessionLog) !== JSON.stringify(localStoredLog) // More robust check
+      ) {
           saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
             console.error("Error saving session log to Firestore:", error);
             toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
@@ -363,7 +368,7 @@ export default function PomodoroPage() {
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
   const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
-
+  
   useEffect(() => {
     if (!isSettingsLoaded || !isSoundPlayerReady) {
       stopSound();
@@ -380,13 +385,9 @@ export default function PomodoroPage() {
     timer.isRunning,
     isSettingsLoaded,
     isSoundPlayerReady,
-    getActiveSoundscapeId, // This is stable due to its own useCallback
-    playSound, // Stable due to its own useCallback
-    stopSound, // Stable due to its own useCallback
-    // The following are removed as getActiveSoundscapeId depends on them
-    // isMuted, 
-    // settings.soundscapeWork, 
-    // settings.soundscapeBreak
+    getActiveSoundscapeId,
+    playSound,
+    stopSound,
   ]);
 
   const formatTime = (seconds: number) => {
@@ -450,18 +451,18 @@ export default function PomodoroPage() {
     const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
     if (confirm(t('dictionaryCard.confirmDeleteEntry', {word: wordToRemove}))) {
        const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-       setDefinedWordsList(updatedList); // Update UI immediately
-       toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+       setDefinedWordsList(updatedList);
        
-       if (currentUser && !isLoadingDailyData && isSettingsLoaded) { // Ensure not to save during initial load
+       if (currentUser && !isLoadingDailyData && isSettingsLoaded) {
          try {
            await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-           // Optional: toast for successful save, though the immediate UI update is primary
-         } catch (error) {
+           toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+         } catch (error: any) {
            console.error("Error saving dictionary after deletion:", error);
-           toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-           // Potentially revert client-side change if save fails critically, or allow user to retry
+           toast({ title: t("errors.firestoreSaveTitle"), description: error.message || t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
          }
+       } else {
+         toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordToRemove }) });
        }
     }
   };
@@ -496,9 +497,9 @@ export default function PomodoroPage() {
       const dateKey = formatDateToKey(date);
       const notes = await loadNotesForDay(currentUser.uid, dateKey);
       setPastDateNotes(notes || t('notes.noNotesForDate')); 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching past notes:", error);
-      toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadPastNotesDescription"), variant: "destructive" });
+      toast({ title: t("errors.firestoreLoadTitle"), description: error.message || t("errors.firestoreLoadPastNotesDescription"), variant: "destructive" });
       setPastDateNotes(t('notes.errorLoadingNotes'));
     } finally {
       setIsLoadingPastNotes(false);
@@ -515,17 +516,17 @@ export default function PomodoroPage() {
     if (!confirm(t('notes.confirmDeletePastNotes', { date: dateKeyToDelete }))) {
       return;
     }
+    
+    setIsDeletingPastNotes(true);
     try {
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.pastNotesDeleted'));
+      setPastDateNotes(t('notes.noNotesForDate')); // Update UI to show notes are gone
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
-      // Optionally re-fetch or just clear the view if it was the currently viewed date
-      if (formatDateToKey(selectedPastDateForNotes) === dateKeyToDelete) {
-         setPastDateNotes(t('notes.noNotesForDate')); // Or an empty string to indicate it's now empty
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting past notes:", error);
-      toast({ title: t('errors.firestoreDeleteTitle'), description: t('errors.firestoreDeletePastNotesDescription'), variant: "destructive" });
+      toast({ title: t('errors.firestoreDeleteTitle'), description: error.message || t('errors.firestoreDeletePastNotesDescription'), variant: "destructive" });
+    } finally {
+      setIsDeletingPastNotes(false);
     }
   };
 
@@ -704,8 +705,8 @@ export default function PomodoroPage() {
                   <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-0"> {/* Apply pt-0 here as CardContent adds its own padding */}
-                 <CardContent className="space-y-4 pt-6"> {/* Added pt-6 to CardContent */}
+              <AccordionContent className="px-0"> 
+                 <CardContent className="space-y-4 pt-6"> 
                     <div>
                         <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
                         <Select
@@ -742,7 +743,6 @@ export default function PomodoroPage() {
                         <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
                     </Button>
 
-                    {/* Past Notes Viewer - Now Collapsible */}
                     <Accordion type="multiple" value={openPastNotesAccordion} onValueChange={setOpenPastNotesAccordion} className="w-full pt-4 mt-4 border-t">
                       <AccordionItem value="view-past-notes" className="border-none">
                         <AccordionTrigger className="hover:no-underline p-0">
@@ -786,9 +786,19 @@ export default function PomodoroPage() {
                               </div>
                             )}
                             {selectedPastDateForNotes && pastDateNotes && pastDateNotes !== t('notes.noNotesForDate') && pastDateNotes !== t('notes.errorLoadingNotes') && !isLoadingPastNotes && (
-                               <Button variant="outline" size="sm" onClick={handleDeletePastNotes} className="mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                {t('notes.deletePastNotesButton', {date: format(selectedPastDateForNotes, "PPP")})}
+                               <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleDeletePastNotes} 
+                                className="mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
+                                disabled={isDeletingPastNotes}
+                              >
+                                {isDeletingPastNotes ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                )}
+                                {isDeletingPastNotes ? t('notes.deletingPastNotes') : t('notes.deletePastNotesButton', {date: format(selectedPastDateForNotes, "PPP")})}
                               </Button>
                             )}
                           </div>
@@ -821,3 +831,4 @@ export default function PomodoroPage() {
   );
 }
 
+    

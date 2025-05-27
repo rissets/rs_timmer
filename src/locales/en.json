@@ -63,7 +63,8 @@
     "deletePastNotesButton": "Delete Notes for {{date}}",
     "pastNotesDeleted": "Notes for the selected date have been deleted.",
     "pastNotesDeleteSuccessTitle": "Past Notes Deleted",
-    "errorNoDateSelectedForDelete": "Please select a date to delete notes for."
+    "errorNoDateSelectedForDelete": "Please select a date to delete notes for.",
+    "deletingPastNotes": "Deleting notes..."
   },
   "aiSummaryDialog": {
     "title": "AI Session Analysis",
@@ -295,6 +296,7 @@
     "confirmDeleteEntry": "Are you sure you want to delete the definition for '{{word}}'?",
     "entryDeletedTitle": "Entry Deleted",
     "entryDeletedDesc": "The definition for '{{word}}' has been removed from this session's dictionary.",
+    "entryDeletedDescLocal": "The definition for '{{word}}' has been removed from the list. Changes will be saved to the database if possible.",
     "theEntry": "the entry"
   },
   "auth": {
@@ -365,3 +367,4 @@
   }
 }
 
+    

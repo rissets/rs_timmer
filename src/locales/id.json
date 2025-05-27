@@ -63,7 +63,8 @@
     "deletePastNotesButton": "Hapus Catatan untuk {{date}}",
     "pastNotesDeleted": "Catatan untuk tanggal yang dipilih telah dihapus.",
     "pastNotesDeleteSuccessTitle": "Catatan Sebelumnya Dihapus",
-    "errorNoDateSelectedForDelete": "Silakan pilih tanggal untuk menghapus catatan."
+    "errorNoDateSelectedForDelete": "Silakan pilih tanggal untuk menghapus catatan.",
+    "deletingPastNotes": "Menghapus catatan..."
   },
   "aiSummaryDialog": {
     "title": "Analisis Sesi AI",
@@ -295,6 +296,7 @@
     "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus definisi untuk '{{word}}'?",
     "entryDeletedTitle": "Entri Dihapus",
     "entryDeletedDesc": "Definisi untuk '{{word}}' telah dihapus dari kamus sesi ini.",
+    "entryDeletedDescLocal": "Definisi untuk '{{word}}' telah dihapus dari daftar. Perubahan akan disimpan ke database jika memungkinkan.",
     "theEntry": "entri tersebut"
   },
   "auth": {
@@ -365,3 +367,4 @@
   }
 }
 
+    
