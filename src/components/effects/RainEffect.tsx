@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-const RainEffect = ({ count = 70 }: { count?: number }) => {
+const RainEffect = ({ count = 100 }: { count?: number }) => { // Increased count from 70 to 100
   const [raindrops, setRaindrops] = useState<React.JSX.Element[]>([]);
 
   useEffect(() => {
@@ -28,3 +28,5 @@ const RainEffect = ({ count = 70 }: { count?: number }) => {
 };
 
 export default RainEffect;
+
+    

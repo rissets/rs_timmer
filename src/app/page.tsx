@@ -32,6 +32,55 @@ export default function PomodoroPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
+  const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume });
+
+  const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
+    if (isMuted) return 'none';
+
+    switch (settings.backgroundAnimation) {
+      case 'rain':
+        return 'gentleRain';
+      case 'snow':
+        return 'pinkNoise'; 
+      case 'gradientFlow':
+        return 'whiteNoise';
+      case 'none':
+      default:
+        // Fallback to work/break specific sounds if no animation sound is defined
+        return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
+    }
+  }, [isMuted, settings.backgroundAnimation, settings.soundscapeWork, settings.soundscapeBreak]);
+  
+  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[]) => {
+    if (!logForSummary || logForSummary.length === 0) {
+      toast({ title: "AI Summary", description: "Not enough session data to generate a summary.", variant: "destructive" });
+      return;
+    }
+    setIsAiLoading(true);
+    setIsAiSummaryOpen(true);
+    setAiSummary(null);
+
+    const sessionDetailsString = logForSummary.map(s => 
+      `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? 'completed' : 'skipped'})`
+    ).join('\n');
+    
+    const fullDetails = `Session Log:\n${sessionDetailsString}\n\nSession Notes:\n${currentNotes || "No notes provided."}`;
+
+    try {
+      const result = await summarizeSession({ sessionDetails: fullDetails });
+      setAiSummary(result);
+      setCurrentNotes(""); // Clear notes after successful summary based on them
+      // timer.setSessionLog([]); // Optionally clear log after summary, or keep for history drawer
+    } catch (error) {
+      console.error("AI Summary Error:", error);
+      toast({ title: "AI Summary Error", description: "Could not generate session summary.", variant: "destructive" });
+      setAiSummary({ summary: "Error generating summary.", improvements: "Please try again later."});
+    } finally {
+      setIsAiLoading(false);
+    }
+  }, [currentNotes, toast]);
+
+
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
     const lastSession = sessionLogFromHook[sessionLogFromHook.length - 1];
     if (lastSession) {
@@ -39,28 +88,18 @@ export default function PomodoroPage() {
     }
     
     if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-      if (endedMode === 'longBreak') {
+      if (endedMode === 'longBreak' && sessionLogFromHook.length > 0) { // only trigger if there's log data
          triggerAiSummary(sessionLogFromHook); 
       }
     }
-    
-    const nextSoundscapeId = timer.mode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-    if (!isMuted) {
-      soundscapePlayer.playSound(nextSoundscapeId);
-    } else {
-      soundscapePlayer.stopSound();
-    }
-
-  }, [settings.longBreakInterval, settings.soundscapeWork, settings.soundscapeBreak, ]);
+    // Sound playing is handled by the main useEffect based on timer.mode and timer.isRunning updates
+  }, [settings.longBreakInterval, triggerAiSummary]);
 
   const timer = useTimerCore({ 
     settings, 
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: (mode) => {
-      const soundscapeId = mode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-      if (!isMuted) {
-        soundscapePlayer.playSound(soundscapeId);
-      }
+    onTimerStart: () => {
+      // Sound playing is handled by the main useEffect
     },
     onTimerPause: () => {
       soundscapePlayer.stopSound();
@@ -68,27 +107,31 @@ export default function PomodoroPage() {
     onTimerReset: () => {
       soundscapePlayer.stopSound();
     },
-    onTimerSkip: (prevMode, nextMode) => {
-       const soundscapeId = nextMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-       if (!isMuted) {
-         soundscapePlayer.playSound(soundscapeId);
-       } else {
-         soundscapePlayer.stopSound();
-       }
+    onTimerSkip: () => {
+       // Sound playing is handled by the main useEffect
     }
   });
   
-  const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume });
-
   useEffect(() => {
-    if (isMuted || (timer.mode === 'work' && settings.soundscapeWork === 'none') || (timer.mode !== 'work' && settings.soundscapeBreak === 'none')) {
-        soundscapePlayer.stopSound();
-    } else if (timer.isRunning) {
-        const currentSoundscape = timer.mode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-        soundscapePlayer.playSound(currentSoundscape);
+    if (!timer.isRunning || !isSettingsLoaded) {
+      soundscapePlayer.stopSound();
+      return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps 
-  }, [settings.soundscapeWork, settings.soundscapeBreak, timer.mode, timer.isRunning, isMuted]);
+    
+    const soundId = getActiveSoundscapeId(timer.mode);
+    if (soundId && soundId !== 'none') {
+      soundscapePlayer.playSound(soundId);
+    } else {
+      soundscapePlayer.stopSound();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    timer.mode,
+    timer.isRunning,
+    soundscapePlayer, 
+    isSettingsLoaded,
+    getActiveSoundscapeId 
+  ]);
 
 
   const formatTime = (seconds: number) => {
@@ -112,45 +155,10 @@ export default function PomodoroPage() {
     settings.longBreakMinutes * 60;
   
   const progressPercentage = ((currentModeDuration - timer.timeLeft) / currentModeDuration) * 100;
-
-  const triggerAiSummary = async (logForSummary: SessionRecord[]) => {
-    if (!logForSummary || logForSummary.length === 0) {
-      toast({ title: "AI Summary", description: "Not enough session data to generate a summary.", variant: "destructive" });
-      return;
-    }
-    setIsAiLoading(true);
-    setIsAiSummaryOpen(true);
-    setAiSummary(null);
-
-    const sessionDetailsString = logForSummary.map(s => 
-      `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? 'completed' : 'skipped'})`
-    ).join('\n');
-    
-    const fullDetails = `Session Log:\n${sessionDetailsString}\n\nSession Notes:\n${currentNotes || "No notes provided."}`;
-
-    try {
-      const result = await summarizeSession({ sessionDetails: fullDetails });
-      setAiSummary(result);
-      setCurrentNotes("");
-      timer.setSessionLog([]); 
-    } catch (error) {
-      console.error("AI Summary Error:", error);
-      toast({ title: "AI Summary Error", description: "Could not generate session summary.", variant: "destructive" });
-      setAiSummary({ summary: "Error generating summary.", improvements: "Please try again later."});
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
   
   const handleToggleMute = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    if (newMutedState) {
-      soundscapePlayer.stopSound();
-    } else if (timer.isRunning) {
-      const currentSoundscape = timer.mode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
-      soundscapePlayer.playSound(currentSoundscape);
-    }
+    setIsMuted(prevMuted => !prevMuted);
+    // Sound adjustment is handled by the main useEffect reacting to isMuted change
   };
 
 
@@ -260,7 +268,7 @@ export default function PomodoroPage() {
               <Button 
                   variant="outline" 
                   className="mt-2"
-                  onClick={() => triggerAiSummary(timer.sessionLog)} 
+                  onClick={() => triggerAiSummary(timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes ? [{id: 'notes-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []))} 
                   disabled={timer.sessionLog.length === 0 && !currentNotes}
                   title="Analyze current session notes and log"
                 >
@@ -285,3 +293,5 @@ export default function PomodoroPage() {
     </>
   );
 }
+
+    

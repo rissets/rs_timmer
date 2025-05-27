@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 
-const SnowEffect = ({ count = 60 }: { count?: number }) => {
+const SnowEffect = ({ count = 80 }: { count?: number }) => { // Increased count from 60 to 80
   const [snowflakes, setSnowflakes] = useState<React.JSX.Element[]>([]);
 
   useEffect(() => {
@@ -36,3 +36,5 @@ const SnowEffect = ({ count = 60 }: { count?: number }) => {
 };
 
 export default SnowEffect;
+
+    
