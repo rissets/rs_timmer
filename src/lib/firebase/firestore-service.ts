@@ -1,6 +1,6 @@
 
 // src/lib/firebase/firestore-service.ts
-import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc, updateDoc, deleteField } from "firebase/firestore";
 import { db } from './config'; // Import Firestore instance
 import type { Task, SessionRecord, DefinedWordEntry, SessionType } from '@/lib/types';
 
@@ -87,17 +87,30 @@ export const deleteSessionLogForDay = async (userId: string, dateKey: string): P
   if (!userId) throw new Error("User not authenticated for deleting data.");
   const docRef = getDailyDataDocRef(userId, dateKey);
   try {
-    // To delete only the sessionLog field, we set it to null or delete it
-    // Firebase does not have a direct "delete field" operation in setDoc like "delete field" in updateDoc.
-    // The cleanest way if other daily data should persist is to set the field to an empty array or a sentinel delete value.
-    // For simplicity here, if clearing history means clearing all logs for the day:
     await setDoc(docRef, { sessionLog: [] }, { merge: true });
-    // If you want to remove the field entirely, you'd use updateDoc and FieldValue.delete()
-    // import { updateDoc, FieldValue } from "firebase/firestore";
-    // await updateDoc(docRef, { sessionLog: FieldValue.delete() });
-    // However, this requires the document to exist. For simplicity, we'll set to empty array.
   } catch (error) {
     console.error(`Error deleting session log for ${dateKey}:`, error);
     throw error;
   }
 };
+
+// --- Delete Notes for a Specific Day ---
+export const deleteNotesForDay = async (userId: string, dateKey: string): Promise<void> => {
+  if (!userId) throw new Error("User not authenticated for deleting notes.");
+  const docRef = getDailyDataDocRef(userId, dateKey);
+  try {
+    // Using updateDoc with deleteField is more robust if the document might not exist
+    // or the field might not exist, though setDoc with merge:true and an empty string works too.
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await updateDoc(docRef, {
+        notes: deleteField()
+      });
+    }
+    // If doc doesn't exist, no action needed, notes are effectively "deleted" or non-existent.
+  } catch (error) {
+    console.error(`Error deleting notes for ${dateKey}:`, error);
+    throw error;
+  }
+};
+

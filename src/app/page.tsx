@@ -52,7 +52,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon, Loader2, Save } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon, Loader2, Save, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -65,7 +65,7 @@ import {
   saveNotesForDay, loadNotesForDay,
   saveDictionaryForDay, loadDictionaryForDay,
   saveSessionContextForDay, loadSessionContextForDay,
-  saveSessionLogForDay
+  saveSessionLogForDay, deleteNotesForDay // Added deleteNotesForDay
 } from '@/lib/firebase/firestore-service';
 import { format } from 'date-fns';
 
@@ -107,6 +107,8 @@ export default function PomodoroPage() {
   const [isDefiningWord, setIsDefiningWord] = useState(false);
 
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
+  const [openPastNotesAccordion, setOpenPastNotesAccordion] = useState<string[]>([]);
+
 
   // For viewing past notes
   const [selectedPastDateForNotes, setSelectedPastDateForNotes] = useState<Date | undefined>();
@@ -126,9 +128,9 @@ export default function PomodoroPage() {
       const newDateKey = getCurrentDateString();
       if (newDateKey !== currentDateKey) {
         setCurrentDateKey(newDateKey);
-        // Reset past notes view when day changes
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
+        setOpenPastNotesAccordion([]); // Close past notes accordion on day change
       }
     }, 60000);
     return () => clearInterval(interval);
@@ -244,6 +246,10 @@ export default function PomodoroPage() {
       content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>,
     },
     {
+      title: t('interactiveTourDialog.viewPastNotesTitle'),
+      content: <p>{t('interactiveTourDialog.viewPastNotesContent')}</p>,
+    },
+    {
       title: t('interactiveTourDialog.headerToolsTitle'),
       content: <p>{t('interactiveTourDialog.headerToolsContent')}</p>,
     },
@@ -341,8 +347,6 @@ export default function PomodoroPage() {
   useEffect(() => {
     if (!currentUser || !isSettingsLoaded) return;
     if (!isLoadingDailyData && timer.sessionLog.length > 0) {
-      // Save only if there's new log activity to avoid redundant saves
-      // This basic check compares length; a more robust check might compare actual content if needed.
       if (timer.sessionLog.length !== (JSON.parse(localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`) || '[]')).length) {
           saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
             console.error("Error saving session log to Firestore:", error);
@@ -376,12 +380,13 @@ export default function PomodoroPage() {
     timer.isRunning,
     isSettingsLoaded,
     isSoundPlayerReady,
-    getActiveSoundscapeId,
-    playSound,
-    stopSound,
-    isMuted,
-    settings.soundscapeWork,
-    settings.soundscapeBreak
+    getActiveSoundscapeId, // This is stable due to its own useCallback
+    playSound, // Stable due to its own useCallback
+    stopSound, // Stable due to its own useCallback
+    // The following are removed as getActiveSoundscapeId depends on them
+    // isMuted, 
+    // settings.soundscapeWork, 
+    // settings.soundscapeBreak
   ]);
 
   const formatTime = (seconds: number) => {
@@ -441,11 +446,23 @@ export default function PomodoroPage() {
     }
   };
 
-  const handleRemoveDefinedWord = (wordId: string) => {
+  const handleRemoveDefinedWord = async (wordId: string) => {
     const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
     if (confirm(t('dictionaryCard.confirmDeleteEntry', {word: wordToRemove}))) {
-       setDefinedWordsList(prev => prev.filter(entry => entry.id !== wordId));
+       const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
+       setDefinedWordsList(updatedList); // Update UI immediately
        toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+       
+       if (currentUser && !isLoadingDailyData && isSettingsLoaded) { // Ensure not to save during initial load
+         try {
+           await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
+           // Optional: toast for successful save, though the immediate UI update is primary
+         } catch (error) {
+           console.error("Error saving dictionary after deletion:", error);
+           toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
+           // Potentially revert client-side change if save fails critically, or allow user to retry
+         }
+       }
     }
   };
 
@@ -489,6 +506,29 @@ export default function PomodoroPage() {
     }
   };
 
+  const handleDeletePastNotes = async () => {
+    if (!selectedPastDateForNotes || !currentUser) {
+      toast({ title: t('notes.errorNoDateSelectedForDelete'), variant: 'destructive' });
+      return;
+    }
+    const dateKeyToDelete = formatDateToKey(selectedPastDateForNotes);
+    if (!confirm(t('notes.confirmDeletePastNotes', { date: dateKeyToDelete }))) {
+      return;
+    }
+    try {
+      await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
+      setPastDateNotes(t('notes.pastNotesDeleted'));
+      toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
+      // Optionally re-fetch or just clear the view if it was the currently viewed date
+      if (formatDateToKey(selectedPastDateForNotes) === dateKeyToDelete) {
+         setPastDateNotes(t('notes.noNotesForDate')); // Or an empty string to indicate it's now empty
+      }
+    } catch (error) {
+      console.error("Error deleting past notes:", error);
+      toast({ title: t('errors.firestoreDeleteTitle'), description: t('errors.firestoreDeletePastNotesDescription'), variant: "destructive" });
+    }
+  };
+
   const handleSaveAiSummaryToNotes = (summary: string, improvements: string) => {
     const formattedSummary = `\n\n--- ${t('aiSummaryDialog.savedSummaryHeader', { dateTime: new Date().toLocaleString() })} ---\n${t('aiSummaryDialog.summaryTitle')}:\n${summary}\n\n${t('aiSummaryDialog.improvementsTitle')}:\n${improvements}\n--- ${t('aiSummaryDialog.savedSummaryFooter')} ---`;
     setCurrentNotes(prevNotes => prevNotes + formattedSummary);
@@ -509,9 +549,7 @@ export default function PomodoroPage() {
     );
   }
   if (!currentUser) {
-      // This should ideally not be reached if the useEffect for auth redirection works correctly.
-      // However, as a fallback, we ensure it redirects.
-      if (typeof window !== 'undefined') { // Ensure router.push is called client-side
+      if (typeof window !== 'undefined') { 
           router.push('/auth/login');
       }
       return (
@@ -666,8 +704,8 @@ export default function PomodoroPage() {
                   <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-0">
-                 <CardContent className="space-y-4">
+              <AccordionContent className="px-0"> {/* Apply pt-0 here as CardContent adds its own padding */}
+                 <CardContent className="space-y-4 pt-6"> {/* Added pt-6 to CardContent */}
                     <div>
                         <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
                         <Select
@@ -704,46 +742,59 @@ export default function PomodoroPage() {
                         <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
                     </Button>
 
-                    {/* Past Notes Viewer */}
-                    <div className="pt-4 mt-4 border-t">
-                      <div className="flex justify-between items-center mb-2">
-                        <h4 className="text-md font-medium">{t('notes.viewPastNotesTitle')}</h4>
-                        <Popover open={isPastNotesPopoverOpen} onOpenChange={setIsPastNotesPopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-[200px] justify-start text-left font-normal",
-                                !selectedPastDateForNotes && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {selectedPastDateForNotes ? format(selectedPastDateForNotes, "PPP") : <span>{t('notes.pickDate')}</span>}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={selectedPastDateForNotes}
-                              onSelect={handleFetchPastNotes}
-                              disabled={(date) => date > new Date() || date < new Date("2000-01-01")} 
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      {isLoadingPastNotes && (
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>{t('notes.loadingPastNotes')}</span>
-                        </div>
-                      )}
-                      {pastDateNotes !== null && !isLoadingPastNotes && (
-                        <div className="mt-2 p-3 border rounded-md bg-muted/50">
-                           <p className="text-sm whitespace-pre-wrap">{pastDateNotes}</p>
-                        </div>
-                      )}
-                    </div>
+                    {/* Past Notes Viewer - Now Collapsible */}
+                    <Accordion type="multiple" value={openPastNotesAccordion} onValueChange={setOpenPastNotesAccordion} className="w-full pt-4 mt-4 border-t">
+                      <AccordionItem value="view-past-notes" className="border-none">
+                        <AccordionTrigger className="hover:no-underline p-0">
+                           <h4 className="text-md font-medium">{t('notes.viewPastNotesTitle')}</h4>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-4 pb-0">
+                          <div className="space-y-3">
+                            <Popover open={isPastNotesPopoverOpen} onOpenChange={setIsPastNotesPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full sm:w-[240px] justify-start text-left font-normal",
+                                    !selectedPastDateForNotes && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {selectedPastDateForNotes ? format(selectedPastDateForNotes, "PPP") : <span>{t('notes.pickDate')}</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={selectedPastDateForNotes}
+                                  onSelect={handleFetchPastNotes}
+                                  disabled={(date) => date > new Date() || date < new Date("2000-01-01")} 
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            
+                            {isLoadingPastNotes && (
+                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <span>{t('notes.loadingPastNotes')}</span>
+                              </div>
+                            )}
+                            {pastDateNotes !== null && !isLoadingPastNotes && (
+                              <div className="mt-2 p-3 border rounded-md bg-muted/30 min-h-[100px] max-h-[200px] overflow-y-auto">
+                                <p className="text-sm whitespace-pre-wrap">{pastDateNotes}</p>
+                              </div>
+                            )}
+                            {selectedPastDateForNotes && pastDateNotes && pastDateNotes !== t('notes.noNotesForDate') && pastDateNotes !== t('notes.errorLoadingNotes') && !isLoadingPastNotes && (
+                               <Button variant="outline" size="sm" onClick={handleDeletePastNotes} className="mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t('notes.deletePastNotesButton', {date: format(selectedPastDateForNotes, "PPP")})}
+                              </Button>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </CardContent>
               </AccordionContent>
             </AccordionItem>
@@ -769,3 +820,4 @@ export default function PomodoroPage() {
     </>
   );
 }
+

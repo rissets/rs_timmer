@@ -58,7 +58,12 @@
     "pickDate": "Pilih tanggal",
     "loadingPastNotes": "Memuat catatan...",
     "noNotesForDate": "Tidak ada catatan ditemukan untuk tanggal yang dipilih.",
-    "errorLoadingNotes": "Kesalahan memuat catatan untuk tanggal yang dipilih."
+    "errorLoadingNotes": "Kesalahan memuat catatan untuk tanggal yang dipilih.",
+    "confirmDeletePastNotes": "Anda yakin ingin menghapus semua catatan untuk tanggal {{date}}? Tindakan ini tidak dapat dibatalkan.",
+    "deletePastNotesButton": "Hapus Catatan untuk {{date}}",
+    "pastNotesDeleted": "Catatan untuk tanggal yang dipilih telah dihapus.",
+    "pastNotesDeleteSuccessTitle": "Catatan Sebelumnya Dihapus",
+    "errorNoDateSelectedForDelete": "Silakan pilih tanggal untuk menghapus catatan."
   },
   "aiSummaryDialog": {
     "title": "Analisis Sesi AI",
@@ -109,7 +114,7 @@
     "selectAnimationPlaceholder": "Pilih animasi",
     "myCustomSoundscapes": {
       "title": "Suara Latar Kustom Saya",
-      "description": "Unggah file audio Anda sendiri (mis., MP3, WAV, OGG) untuk digunakan sebagai suara latar. File disimpan secara lokal di browser Anda.",
+      "description": "Unggah file audio Anda sendiri (mis., MP3, WAV, OGG) untuk digunakan sebagai suara latar. File disimpan secara lokal di IndexedDB browser Anda.",
       "uploadLabel": "Unggah suara latar baru",
       "uploading": "Mengunggah...",
       "uploadedListTitle": "Suara Unggahan Saya",
@@ -150,7 +155,7 @@
       },
       "tasksAndNotes": {
         "title": "Tugas & Catatan",
-        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul. Anda juga dapat melihat catatan dari hari-hari sebelumnya menggunakan pemilih tanggal.\\nTugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI. Data ini disimpan per hari di database Firebase Anda."
+        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul. Tugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI. Data ini, beserta konteks sesi yang dipilih, disimpan per hari di database Firebase Anda."
       },
       "sessionContext": {
         "title": "Konteks Sesi",
@@ -158,7 +163,7 @@
       },
       "aiAnalysis": {
         "title": "Analisis Sesi AI",
-        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas. Ringkasan dapat disimpan ke catatan harian Anda."
+        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas. Ringkasan dapat disimpan ke catatan harian Anda untuk hari ini."
       },
       "chatWidget": {
         "title": "Asisten Chat AI",
@@ -167,6 +172,10 @@
       "dictionaryCard": {
         "title": "Kamus Sesi",
         "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia selama sesi Anda. Definisi ini disimpan per hari di database Firebase Anda dan dapat diekspor ke file Markdown. Anda juga dapat menghapus entri dari kamus hari ini."
+      },
+      "viewPastNotes": {
+        "title": "Melihat Catatan Sebelumnya",
+        "content": "Di dalam kartu 'Catatan & Konteks Sesi', Anda dapat menemukan bagian yang dapat dilipat untuk 'Lihat Catatan Sebelumnya'. Gunakan kalender untuk memilih tanggal sebelumnya dan melihat catatan (termasuk ringkasan AI yang disimpan) dari hari itu. Anda juga dapat menghapus catatan untuk hari lampau yang dipilih."
       },
       "sessionHistory": {
         "title": "Riwayat Sesi",
@@ -200,6 +209,8 @@
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "dictionaryCardTitle": "Kamus Sesi",
     "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda disimpan untuk hari ini di database Firebase Anda, dapat diekspor ke Markdown, dan entri individual dapat dihapus.",
+    "viewPastNotesTitle": "Melihat Catatan Sebelumnya",
+    "viewPastNotesContent": "Di kartu 'Catatan & Konteks Sesi', perluas 'Lihat Catatan Sebelumnya' untuk memilih tanggal dan melihat catatan dari hari itu. Anda juga dapat menghapus catatan untuk hari lampau yang dilihat.",
     "headerToolsTitle": "Alat Header",
     "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒 untuk hari ini), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
@@ -348,6 +359,9 @@
     "firestoreSaveNotesDescription": "Tidak dapat menyimpan catatan ke database.",
     "firestoreSaveDictionaryDescription": "Tidak dapat menyimpan kamus ke database.",
     "firestoreSaveContextDescription": "Tidak dapat menyimpan konteks sesi ke database.",
-    "firestoreSaveLogDescription": "Tidak dapat menyimpan log sesi ke database."
+    "firestoreSaveLogDescription": "Tidak dapat menyimpan log sesi ke database.",
+    "firestoreDeleteTitle": "Kesalahan Menghapus Data",
+    "firestoreDeletePastNotesDescription": "Tidak dapat menghapus catatan sebelumnya dari database."
   }
 }
+
