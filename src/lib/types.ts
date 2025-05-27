@@ -1,6 +1,6 @@
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
-export type BackgroundAnimationType = 'none' | 'gradientFlow' | 'rain' | 'snow' | 'starfield' | 'bubbles';
+export type BackgroundAnimationType = 'none' | 'gradientFlow' | 'rain' | 'snow' | 'starfield' | 'bubbles' | 'fireflies';
 export type SessionType = 'general' | 'work' | 'learning';
 
 export interface Settings {
@@ -40,7 +40,7 @@ export interface SelectOptionWithTranslation {
 export interface SoundscapeOption {
   id: string;
   name: string; // This would ideally be a translation key or handled by i18n
-  type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop';
+  type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace';
   params?: any;
 }
 

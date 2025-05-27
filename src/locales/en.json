@@ -41,7 +41,8 @@
     "tasksTitle": "Today's Tasks",
     "notesTitle": "Session Notes & Context",
     "sessionContextLabel": "Session Context",
-    "sessionContextPlaceholder": "Select session context"
+    "sessionContextPlaceholder": "Select session context",
+    "dictionaryTitle": "Session Dictionary"
   },
   "tasks": {
     "addTaskPlaceholder": "Add a new task...",
@@ -196,6 +197,8 @@
     "pinkNoise": "Pink Noise",
     "brownNoise": "Brown Noise",
     "gentleRain": "Gentle Rain (Simulated)",
+    "oceanWaves": "Ocean Waves (Synth)",
+    "cracklingFireplace": "Crackling Fireplace (Synth)",
     "focusTone": "Focus Tone (440Hz Sine)",
     "deepDrone": "Deep Drone (80Hz Sine)",
     "windyAmbience": "Windy Ambience",
@@ -203,6 +206,7 @@
     "ambientPad": "Ambient Pad",
     "calmingChimes": "Calming Chimes",
     "gentlePianoChord": "Gentle Piano Chord",
+    "simplePianoMelody": "Simple Piano Melody (Synth)",
     "lofiBeat": "Lofi Beat (Synth)",
     "classicalExcerpt": "Classical Snippet (Synth)",
     "dreamyLullaby": "Dreamy Lullaby (Synth)"
@@ -238,5 +242,3 @@
     "exportSuccessfulDescription": "Your dictionary session has been downloaded as a Markdown file."
   }
 }
-
-    

@@ -23,15 +23,17 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volume: -6 } },
   { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volume: -6 } },
   { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volume: -6 } },
-  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volume: -18 } },
+  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volume: -18 } }, // Simulated rain
+  { id: 'oceanWaves', nameKey: 'soundscapes.oceanWaves', type: 'ocean', params: { volumeAdjustment: -12 } },
+  { id: 'cracklingFireplace', nameKey: 'soundscapes.cracklingFireplace', type: 'fireplace', params: { volumeAdjustment: -15 } },
   { id: 'focusTone', nameKey: 'soundscapes.focusTone', type: 'tone', params: { frequency: 440, type: 'sine' } },
   { id: 'deepDrone', nameKey: 'soundscapes.deepDrone', type: 'tone', params: { frequency: 80, type: 'sine', volume: -10 } },
-  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volume: -20 } },
+  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volume: -20 } }, // Simulated wind
   { id: 'alphaBinaural', nameKey: 'soundscapes.alphaBinaural', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volume: -15 } },
   {
     id: 'ambientPad',
     nameKey: 'soundscapes.ambientPad',
-    type: 'tone',
+    type: 'tone', // Uses PolySynth via 'tone' type if notes are provided
     params: {
       notes: ['C3', 'E3', 'G3', 'B4'],
       oscillator: 'fatsine',
@@ -42,7 +44,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   {
     id: 'calmingChimes',
     nameKey: 'soundscapes.calmingChimes',
-    type: 'tone',
+    type: 'tone', // Uses PolySynth
     params: {
       notes: ['C6', 'E6', 'G6', 'A6'],
       oscillator: 'triangle',
@@ -53,12 +55,36 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   {
     id: 'gentlePianoChord',
     nameKey: 'soundscapes.gentlePianoChord',
-    type: 'tone',
+    type: 'tone', // Uses PolySynth
     params: {
       notes: ['C4', 'G4', 'E5'],
       oscillator: 'triangle',
       envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 },
       volume: -16,
+    }
+  },
+  {
+    id: 'simplePianoMelody',
+    nameKey: 'soundscapes.simplePianoMelody',
+    type: 'patternLoop',
+    params: {
+      bpm: 70,
+      volumeAdjustment: -18,
+      instruments: [
+        {
+          name: 'pianoMelody',
+          synthType: 'Synth',
+          synthOptions: { oscillator: { type: 'triangle8' }, envelope: { attack: 0.01, decay: 0.6, sustain: 0.1, release: 1 } },
+          sequence: [
+            { time: '0:0', notes: 'C4', duration: '4n' }, { time: '0:1', notes: 'E4', duration: '4n' },
+            { time: '0:2', notes: 'G4', duration: '4n' }, { time: '0:3', notes: 'C5', duration: '4n' },
+            { time: '1:0', notes: 'B4', duration: '2n' }, { time: '1:2', notes: 'G4', duration: '2n.' },
+            { time: '2:0', notes: 'A4', duration: '4n' }, { time: '2:1', notes: 'F4', duration: '4n' },
+            { time: '2:2', notes: 'D4', duration: '4n' }, { time: '2:3', notes: 'G4', duration: '4n' },
+            { time: '3:0', notes: 'C4', duration: '1m' }
+          ],
+        }
+      ]
     }
   },
   {
@@ -133,16 +159,15 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
     type: 'patternLoop',
     params: {
       bpm: 60,
-      volumeAdjustment: -22, // Softer volume for a lullaby
+      volumeAdjustment: -22, 
       instruments: [
         {
           name: 'melody',
-          synthType: 'Synth', // Simple synth for a clear tone
+          synthType: 'Synth', 
           synthOptions: {
-            oscillator: { type: 'triangle' }, // Soft, pure tone
+            oscillator: { type: 'triangle' }, 
             envelope: { attack: 0.1, decay: 0.5, sustain: 0.3, release: 1 },
           },
-          // Simple pentatonic-like melody
           sequence: [
             { time: '0:0:0', notes: 'C5', duration: '2n' },
             { time: '0:2:0', notes: 'D5', duration: '2n' },
@@ -161,7 +186,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
           synthOptions: {
             oscillator: { type: 'fatsine', count: 3, spread: 40 },
             envelope: { attack: 2, decay: 1, sustain: 1, release: 3 },
-            volume: -6 // Pad slightly quieter than melody
+            volume: -6 
           },
           sequence: [
             { time: '0:0:0', notes: ['C3', 'G3', 'E4'], duration: '1m' },
@@ -171,7 +196,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         }
       ],
       effects: {
-        reverb: { wet: 0.4, decay: 4 } // Add some reverb for dreaminess
+        reverb: { wet: 0.4, decay: 4 } 
       }
     }
   }
@@ -194,4 +219,3 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
 ];
 
 export const APP_NAME = "RS";
-

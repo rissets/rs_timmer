@@ -41,7 +41,8 @@
     "tasksTitle": "Tugas Hari Ini",
     "notesTitle": "Catatan & Konteks Sesi",
     "sessionContextLabel": "Konteks Sesi",
-    "sessionContextPlaceholder": "Pilih konteks sesi"
+    "sessionContextPlaceholder": "Pilih konteks sesi",
+    "dictionaryTitle": "Kamus Sesi"
   },
   "tasks": {
     "addTaskPlaceholder": "Tambah tugas baru...",
@@ -196,6 +197,8 @@
     "pinkNoise": "Pink Noise",
     "brownNoise": "Brown Noise",
     "gentleRain": "Hujan Lembut (Simulasi)",
+    "oceanWaves": "Ombak Laut (Synth)",
+    "cracklingFireplace": "Api Unggun (Synth)",
     "focusTone": "Nada Fokus (440Hz Sinus)",
     "deepDrone": "Drone Dalam (80Hz Sinus)",
     "windyAmbience": "Suasana Berangin",
@@ -203,6 +206,7 @@
     "ambientPad": "Ambient Pad",
     "calmingChimes": "Lonceng Menenangkan",
     "gentlePianoChord": "Akord Piano Lembut",
+    "simplePianoMelody": "Melodi Piano Sederhana (Synth)",
     "lofiBeat": "Lofi Beat (Synth)",
     "classicalExcerpt": "Cuplikan Klasik (Synth)",
     "dreamyLullaby": "Nina Bobo Melamun (Synth)"
@@ -238,5 +242,3 @@
     "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown."
   }
 }
-
-    
