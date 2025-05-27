@@ -204,6 +204,40 @@ body {
     }
   }
 
+  /* Fireflies */
+  .firefly {
+    position: absolute;
+    background-color: hsl(var(--accent) / 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 8px 2px hsl(var(--accent) / 0.5);
+    animation: driftAndFade infinite ease-in-out;
+    will-change: transform, opacity;
+  }
+  .dark .firefly {
+    background-color: hsl(var(--accent) / 0.9);
+    box-shadow: 0 0 10px 3px hsl(var(--accent) / 0.6);
+  }
+
+  @keyframes driftAndFade {
+    0%, 100% {
+      opacity: 0;
+      transform: translate(0, 0) scale(0.5);
+    }
+    25% {
+      opacity: 1;
+      transform: translate(var(--firefly-translateX), var(--firefly-translateY)) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translate(calc(var(--firefly-translateX) * 0.5), calc(var(--firefly-translateY) * 1.5)) scale(0.8);
+    }
+    75% {
+      opacity: 1;
+      transform: translate(calc(var(--firefly-translateX) * 1.2), calc(var(--firefly-translateY) * 0.8)) scale(1);
+    }
+  }
+
+
   /* Mouse Trail Particle */
   .mouse-trail-particle {
     position: fixed; /* Use fixed to follow mouse anywhere on screen */
@@ -242,3 +276,4 @@ body {
     }
   }
 }
+

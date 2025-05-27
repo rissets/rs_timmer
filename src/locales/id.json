@@ -204,7 +204,8 @@
     "calmingChimes": "Lonceng Menenangkan",
     "gentlePianoChord": "Akord Piano Lembut",
     "lofiBeat": "Lofi Beat (Synth)",
-    "classicalExcerpt": "Cuplikan Klasik (Synth)"
+    "classicalExcerpt": "Cuplikan Klasik (Synth)",
+    "dreamyLullaby": "Nina Bobo Melamun (Synth)"
   },
   "backgroundAnimations": {
     "none": "Tidak Ada",
@@ -212,7 +213,8 @@
     "rain": "Efek Hujan",
     "snow": "Efek Salju",
     "starfield": "Efek Langit Berbintang",
-    "bubbles": "Efek Gelembung Mengambang"
+    "bubbles": "Efek Gelembung Mengambang",
+    "fireflies": "Efek Kunang-kunang"
   },
   "chatWidget": {
     "toggleButtonLabel": "Buka Chat AI",

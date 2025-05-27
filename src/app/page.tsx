@@ -33,6 +33,7 @@ import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
 import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
+import FirefliesEffect from "@/components/effects/FirefliesEffect"; // Added
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { SimpleTaskList } from "@/components/simple-task-list";
 import { DictionaryCard } from "@/components/dictionary-card";
@@ -427,6 +428,7 @@ export default function PomodoroPage() {
         {settings.backgroundAnimation === 'snow' && <SnowEffect />}
         {settings.backgroundAnimation === 'starfield' && <StarfieldEffect />}
         {settings.backgroundAnimation === 'bubbles' && <FloatingBubblesEffect />}
+        {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />} 
         
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           {isMobile ? (

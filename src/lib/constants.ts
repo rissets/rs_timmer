@@ -126,6 +126,54 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         reverb: { wet: 0.3, decay: 5 }
       }
     }
+  },
+  {
+    id: 'dreamyLullaby',
+    nameKey: 'soundscapes.dreamyLullaby',
+    type: 'patternLoop',
+    params: {
+      bpm: 60,
+      volumeAdjustment: -22, // Softer volume for a lullaby
+      instruments: [
+        {
+          name: 'melody',
+          synthType: 'Synth', // Simple synth for a clear tone
+          synthOptions: {
+            oscillator: { type: 'triangle' }, // Soft, pure tone
+            envelope: { attack: 0.1, decay: 0.5, sustain: 0.3, release: 1 },
+          },
+          // Simple pentatonic-like melody
+          sequence: [
+            { time: '0:0:0', notes: 'C5', duration: '2n' },
+            { time: '0:2:0', notes: 'D5', duration: '2n' },
+            { time: '1:0:0', notes: 'E5', duration: '1m' },
+            { time: '2:0:0', notes: 'G5', duration: '2n' },
+            { time: '2:2:0', notes: 'A5', duration: '2n' },
+            { time: '3:0:0', notes: 'G5', duration: '1m' },
+            { time: '4:0:0', notes: 'E5', duration: '2n' },
+            { time: '4:2:0', notes: 'D5', duration: '2n' },
+            { time: '5:0:0', notes: 'C5', duration: '1m' },
+          ],
+        },
+        {
+          name: 'pad',
+          synthType: 'PolySynth',
+          synthOptions: {
+            oscillator: { type: 'fatsine', count: 3, spread: 40 },
+            envelope: { attack: 2, decay: 1, sustain: 1, release: 3 },
+            volume: -6 // Pad slightly quieter than melody
+          },
+          sequence: [
+            { time: '0:0:0', notes: ['C3', 'G3', 'E4'], duration: '1m' },
+            { time: '2:0:0', notes: ['F3', 'C4', 'A4'], duration: '1m' },
+            { time: '4:0:0', notes: ['G3', 'D4', 'B4'], duration: '1m' },
+          ]
+        }
+      ],
+      effects: {
+        reverb: { wet: 0.4, decay: 4 } // Add some reverb for dreaminess
+      }
+    }
   }
 ];
 
@@ -136,6 +184,7 @@ export const BACKGROUND_ANIMATION_OPTIONS: SelectOptionWithTranslation[] = [
   { id: 'snow', nameKey: 'backgroundAnimations.snow' },
   { id: 'starfield', nameKey: 'backgroundAnimations.starfield' },
   { id: 'bubbles', nameKey: 'backgroundAnimations.bubbles' },
+  { id: 'fireflies', nameKey: 'backgroundAnimations.fireflies' },
 ];
 
 export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
@@ -145,3 +194,4 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
 ];
 
 export const APP_NAME = "RS";
+

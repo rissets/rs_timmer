@@ -204,7 +204,8 @@
     "calmingChimes": "Calming Chimes",
     "gentlePianoChord": "Gentle Piano Chord",
     "lofiBeat": "Lofi Beat (Synth)",
-    "classicalExcerpt": "Classical Snippet (Synth)"
+    "classicalExcerpt": "Classical Snippet (Synth)",
+    "dreamyLullaby": "Dreamy Lullaby (Synth)"
   },
   "backgroundAnimations": {
     "none": "None",
@@ -212,7 +213,8 @@
     "rain": "Rain Effect",
     "snow": "Snow Effect",
     "starfield": "Starfield Effect",
-    "bubbles": "Floating Bubbles Effect"
+    "bubbles": "Floating Bubbles Effect",
+    "fireflies": "Fireflies Effect"
   },
   "chatWidget": {
     "toggleButtonLabel": "Open AI Chat",
