@@ -51,7 +51,13 @@
     "deleteTask": "Hapus tugas: {{taskText}}"
   },
   "notes": {
-    "textareaPlaceholder": "Tulis tugas, gangguan, atau pemikiran selama sesi Anda..."
+    "textareaPlaceholder": "Tulis tugas, gangguan, atau pemikiran selama sesi Anda...",
+    "currentDayNotesAreaLabel": "Catatan untuk hari ini",
+    "viewPastNotesTitle": "Lihat Catatan Sebelumnya",
+    "pickDate": "Pilih tanggal",
+    "loadingPastNotes": "Memuat catatan...",
+    "noNotesForDate": "Tidak ada catatan ditemukan untuk tanggal yang dipilih.",
+    "errorLoadingNotes": "Kesalahan memuat catatan untuk tanggal yang dipilih."
   },
   "aiSummaryDialog": {
     "title": "Analisis Sesi AI",
@@ -139,11 +145,11 @@
       },
       "tasksAndNotes": {
         "title": "Tugas & Catatan",
-        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul.\\nTugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI. Data ini disimpan secara lokal per hari."
+        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul. Anda juga dapat melihat catatan dari hari-hari sebelumnya menggunakan pemilih tanggal.\\nTugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI. Data ini disimpan per hari di database Firebase Anda."
       },
       "sessionContext": {
         "title": "Konteks Sesi",
-        "content": "Sebelum menganalisis data sesi Anda (catatan, tugas, atau log Pomodoro lengkap), Anda dapat menentukan \"Konteks Sesi\" (misalnya, Kerja, Belajar, Umum).\\nIni membantu AI memberikan umpan balik dan saran yang lebih disesuaikan dengan aktivitas Anda saat ini. Konteks ini juga disimpan secara lokal per hari."
+        "content": "Sebelum menganalisis data sesi Anda (catatan, tugas, atau log Pomodoro lengkap), Anda dapat menentukan \"Konteks Sesi\" (misalnya, Kerja, Belajar, Umum).\\nIni membantu AI memberikan umpan balik dan saran yang lebih disesuaikan dengan aktivitas Anda saat ini. Konteks ini juga disimpan per hari di database Firebase Anda."
       },
       "aiAnalysis": {
         "title": "Analisis Sesi AI",
@@ -155,11 +161,11 @@
       },
       "dictionaryCard": {
         "title": "Kamus Sesi",
-        "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia selama sesi Anda. Definisi ini disimpan secara lokal per hari dan dapat diekspor ke file Markdown."
+        "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia selama sesi Anda. Definisi ini disimpan per hari di database Firebase Anda dan dapat diekspor ke file Markdown. Anda juga dapat menghapus entri dari kamus hari ini."
       },
       "sessionHistory": {
         "title": "Riwayat Sesi",
-        "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai untuk hari ini.\\nIni membantu Anda melacak sesi fokus Anda. Melihat riwayat dari hari-hari sebelumnya adalah fitur yang direncanakan."
+        "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai untuk hari ini dari database Firebase Anda.\\nIni membantu Anda melacak sesi fokus Anda."
       },
       "themeAndAppearance": {
         "title": "Tema & Tampilan",
@@ -180,15 +186,15 @@
     "collapsibleCardsTitle": "Bagian yang Dapat Dilipat",
     "collapsibleCardsContent": "Bagian untuk Tugas, Kamus, dan Catatan di bawah timer dapat diperluas atau dilipat dengan mengklik judulnya.",
     "tasksTitle": "Tugas",
-    "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas dapat disertakan dalam Analisis AI dan disimpan untuk hari ini.",
+    "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas dapat disertakan dalam Analisis AI dan disimpan untuk hari ini di database Firebase Anda.",
     "notesContextTitle": "Catatan & Konteks Sesi",
-    "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan dan konteks disimpan untuk hari ini.",
+    "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan, konteks, dan kemampuan untuk melihat catatan masa lalu disimpan untuk hari ini di database Firebase Anda.",
     "aiAnalysisTitle": "Analisis AI",
     "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan.",
     "chatWidgetTitle": "Asisten Chat AI",
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "dictionaryCardTitle": "Kamus Sesi",
-    "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda disimpan untuk hari ini dan dapat diekspor ke Markdown.",
+    "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda disimpan untuk hari ini di database Firebase Anda, dapat diekspor ke Markdown, dan entri individual dapat dihapus.",
     "headerToolsTitle": "Alat Header",
     "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi (🕒 untuk hari ini), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), dan Ganti Bahasa (🌐) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
@@ -268,7 +274,9 @@
     "errorDefiningDescription": "Tidak dapat mengambil definisi untuk kata tersebut. Silakan coba lagi.",
     "nothingToExport": "Belum ada kata yang didefinisikan dalam sesi ini.",
     "exportSuccessfulTitle": "Ekspor Berhasil",
-    "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown."
+    "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown.",
+    "deleteEntryTooltip": "Hapus entri untuk '{{word}}'",
+    "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus entri kamus ini?"
   },
   "auth": {
     "loginTitle": "Masuk ke {{appName}}",
@@ -322,5 +330,16 @@
       "logoutFailed": "Logout gagal. Silakan coba lagi.",
       "passwordResetFailed": "Gagal mengirim email pengaturan ulang kata sandi. Silakan coba lagi."
     }
+  },
+  "errors": {
+    "firestoreLoadTitle": "Kesalahan Memuat Data",
+    "firestoreLoadDescription": "Tidak dapat memuat data harian dari database. Silakan periksa koneksi Anda atau coba lagi nanti.",
+    "firestoreLoadPastNotesDescription": "Tidak dapat memuat catatan untuk tanggal yang dipilih. Silakan coba lagi.",
+    "firestoreSaveTitle": "Kesalahan Menyimpan Data",
+    "firestoreSaveTasksDescription": "Tidak dapat menyimpan tugas ke database.",
+    "firestoreSaveNotesDescription": "Tidak dapat menyimpan catatan ke database.",
+    "firestoreSaveDictionaryDescription": "Tidak dapat menyimpan kamus ke database.",
+    "firestoreSaveContextDescription": "Tidak dapat menyimpan konteks sesi ke database.",
+    "firestoreSaveLogDescription": "Tidak dapat menyimpan log sesi ke database."
   }
 }

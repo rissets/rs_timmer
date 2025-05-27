@@ -9,20 +9,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import type { DefinedWordEntry } from '@/lib/types';
 import { useLanguageContext } from "@/contexts/language-context";
-import { BookMarked, Brain, Download, Loader2, Languages } from 'lucide-react';
+import { BookMarked, Brain, Download, Loader2, Languages, Trash2 } from 'lucide-react'; // Added Trash2
 
-interface DictionaryCardProps {
+interface DictionaryCardContentProps {
   definedWordsList: DefinedWordEntry[];
   onDefineWord: (word: string) => Promise<void>;
+  onRemoveWord: (wordId: string) => void; // New prop for removing a word
   isDefining: boolean;
 }
 
-// Sub-components for better structure with Accordion
 const DictionaryCardTitle = () => {
   const { t } = useLanguageContext();
   return (
-    // This component is the content for AccordionTrigger.
-    // It should only contain the main title elements.
     <div className="flex items-center">
       <BookMarked className="mr-2 h-5 w-5 text-primary" />
       <span className="text-lg font-semibold leading-none tracking-tight">
@@ -32,7 +30,7 @@ const DictionaryCardTitle = () => {
   );
 };
 
-const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, isDefining }: DictionaryCardProps) => {
+const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, onRemoveWord, isDefining }: DictionaryCardContentProps) => {
   const { t } = useLanguageContext();
   const [wordInput, setWordInput] = useState("");
 
@@ -44,11 +42,7 @@ const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, isDefining 
   };
 
   return (
-    // AccordionContent in page.tsx has className="px-0".
-    // CardContent by default adds p-6 pt-0.
-    // We'll explicitly set padding here for clarity within the accordion structure.
     <CardContent className="px-6 pt-4 pb-6 space-y-4">
-      {/* Description moved here, now part of collapsible content */}
       <p className="text-sm text-muted-foreground -mt-2 mb-2">
         {t('dictionaryCard.description')}
       </p>
@@ -60,7 +54,7 @@ const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, isDefining 
           </Label>
           <div className="flex flex-col sm:flex-row gap-2 mt-1">
             <Input
-              id="word-input-dict" // Changed ID to avoid conflict if another "word-input" exists
+              id="word-input-dict"
               type="text"
               placeholder={t('dictionaryCard.wordInputPlaceholder')}
               value={wordInput}
@@ -89,7 +83,7 @@ const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, isDefining 
           <ScrollArea className="h-[250px] border rounded-md p-3 bg-muted/30">
             <div className="space-y-4">
               {definedWordsList.slice().reverse().map((entry) => (
-                <div key={entry.id} className="p-3 border rounded-md bg-card shadow-sm">
+                <div key={entry.id} className="p-3 border rounded-md bg-card shadow-sm relative group">
                   <h5 className="font-semibold text-primary">{entry.word}</h5>
                   <div className="mt-2">
                     <p className="text-xs font-medium text-muted-foreground">English:</p>
@@ -99,6 +93,15 @@ const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, isDefining 
                     <p className="text-xs font-medium text-muted-foreground">Indonesia:</p>
                     <p className="text-sm whitespace-pre-wrap">{entry.indonesianDefinition}</p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                    onClick={() => onRemoveWord(entry.id)}
+                    title={t('dictionaryCard.deleteEntryTooltip', { word: entry.word })}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive/70 hover:text-destructive" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -112,7 +115,6 @@ const DictionaryCardContentComp = ({ definedWordsList, onDefineWord, isDefining 
 const DictionaryCardFooterComp = ({ onExportMarkdown }: { onExportMarkdown: () => void; }) => {
   const { t } = useLanguageContext();
   return (
-    // CardFooter also needs explicit horizontal padding if AccordionContent is px-0
     <CardFooter className="px-6 pb-6 pt-0">
       <Button variant="outline" onClick={onExportMarkdown} className="w-full">
         <Download className="mr-2 h-4 w-4" />

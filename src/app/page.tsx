@@ -22,6 +22,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useSettingsContext } from "@/contexts/settings-context";
 import { useTimerCore } from "@/hooks/use-timer-core";
 import { useSoundscapePlayer } from "@/hooks/use-soundscape-player";
@@ -46,9 +52,9 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { cn, getCurrentDateString } from '@/lib/utils';
+import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguageContext } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -59,8 +65,9 @@ import {
   saveNotesForDay, loadNotesForDay,
   saveDictionaryForDay, loadDictionaryForDay,
   saveSessionContextForDay, loadSessionContextForDay,
-  saveSessionLogForDay // We will use timer.setSessionLog to update, then this effect will save
+  saveSessionLogForDay
 } from '@/lib/firebase/firestore-service';
+import { format } from 'date-fns';
 
 
 const INTERACTIVE_TOUR_STORAGE_KEY = "rs-timer-interactive-tour-completed";
@@ -79,11 +86,9 @@ export default function PomodoroPage() {
   const [currentNotes, setCurrentNotes] = useState("");
   const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
   const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
-  // Note: sessionLog is managed by useTimerCore, but we'll persist it from here
 
   // Loading states for daily data
   const [isLoadingDailyData, setIsLoadingDailyData] = useState(true);
-
 
   const [aiSummary, setAiSummary] = useState<AiSessionSummary | null>(null);
   const [isAiSummaryOpen, setIsAiSummaryOpen] = useState(false);
@@ -103,24 +108,32 @@ export default function PomodoroPage() {
 
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
 
+  // For viewing past notes
+  const [selectedPastDateForNotes, setSelectedPastDateForNotes] = useState<Date | undefined>();
+  const [pastDateNotes, setPastDateNotes] = useState<string | null>(null);
+  const [isLoadingPastNotes, setIsLoadingPastNotes] = useState(false);
+  const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
+
+
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
     settings: settings,
     isSettingsLoaded: isSettingsLoaded,
   });
 
-  // Effect to update currentDateKey if the day changes
   useEffect(() => {
     const interval = setInterval(() => {
       const newDateKey = getCurrentDateString();
       if (newDateKey !== currentDateKey) {
         setCurrentDateKey(newDateKey);
+        // Reset past notes view when day changes
+        setSelectedPastDateForNotes(undefined);
+        setPastDateNotes(null);
       }
-    }, 60000); // Check every minute
+    }, 60000);
     return () => clearInterval(interval);
   }, [currentDateKey]);
 
-  // Load all daily data from Firestore when date or user changes
   useEffect(() => {
     if (!currentUser || !isSettingsLoaded) return;
 
@@ -132,7 +145,6 @@ export default function PomodoroPage() {
           loadNotesForDay(currentUser.uid, currentDateKey),
           loadDictionaryForDay(currentUser.uid, currentDateKey),
           loadSessionContextForDay(currentUser.uid, currentDateKey),
-          // SessionLog will be loaded by useTimerCore if needed or we manage it separately
         ]);
         setTasks(loadedTasks);
         setCurrentNotes(loadedNotes);
@@ -140,8 +152,7 @@ export default function PomodoroPage() {
         setCurrentSessionType(loadedContext);
       } catch (error) {
         console.error("Error loading daily data from Firestore:", error);
-        toast({ title: "Error", description: "Could not load daily data.", variant: "destructive" });
-        // Reset to defaults if loading fails
+        toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadDescription"), variant: "destructive" });
         setTasks([]);
         setCurrentNotes("");
         setDefinedWordsList([]);
@@ -153,43 +164,37 @@ export default function PomodoroPage() {
     loadData();
   }, [currentDateKey, currentUser, isSettingsLoaded, toast]);
 
-
-  // Save Tasks to Firestore
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return; // Don't save while loading initial data
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
       console.error("Error saving tasks to Firestore:", error);
-      toast({ title: "Save Error", description: "Could not save tasks.", variant: "destructive" });
+      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
     });
-  }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
+  }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  // Save Notes to Firestore
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
       console.error("Error saving notes to Firestore:", error);
-      toast({ title: "Save Error", description: "Could not save notes.", variant: "destructive" });
+      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
     });
-  }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
+  }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  // Save Dictionary to Firestore
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
       console.error("Error saving dictionary to Firestore:", error);
-      toast({ title: "Save Error", description: "Could not save dictionary.", variant: "destructive" });
+      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
     });
-  }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
+  }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  // Save Session Type to Firestore
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
       console.error("Error saving session context to Firestore:", error);
-      toast({ title: "Save Error", description: "Could not save session context.", variant: "destructive" });
+      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveContextDescription"), variant: "destructive" });
     });
-  }, [currentSessionType, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast]);
-
+  }, [currentSessionType, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
   useEffect(() => {
     if (!authLoading && !currentUser && isSettingsLoaded) {
@@ -251,7 +256,6 @@ export default function PomodoroPage() {
       content: <p>{t('interactiveTourDialog.allSetContent')}</p>,
     }
   ], [t]);
-
 
   useEffect(() => {
     if (isSettingsLoaded && currentUser) {
@@ -316,7 +320,6 @@ export default function PomodoroPage() {
     }
   }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
 
-
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
     if (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) {
        if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
@@ -328,30 +331,22 @@ export default function PomodoroPage() {
   const timer = useTimerCore({
     settings,
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: () => { /* Sound controlled by useEffect */ },
-    onTimerPause: () => { /* Sound controlled by useEffect */ },
-    onTimerReset: () => { /* Sound controlled by useEffect */ },
-    onTimerSkip: () => { /* Sound for next interval will be handled by useEffect */ },
+    onTimerStart: () => {},
+    onTimerPause: () => {},
+    onTimerReset: () => {},
+    onTimerSkip: () => {},
     getTranslatedText: t,
   });
 
-  // Save Session History (Pomodoro Logs) to Firestore
   useEffect(() => {
-    if (!currentUser || !isSettingsLoaded || timer.sessionLog.length === 0) {
-      // Only save if there's actual log data to prevent overwriting an empty log
-      // if the component re-renders before timer.sessionLog is populated.
-      return;
-    }
-    // Check if isLoadingDailyData is false to ensure we don't save while initial data is still loading
-    // or if the session log is empty due to a new day or initial load.
+    if (!currentUser || !isSettingsLoaded) return;
     if (!isLoadingDailyData && timer.sessionLog.length > 0) {
       saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
         console.error("Error saving session log to Firestore:", error);
-        toast({ title: "Save Error", description: "Could not save session log.", variant: "destructive" });
+        toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
       });
     }
-  }, [timer.sessionLog, currentDateKey, currentUser, isSettingsLoaded, isLoadingDailyData, toast]);
-
+  }, [timer.sessionLog, currentDateKey, currentUser, isSettingsLoaded, isLoadingDailyData, toast, t]);
 
   const getActiveSoundscapeId = useCallback((currentTimerMode: TimerMode): string | undefined => {
     if (isMuted) return 'none';
@@ -365,7 +360,6 @@ export default function PomodoroPage() {
       stopSound();
       return;
     }
-  
     const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
        playSound(soundId);
@@ -373,10 +367,10 @@ export default function PomodoroPage() {
       stopSound();
     }
   }, [
-    timer.mode, 
-    timer.isRunning, 
-    isSettingsLoaded, 
-    isSoundPlayerReady, 
+    timer.mode,
+    timer.isRunning,
+    isSettingsLoaded,
+    isSoundPlayerReady,
     getActiveSoundscapeId,
     playSound,
     stopSound,
@@ -384,7 +378,6 @@ export default function PomodoroPage() {
     settings.soundscapeWork,
     settings.soundscapeBreak
   ]);
-
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -399,72 +392,27 @@ export default function PomodoroPage() {
 
   const progressPercentage = ((currentModeDuration - timer.timeLeft) / currentModeDuration) * 100;
 
-  const handleToggleMute = () => {
-    setIsMuted(prevMuted => !prevMuted);
-  };
-
-  const handleAddTask = (taskText: string) => {
-    const newTask: Task = { id: Date.now().toString(), text: taskText, completed: false };
-    setTasks(prevTasks => [...prevTasks, newTask]);
-  };
-
-  const handleToggleTask = (taskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      )
-    );
-  };
-
-  const handleRemoveTask = (taskId: string) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
-  };
-
-  const handleClearCompletedTasks = () => {
-    setTasks(prevTasks => prevTasks.filter(task => !task.completed));
-  };
+  const handleToggleMute = () => setIsMuted(prevMuted => !prevMuted);
+  const handleAddTask = (taskText: string) => setTasks(prev => [...prev, { id: Date.now().toString(), text: taskText, completed: false }]);
+  const handleToggleTask = (taskId: string) => setTasks(prev => prev.map(task => task.id === taskId ? { ...task, completed: !task.completed } : task));
+  const handleRemoveTask = (taskId: string) => setTasks(prev => prev.filter(task => task.id !== taskId));
+  const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
 
   const handleSendChatMessage = async () => {
     if (!chatInputValue.trim()) return;
-
-    const newUserMessage: ChatMessage = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: chatInputValue.trim(),
-      timestamp: new Date(),
-    };
+    const newUserMessage: ChatMessage = { id: Date.now().toString(), sender: 'user', text: chatInputValue.trim(), timestamp: new Date() };
     setChatMessages(prev => [...prev, newUserMessage]);
     const currentInput = chatInputValue.trim();
     setChatInputValue("");
     setIsAiChatLoading(true);
-
     try {
-      const genkitHistory: GenkitChatInput['history'] = chatMessages
-        .map(msg => ({
-          role: msg.sender === 'user' ? 'user' : 'model',
-          parts: [{text: msg.text}],
-        }));
-
+      const genkitHistory: GenkitChatInput['history'] = chatMessages.map(msg => ({ role: msg.sender === 'user' ? 'user' : 'model', parts: [{text: msg.text}] }));
       const response = await chatWithAI({userInput: currentInput, history: genkitHistory});
-
-      const aiResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: response.aiResponse,
-        timestamp: new Date(),
-      };
-      setChatMessages(prev => [...prev, aiResponse]);
-
+      setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: 'ai', text: response.aiResponse, timestamp: new Date() }]);
     } catch (error: any) {
       console.error("AI Chat Error:", error);
       toast({ title: t('ai.errorTitle'), description: error.message || t('ai.errorDescription'), variant: "destructive" });
-      const errorResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: t('ai.errorChatResponse') || "Sorry, I encountered an error.",
-        timestamp: new Date(),
-      };
-      setChatMessages(prev => [...prev, errorResponse]);
+      setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: 'ai', text: t('ai.errorChatResponse') || "Sorry, I encountered an error.", timestamp: new Date() }]);
     } finally {
       setIsAiChatLoading(false);
     }
@@ -478,24 +426,19 @@ export default function PomodoroPage() {
         defineWord({ word: word.trim(), targetLanguage: 'English' }),
         defineWord({ word: word.trim(), targetLanguage: 'Indonesian' }),
       ]);
-
-      const newEntry: DefinedWordEntry = {
-        id: Date.now().toString(),
-        word: word.trim(),
-        englishDefinition: engResult.definition,
-        indonesianDefinition: indResult.definition,
-      };
-      setDefinedWordsList(prev => [newEntry, ...prev]);
-    } catch (error: any)
-      {
+      const newEntry: DefinedWordEntry = { id: Date.now().toString(), word: word.trim(), englishDefinition: engResult.definition, indonesianDefinition: indResult.definition };
+      setDefinedWordsList(prev => [newEntry, ...prev.filter(w => w.word.toLowerCase() !== word.trim().toLowerCase())]);
+    } catch (error: any) {
       console.error("Error defining word:", error);
-      toast({
-        title: t('dictionaryCard.errorDefiningTitle'),
-        description: error.message || t('dictionaryCard.errorDefiningDescription'),
-        variant: "destructive",
-      });
+      toast({ title: t('dictionaryCard.errorDefiningTitle'), description: error.message || t('dictionaryCard.errorDefiningDescription'), variant: "destructive" });
     } finally {
       setIsDefiningWord(false);
+    }
+  };
+
+  const handleRemoveDefinedWord = (wordId: string) => {
+    if (confirm(t('dictionaryCard.confirmDeleteEntry'))) {
+       setDefinedWordsList(prev => prev.filter(entry => entry.id !== wordId));
     }
   };
 
@@ -504,12 +447,7 @@ export default function PomodoroPage() {
       toast({ title: t('dictionaryCard.nothingToExport'), variant: 'default' });
       return;
     }
-    const markdownContent = definedWordsList
-      .slice()
-      .reverse()
-      .map(entry => `## ${entry.word}\n\n**English:**\n${entry.englishDefinition}\n\n**Indonesian:**\n${entry.indonesianDefinition}\n\n---\n`)
-      .join('\n');
-
+    const markdownContent = definedWordsList.slice().reverse().map(entry => `## ${entry.word}\n\n**English:**\n${entry.englishDefinition}\n\n**Indonesian:**\n${entry.indonesianDefinition}\n\n---\n`).join('\n');
     const blob = new Blob([markdownContent], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -522,12 +460,34 @@ export default function PomodoroPage() {
     toast({ title: t('dictionaryCard.exportSuccessfulTitle'), description: t('dictionaryCard.exportSuccessfulDescription') });
   };
 
+  const handleFetchPastNotes = async (date: Date | undefined) => {
+    setSelectedPastDateForNotes(date);
+    if (!date || !currentUser) {
+      setPastDateNotes(null);
+      return;
+    }
+    setIsLoadingPastNotes(true);
+    setPastDateNotes(null);
+    try {
+      const dateKey = formatDateToKey(date);
+      const notes = await loadNotesForDay(currentUser.uid, dateKey);
+      setPastDateNotes(notes || t('notes.noNotesForDate')); // Provide feedback if no notes
+    } catch (error) {
+      console.error("Error fetching past notes:", error);
+      toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadPastNotesDescription"), variant: "destructive" });
+      setPastDateNotes(t('notes.errorLoadingNotes'));
+    } finally {
+      setIsLoadingPastNotes(false);
+      setIsPastNotesPopoverOpen(false); // Close popover after selection
+    }
+  };
+
+
   const handleLogout = async () => {
     await logoutUser();
     router.push('/auth/login');
   };
 
-  // Updated loading state to include daily data loading
   if (authLoading || !isSettingsLoaded || (!currentUser && !authLoading) || (currentUser && isLoadingDailyData)) {
      return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
@@ -535,27 +495,22 @@ export default function PomodoroPage() {
       </div>
     );
   }
-  // If not authenticated after loading, AuthContext will redirect, but this is an extra check
   if (!currentUser) {
-      router.push('/auth/login'); // Should be handled by AuthContext, but good for robustness
-      return ( // Return loading or null to prevent rendering the main page
+      router.push('/auth/login');
+      return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
       );
   }
 
-
   const pomodoroDots = Array(settings.longBreakInterval).fill(0).map((_, i) => (
     <span
       key={i}
-      className={`inline-block h-3 w-3 rounded-full mx-1 ${
-        i < timer.currentCyclePomodoros ? 'bg-primary' : 'bg-muted'
-      }`}
+      className={`inline-block h-3 w-3 rounded-full mx-1 ${ i < timer.currentCyclePomodoros ? 'bg-primary' : 'bg-muted' }`}
       title={t('tooltips.pomodoroProgress', { completed: (i+1).toString(), total: settings.longBreakInterval.toString() })}
     ></span>
   ));
-
 
   return (
     <>
@@ -677,6 +632,7 @@ export default function PomodoroPage() {
                   <DictionaryCard.Content
                     definedWordsList={definedWordsList}
                     onDefineWord={handleDefineWord}
+                    onRemoveWord={handleRemoveDefinedWord}
                     isDefining={isDefiningWord}
                   />
                   {definedWordsList.length > 0 && (
@@ -693,9 +649,8 @@ export default function PomodoroPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-0">
-                 <CardContent>
-                    <div className="mb-4">
-                      <div>
+                 <CardContent className="space-y-4">
+                    <div>
                         <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
                         <Select
                             value={currentSessionType}
@@ -710,13 +665,13 @@ export default function PomodoroPage() {
                               ))}
                             </SelectContent>
                           </Select>
-                      </div>
                     </div>
                     <Textarea
                       placeholder={t('notes.textareaPlaceholder')}
                       value={currentNotes}
                       onChange={(e) => setCurrentNotes(e.target.value)}
                       className="min-h-[100px] focus:ring-accent"
+                      aria-label={t('notes.currentDayNotesAreaLabel')}
                     />
                     <Button
                         variant="outline"
@@ -729,45 +684,59 @@ export default function PomodoroPage() {
                         title={t('tooltips.analyzeCurrentData')}
                       >
                         <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
-                      </Button>
+                    </Button>
+
+                    {/* Past Notes Viewer */}
+                    <div className="pt-4 mt-4 border-t">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-md font-medium">{t('notes.viewPastNotesTitle')}</h4>
+                        <Popover open={isPastNotesPopoverOpen} onOpenChange={setIsPastNotesPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-[200px] justify-start text-left font-normal",
+                                !selectedPastDateForNotes && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {selectedPastDateForNotes ? format(selectedPastDateForNotes, "PPP") : <span>{t('notes.pickDate')}</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={selectedPastDateForNotes}
+                              onSelect={handleFetchPastNotes}
+                              disabled={(date) => date > new Date() || date < new Date("2000-01-01")} // Example range
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      {isLoadingPastNotes && (
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>{t('notes.loadingPastNotes')}</span>
+                        </div>
+                      )}
+                      {pastDateNotes !== null && !isLoadingPastNotes && (
+                        <div className="mt-2 p-3 border rounded-md bg-muted/50">
+                           <p className="text-sm whitespace-pre-wrap">{pastDateNotes}</p>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-
         </main>
 
-        <AiSummaryDialog
-          summaryData={aiSummary}
-          isOpen={isAiSummaryOpen}
-          onOpenChange={setIsAiSummaryOpen}
-          isLoading={isAiLoading}
-        />
-
-        <UserGuideDialog
-            isOpen={isUserGuideOpen}
-            onOpenChange={setIsUserGuideOpen}
-        />
-
-        <InteractiveTourDialog
-          isOpen={isInteractiveTourActive}
-          currentStep={currentTourStep}
-          totalSteps={tourSteps.length}
-          stepData={tourSteps[currentTourStep]}
-          onNext={handleNextTourStep}
-          onSkip={handleFinishTour}
-        />
-
+        <AiSummaryDialog summaryData={aiSummary} isOpen={isAiSummaryOpen} onOpenChange={setIsAiSummaryOpen} isLoading={isAiLoading} />
+        <UserGuideDialog isOpen={isUserGuideOpen} onOpenChange={setIsUserGuideOpen} />
+        <InteractiveTourDialog isOpen={isInteractiveTourActive} currentStep={currentTourStep} totalSteps={tourSteps.length} stepData={tourSteps[currentTourStep]} onNext={handleNextTourStep} onSkip={handleFinishTour} />
         <ChatWidgetButton onClick={() => setIsChatOpen(prev => !prev)} />
-        <ChatPopup
-          isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-          messages={chatMessages}
-          inputValue={chatInputValue}
-          onInputChange={setChatInputValue}
-          onSendMessage={handleSendChatMessage}
-          isLoadingAiResponse={isAiChatLoading}
-        />
+        <ChatPopup isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} messages={chatMessages} inputValue={chatInputValue} onInputChange={setChatInputValue} onSendMessage={handleSendChatMessage} isLoadingAiResponse={isAiChatLoading} />
 
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
           <p>{t('footerCopyright', { year: new Date().getFullYear().toString(), appName: APP_NAME })}</p>

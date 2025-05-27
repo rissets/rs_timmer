@@ -10,14 +10,14 @@ export interface Settings {
   longBreakInterval: number;
   autoStartBreaks: boolean;
   autoStartPomodoros: boolean;
-  soundscapeWork?: string; // Can now be an ID of a predefined or user-uploaded sound
-  soundscapeBreak?: string; // Can now be an ID of a predefined or user-uploaded sound
+  soundscapeWork?: string;
+  soundscapeBreak?: string;
   volume: number;
   notificationsEnabled: boolean;
   backgroundAnimation: BackgroundAnimationType;
   mouseTrailEffectEnabled: boolean;
   showCoachMarks: boolean;
-  // customSoundscapeUrls: Record<string, string>; // Removed
+  // customSoundscapeUrls: Record<string, string>; // Removed, will be handled by IndexedDB/Firebase Storage
 }
 
 export interface SessionRecord {
@@ -32,7 +32,7 @@ export interface SessionRecord {
 export interface SoundscapeOption {
   id: string;
   nameKey: string;
-  type: 'noise' | 'tone' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace' | 'userUploaded'; // Added 'userUploaded'
+  type: 'noise' | 'tone' | 'binaural' | 'patternLoop' | 'ocean' | 'fireplace' | 'userUploaded';
   params?: {
     type?: 'white' | 'pink' | 'brown' | 'off' | Tone.ToneOscillatorType;
     frequency?: number;
@@ -47,14 +47,13 @@ export interface SoundscapeOption {
     bpm?: number;
     instruments?: any[];
     effects?: any;
-    // audioSrc?: string; // No longer needed for predefined 'url' types as they are removed
     sequence?: any[];
     subdivision?: string;
     duration?: string;
     loopEnd?: string;
-    // For userUploaded type, actual data will be fetched from IndexedDB
-    indexedDbId?: number; // To reference the sound in IndexedDB
-    mimeType?: string; // To store the MIME type of the uploaded file
+    indexedDbId?: number;
+    mimeType?: string;
+    // audioSrc?: string; // Removed, direct URL input is replaced by uploads
   };
 }
 
@@ -89,7 +88,7 @@ export interface ChatMessage {
 }
 
 export interface DefinedWordEntry {
-  id: string;
+  id: string; // Using string for ID for flexibility, can be Date.now().toString()
   word: string;
   englishDefinition: string;
   indonesianDefinition: string;
