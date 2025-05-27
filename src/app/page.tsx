@@ -37,14 +37,14 @@ import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2,
 import { useToast } from "@/hooks/use-toast";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useLanguageContext } from "@/contexts/language-context"; // Added
-import { LanguageSwitcher } from "@/components/language-switcher"; // Added
+import { useLanguageContext } from "@/contexts/language-context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 const INTERACTIVE_TOUR_STORAGE_KEY = "rs-timer-interactive-tour-completed";
 
 export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
-  const { t } = useLanguageContext(); // Added
+  const { t } = useLanguageContext();
   const { toast } = useToast();
   const [currentNotes, setCurrentNotes] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -59,7 +59,7 @@ export default function PomodoroPage() {
   const [currentTourStep, setCurrentTourStep] = useState(0);
   const isMobile = useIsMobile();
 
-  const tourSteps = React.useMemo(() => [ // Wrapped in useMemo for t
+  const tourSteps = React.useMemo(() => [
     {
       title: t('interactiveTourDialog.welcomeTitle', { appName: APP_NAME }),
       content: <p>{t('interactiveTourDialog.welcomeContent', { appName: APP_NAME })}</p>,
@@ -172,9 +172,9 @@ export default function PomodoroPage() {
     
     const tasksString = tasks.length > 0 
       ? `${t('cards.tasksTitle')}:\n` + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
-      : t('tasks.noTasks'); // Or a more specific "no tasks for this analysis"
+      : t('tasks.noTasks');
 
-    const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : "No pomodoro session log for this analysis."}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || "No additional notes provided."}`;
+    const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : t('ai.noSessionLog')}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || t('ai.noNotes')}`;
 
     try {
       const result = await summarizeSession({ sessionDetails: fullDetails, sessionType });
@@ -186,7 +186,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType, t]);
+  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -212,7 +212,8 @@ export default function PomodoroPage() {
     onTimerReset: () => {
       soundscapePlayer.stopSound();
     },
-    onTimerSkip: () => {}
+    onTimerSkip: () => {},
+    getTranslatedText: t, // Pass the t function here
   });
   
   useEffect(() => {
@@ -289,7 +290,7 @@ export default function PomodoroPage() {
       className={`inline-block h-3 w-3 rounded-full mx-1 ${
         i < timer.currentCyclePomodoros ? 'bg-primary' : 'bg-muted'
       }`}
-      title={t('tooltips.pomodoroProgress', { completed: (i+1).toString(), total: timer.currentCyclePomodoros.toString() })}
+      title={t('tooltips.pomodoroProgress', { completed: (i+1).toString(), total: settings.longBreakInterval.toString() })}
     ></span>
   ));
 
@@ -317,7 +318,7 @@ export default function PomodoroPage() {
             </div>
           )}
           <div className="flex items-center space-x-1">
-            <LanguageSwitcher /> {/* Added */}
+            <LanguageSwitcher />
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
               <SparklesIcon className="h-5 w-5" />
             </Button>
@@ -459,3 +460,5 @@ export default function PomodoroPage() {
     </>
   );
 }
+
+    
