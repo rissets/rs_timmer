@@ -4,6 +4,7 @@
 import type { Settings, TimerMode, SessionRecord } from '@/lib/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import * as Tone from 'tone';
 
 interface UseTimerCoreProps {
   settings: Settings;
