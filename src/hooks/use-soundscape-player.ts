@@ -48,20 +48,20 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
 
     activePatternElements.current.loops.forEach(loop => {
       if (loop && !loop.disposed) {
-        loop.stop(0); // Stop loop at time 0
+        // loop.stop(0); // Transport.stop() should handle this for synced sources
         loop.dispose();
       }
     });
     activePatternElements.current.parts.forEach(part => {
       if (part && !part.disposed) {
-        part.stop(0); // Stop part at time 0
+        // part.stop(0); // Transport.stop() should handle this
         part.clear(); 
         part.dispose();
       }
     });
     activePatternElements.current.sequences.forEach(seq => {
       if (seq && !seq.disposed) {
-        seq.stop(0); // Stop sequence at time 0
+        // seq.stop(0); // Transport.stop() should handle this
         seq.clear(); 
         seq.dispose();
       }
@@ -69,9 +69,9 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
     
     activePatternElements.current.synths.forEach(synth => {
       if (synth && !synth.disposed) {
-        if (typeof (synth as any).releaseAll === 'function') { // For PolySynth
+        if (typeof (synth as any).releaseAll === 'function') { 
           (synth as any).releaseAll();
-        } else if (typeof (synth as any).triggerRelease === 'function') { // For Synth, NoiseSynth etc.
+        } else if (typeof (synth as any).triggerRelease === 'function') { 
           (synth as any).triggerRelease();
         }
         synth.dispose();
@@ -300,12 +300,15 @@ export function useSoundscapePlayer({ volume }: UseSoundscapePlayerProps): Sound
             octaves: 3, 
             filter: { type: "lowpass", rolloff: -12, Q: 1 }
         }).start();
+        
         const lfo = new Tone.LFO({
             frequency: "8m", 
             min: 200,
             max: 1000,
             amplitude: 0.5
-        }).connect(autoFilter.baseFrequency).start(); 
+        });
+        lfo.connect(autoFilter.baseFrequency); // Connect LFO to the AutoFilter's baseFrequency
+        lfo.start(); // Start the LFO
         
         oceanNoise.connect(autoFilter);
         if (activePatternElements.current.masterVolumeNode && !activePatternElements.current.masterVolumeNode.disposed) {
