@@ -163,12 +163,14 @@ export function useTimerCore({
     };
   }, [isRunning, mode, moveToNextMode, onTick]);
 
-  // Update timer when settings change and timer is not running
+  // Update timer timeLeft when settings or mode change, but only if the timer is not currently running.
+  // This ensures that pausing doesn't reset timeLeft to the full duration,
+  // but changing mode or settings while paused/stopped WILL update timeLeft correctly.
   useEffect(() => {
     if (!isRunning) {
       setTimeLeft(getDurationForMode(mode));
     }
-  }, [settings, mode, isRunning, getDurationForMode]);
+  }, [settings, mode, getDurationForMode]); // Key change: removed isRunning from dependency array
 
   const startTimer = () => {
     if (Tone.context.state !== 'running') { // Ensure audio context is started
