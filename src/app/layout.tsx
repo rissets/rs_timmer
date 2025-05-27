@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: APP_NAME,
-  description: 'A Pomodoro timer to enhance focus and productivity, now called Rissets.',
+  title: `${APP_NAME} Timer`,
+  description: `A Pomodoro timer to enhance focus and productivity, now called ${APP_NAME} Timer.`,
 };
 
 export default function RootLayout({

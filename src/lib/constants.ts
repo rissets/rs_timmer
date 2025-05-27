@@ -143,5 +143,6 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; name: string }[] = [
   { id: 'learning', name: 'Learning Focus' },
 ];
 
-export const APP_NAME = "Rissets";
+export const APP_NAME = "RS"; // Changed from "Rissets"
+
 

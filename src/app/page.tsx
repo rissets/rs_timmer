@@ -22,7 +22,7 @@ import { SettingsDialog } from "@/components/settings-dialog";
 import { SessionHistoryDrawer, addSessionToHistory } from "@/components/session-history-drawer";
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
 import { UserGuideDialog } from "@/components/user-guide-dialog";
-import { InteractiveTourDialog } from "@/components/interactive-tour-dialog"; // New Import
+import { InteractiveTourDialog } from "@/components/interactive-tour-dialog";
 import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
@@ -41,7 +41,7 @@ const INTERACTIVE_TOUR_STORAGE_KEY = "zenith-timer-interactive-tour-completed"; 
 
 const tourSteps = [
   {
-    title: `Welcome to ${APP_NAME}!`,
+    title: `Welcome to ${APP_NAME} Timer!`,
     content: <p>Let's take a quick tour of the main features to get you started.</p>,
   },
   {
@@ -182,7 +182,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType]);
+  }, [currentNotes, tasks, toast, currentSessionType]); // Removed sessionLog
 
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
@@ -276,7 +276,7 @@ export default function PomodoroPage() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-        <p className="ml-4 text-lg">Loading {APP_NAME}...</p>
+        <p className="ml-4 text-lg">Loading {APP_NAME} Timer...</p>
       </div>
     );
   }
@@ -308,7 +308,7 @@ export default function PomodoroPage() {
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           <div className="flex items-center space-x-2">
             <LogoIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-semibold animate-title-reveal">Rissets Timer</h1>
+            <h1 className="text-2xl font-semibold animate-title-reveal">RS Timer</h1>
           </div>
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
@@ -446,7 +446,7 @@ export default function PomodoroPage() {
         />
         
         <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
-          <p>&copy; {new Date().getFullYear()} {APP_NAME}. Stay focused!</p>
+          <p>&copy; {new Date().getFullYear()} {APP_NAME} Timer. Stay focused!</p>
         </footer>
       </div>
     </>

@@ -33,7 +33,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       content: (
         <>
           <p className="mb-2">The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.</p>
-          <p className="mb-2">{APP_NAME} helps you implement this technique. Each work interval is a "Pomodoro." After a set number of Pomodoros (usually 4), you take a longer break.</p>
+          <p className="mb-2">{APP_NAME} Timer helps you implement this technique. Each work interval is a "Pomodoro." After a set number of Pomodoros (usually 4), you take a longer break.</p>
           <p>Benefits include improved focus, reduced burnout, and better time estimation.</p>
         </>
       ),
@@ -94,7 +94,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       content: (
         <>
           <p className="mb-2">
-            {APP_NAME} features an AI-powered session analyzer. Click the sparkles icon in the header or the "Analyze Data" button in the notes section.
+            {APP_NAME} Timer features an AI-powered session analyzer. Click the sparkles icon in the header or the "Analyze Data" button in the notes section.
           </p>
           <p className="mb-2">
             The AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.
@@ -129,7 +129,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <BookOpen className="mr-2 h-6 w-6 text-primary" />
-            {APP_NAME} User Guide
+            {APP_NAME} Timer User Guide
           </DialogTitle>
           <DialogDescription>
             Learn how to make the most of your focus sessions.
