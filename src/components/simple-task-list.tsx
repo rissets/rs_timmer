@@ -30,11 +30,13 @@ export function SimpleTaskList({
   const { t } = useLanguageContext();
 
   const handleAddTask = () => {
+ console.log('onAddTask triggered');
     if (newTaskText.trim()) {
       onAddTask(newTaskText.trim());
       setNewTaskText("");
     }
   };
+
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -81,7 +83,9 @@ export function SimpleTaskList({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onRemoveTask(task.id)}
+ onClick={() => {
+ console.log('onRemoveTask triggered for task:', task.id);
+ onRemoveTask(task.id); }}
                     className="h-7 w-7"
                     aria-label={t('tasks.deleteTask', { taskText: task.text })}
                   >
@@ -95,7 +99,9 @@ export function SimpleTaskList({
       </CardContent>
       {tasks.some(task => task.completed) && (
          <CardFooter>
-            <Button variant="outline" onClick={onClearCompletedTasks} className="w-full">
+            <Button variant="outline" onClick={() => {
+ console.log('onClearCompletedTasks triggered');
+ onClearCompletedTasks(); }} className="w-full">
                 {t('buttons.clearCompletedTasks')}
             </Button>
          </CardFooter>

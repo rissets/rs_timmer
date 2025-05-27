@@ -447,25 +447,46 @@ export default function PomodoroPage() {
     }
   };
 
-  const handleRemoveDefinedWord = async (wordId: string) => {
-    const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
-    if (confirm(t('dictionaryCard.confirmDeleteEntry', {word: wordToRemove}))) {
-       const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-       setDefinedWordsList(updatedList);
-       
-       if (currentUser && !isLoadingDailyData && isSettingsLoaded) {
-         try {
-           await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-           toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
-         } catch (error: any) {
-           console.error("Error saving dictionary after deletion:", error);
-           toast({ title: t("errors.firestoreSaveTitle"), description: error.message || t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-         }
-       } else {
-         toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordToRemove }) });
-       }
-    }
-  };
+const handleRemoveDefinedWord = async (wordId: string) => {
+  console.log("[DEBUG] handleRemoveDefinedWord: Called with wordId:", wordId);
+  console.log("[DEBUG] handleRemoveDefinedWord: definedWordsList before filter:", definedWordsList);
+  const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
+
+  let updatedList: DefinedWordEntry[] = [];
+  try {
+    // Filter the list to remove the word
+    updatedList = definedWordsList.filter(entry => entry.id !== wordId);
+    console.log("[DEBUG] handleRemoveDefinedWord: definedWordsList after filter:", updatedList);
+
+    // Optimistically update the UI state
+    setDefinedWordsList(updatedList);
+    console.log("[DEBUG] handleRemoveDefinedWord: UI state updated optimistically.");
+
+  } catch (stateError: any) {
+    console.error("[DEBUG] handleRemoveDefinedWord: Error during state update:", stateError);
+    toast({ title: t("errors.generalErrorTitle"), description: t("errors.generalErrorDescription"), variant: "destructive" });
+    return; // Stop further execution if state update failed
+  }
+
+  // Attempt to save the updated list to Firestore
+  if (currentUser && !isLoadingDailyData && isSettingsLoaded) {
+    try {
+      console.log(`[DEBUG] handleRemoveDefinedWord: Attempting to save dictionary after removing word: ${wordToRemove} (ID: ${wordId})`);
+      console.log("[DEBUG] handleRemoveDefinedWord: Calling saveDictionaryForDay with updatedList:", updatedList);
+      await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
+      console.log("[DEBUG] handleRemoveDefinedWord: saveDictionaryForDay successful.");
+      toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+
+    } catch (firestoreError: any) {
+      console.error("[DEBUG] handleRemoveDefinedWord: Error saving dictionary after deletion:", firestoreError);
+      // Revert the UI state if Firestore save fails? Or just show error? Let's show error for now.
+      toast({ title: t("errors.firestoreSaveTitle"), description: firestoreError.message || t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
+      // Consider reverting state here if necessary
+      // setDefinedWordsList(definedWordsList);
+    } 
+  }
+  console.log("[DEBUG] handleRemoveDefinedWord: Function finished.");
+};
 
   const handleExportMarkdown = () => {
     if (definedWordsList.length === 0) {
@@ -508,25 +529,42 @@ export default function PomodoroPage() {
   };
 
   const handleDeletePastNotes = async () => {
+    console.log("[DEBUG] handleDeletePastNotes: Called.");
     if (!selectedPastDateForNotes || !currentUser) {
+      console.log("[DEBUG] handleDeletePastNotes: No date selected or user not logged in. Stopping.");
       toast({ title: t('notes.errorNoDateSelectedForDelete'), variant: 'destructive' });
       return;
     }
     const dateKeyToDelete = formatDateToKey(selectedPastDateForNotes);
-    if (!confirm(t('notes.confirmDeletePastNotes', { date: dateKeyToDelete }))) {
-      return;
-    }
-    
+    console.log("[DEBUG] handleDeletePastNotes: Date key to delete:", dateKeyToDelete);
+
+    // --- TEMPORARY: Removing confirmation for debugging ---
+    // if (!confirm(t('notes.confirmDeletePastNotes', { date: dateKeyToDelete }))) { /* ... */ }
     setIsDeletingPastNotes(true);
+    console.log("[DEBUG] handleDeletePastNotes: Setting isDeletingPastNotes to true.");
+
     try {
+      console.log(`[DEBUG] handleDeletePastNotes: Attempting to delete notes for date: ${dateKeyToDelete}`);
+      console.log(`Attempting to delete notes for date: ${dateKeyToDelete}`);
+      console.log("[DEBUG] handleDeletePastNotes: Calling deleteNotesForDay...");
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.noNotesForDate')); // Update UI to show notes are gone
+      console.log("[DEBUG] handleDeletePastNotes: deleteNotesForDay successful.");
+
+      // Update UI state after successful deletion
+      setPastDateNotes(t('notes.noNotesForDate')); // Update UI state to show notes are gone
+      console.log("[DEBUG] handleDeletePastNotes: UI state updated to show no notes.");
+
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
+      console.log("[DEBUG] handleDeletePastNotes: Success toast shown.");
+
     } catch (error: any) {
-      console.error("Error deleting past notes:", error);
+      console.error("[DEBUG] handleDeletePastNotes: Error deleting past notes:", error);
       toast({ title: t('errors.firestoreDeleteTitle'), description: error.message || t('errors.firestoreDeletePastNotesDescription'), variant: "destructive" });
+      console.log("[DEBUG] handleDeletePastNotes: Error toast shown.");
     } finally {
       setIsDeletingPastNotes(false);
+      console.log("[DEBUG] handleDeletePastNotes: Setting isDeletingPastNotes to false.");
+      console.log("[DEBUG] handleDeletePastNotes: Function finished.");
     }
   };
 

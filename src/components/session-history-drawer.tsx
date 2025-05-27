@@ -61,6 +61,7 @@ export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryD
   }, [isOpen, userId, fetchHistory]); // fetchHistory is now stable
 
   const clearTodaysHistory = async () => {
+    console.log("clearTodaysHistory triggered");
     if (!userId) return;
     if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) return;
     try {
