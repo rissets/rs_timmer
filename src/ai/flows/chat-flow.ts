@@ -10,8 +10,9 @@
  */
 
 import {ai} from '@/ai/genkit';
-// import {generate} from 'genkit/ai'; // Removed incorrect import
 import {z} from 'genkit';
+import type { MessageData, Part } from 'genkit/ai';
+
 
 // Define the structure for individual history messages
 const HistoryMessageSchema = z.object({
@@ -51,22 +52,24 @@ If asked about a feature RS Timer doesn't have, politely state that and perhaps 
 Do not provide overly long responses. Aim for 1-3 helpful sentences.
 Current date: ${new Date().toLocaleDateString()}`;
 
-    const response = await ai.generate({ // Changed to ai.generate
+    // Ensure history format matches Genkit's MessageData[]
+    // The input 'history' (from ChatInputSchema) is already compatible.
+    const genkitHistory: MessageData[] | undefined = history?.map(h => ({
+      role: h.role,
+      parts: h.parts.map(p => ({ text: p.text })) as Part[], // Cast to Part[]
+    }));
+
+    const response = await ai.generate({
       model: ai.model, // Uses the default model configured in genkit.ts
-      prompt: [
-        {role: 'user', parts: [{text: systemInstruction}]}, // System-like instruction as a user message
-        ...(history || []).map(h => ({ // Ensure history is mapped correctly
-            role: h.role,
-            parts: h.parts.map(p => ({text: p.text}))
-        })),
-        {role: 'user', parts: [{text: userInput}]},
-      ],
+      system: systemInstruction,
+      history: genkitHistory,
+      prompt: userInput, // Current user input as a string
       config: {
         // You can add specific config for the model if needed, e.g., temperature
       },
     });
 
-    return {aiResponse: response.text || "I'm sorry, I couldn't generate a response right now."}; // Changed to response.text
+    return {aiResponse: response.text || "I'm sorry, I couldn't generate a response right now."};
   }
 );
 
