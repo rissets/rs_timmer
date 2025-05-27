@@ -308,7 +308,7 @@ export default function PomodoroPage() {
         <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
           <div className="flex items-center space-x-2">
             <LogoIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-semibold animate-title-reveal">{APP_NAME}</h1>
+            <h1 className="text-2xl font-semibold animate-title-reveal">Rissets Timer</h1>
           </div>
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title="Get AI Session Summary (if data available)">
