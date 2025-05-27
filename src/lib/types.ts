@@ -31,7 +31,7 @@ export interface SessionRecord {
 export interface SoundscapeOption {
   id: string;
   name: string;
-  type: 'noise' | 'tone' | 'file' | 'binaural';
+  type: 'noise' | 'tone' | 'file' | 'binaural' | 'patternLoop';
   params?: any;
 }
 
@@ -55,3 +55,4 @@ export interface SummarizeSessionInput {
   sessionDetails: string;
   sessionType?: SessionType;
 }
+
