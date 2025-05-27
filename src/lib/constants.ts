@@ -20,47 +20,58 @@ export const DEFAULT_SETTINGS: Settings = {
 // Note: 'name' properties are now translation keys
 export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
   { id: 'none', nameKey: 'soundscapes.none', type: 'noise', params: { type: 'off' } },
-  { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volume: -6 } },
-  { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volume: -6 } },
-  { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volume: -6 } },
-  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volume: -18 } }, // Simulated rain
+  { id: 'whiteNoise', nameKey: 'soundscapes.whiteNoise', type: 'noise', params: { type: 'white', volumeAdjustment: -6 } },
+  { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volumeAdjustment: -6 } },
+  { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volumeAdjustment: -6 } },
+  { id: 'gentleRain', nameKey: 'soundscapes.gentleRain', type: 'noise', params: { type: 'pink', volumeAdjustment: -18 } }, // Simulated rain
   { id: 'oceanWaves', nameKey: 'soundscapes.oceanWaves', type: 'ocean', params: { volumeAdjustment: -12 } },
-  { id: 'cracklingFireplace', nameKey: 'soundscapes.cracklingFireplace', type: 'fireplace', params: { volumeAdjustment: -15 } },
+  { 
+    id: 'cracklingFireplace', 
+    nameKey: 'soundscapes.cracklingFireplace', 
+    type: 'fireplace', 
+    params: { 
+      volumeAdjustment: -15,
+      synthOptions: { // Envelope for individual crackles
+        noise: { type: 'pink' }, // Pink noise often sounds more natural for crackles
+        envelope: { attack: 0.001, decay: 0.015, sustain: 0, release: 0.02 } // Very short
+      }
+    } 
+  },
   { id: 'focusTone', nameKey: 'soundscapes.focusTone', type: 'tone', params: { frequency: 440, type: 'sine' } },
-  { id: 'deepDrone', nameKey: 'soundscapes.deepDrone', type: 'tone', params: { frequency: 80, type: 'sine', volume: -10 } },
-  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volume: -20 } }, // Simulated wind
-  { id: 'alphaBinaural', nameKey: 'soundscapes.alphaBinaural', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volume: -15 } },
+  { id: 'deepDrone', nameKey: 'soundscapes.deepDrone', type: 'tone', params: { frequency: 80, type: 'sine', volumeAdjustment: -10 } },
+  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volumeAdjustment: -20 } }, // Simulated wind
+  { id: 'alphaBinaural', nameKey: 'soundscapes.alphaBinaural', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volumeAdjustment: -15 } },
   {
     id: 'ambientPad',
     nameKey: 'soundscapes.ambientPad',
-    type: 'tone', // Uses PolySynth via 'tone' type if notes are provided
+    type: 'tone', 
     params: {
       notes: ['C3', 'E3', 'G3', 'B4'],
       oscillator: 'fatsine',
       envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 },
-      volume: -20,
+      volumeAdjustment: -20,
     }
   },
   {
     id: 'calmingChimes',
     nameKey: 'soundscapes.calmingChimes',
-    type: 'tone', // Uses PolySynth
+    type: 'tone', 
     params: {
       notes: ['C6', 'E6', 'G6', 'A6'],
       oscillator: 'triangle',
       envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 },
-      volume: -18,
+      volumeAdjustment: -18,
     }
   },
   {
     id: 'gentlePianoChord',
     nameKey: 'soundscapes.gentlePianoChord',
-    type: 'tone', // Uses PolySynth
+    type: 'tone', 
     params: {
       notes: ['C4', 'G4', 'E5'],
-      oscillator: 'triangle',
+      oscillator: 'triangle', // Simplification for piano-like
       envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 },
-      volume: -16,
+      volumeAdjustment: -16,
     }
   },
   {
@@ -118,7 +129,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
         {
           name: 'hihat',
           synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 },
+          synthOptions: { noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, // volume relative to other instruments in pattern
           pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'],
           subdivision: '8n',
         }
@@ -186,7 +197,7 @@ export const SOUNDSCAPE_OPTIONS: SelectOptionWithTranslation[] = [
           synthOptions: {
             oscillator: { type: 'fatsine', count: 3, spread: 40 },
             envelope: { attack: 2, decay: 1, sustain: 1, release: 3 },
-            volume: -6 
+            volume: -6 // volume relative to other instruments in pattern
           },
           sequence: [
             { time: '0:0:0', notes: ['C3', 'G3', 'E4'], duration: '1m' },
