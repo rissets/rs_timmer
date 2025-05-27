@@ -64,8 +64,8 @@ export function useTimerCore({
   }, [requestNotificationPermission]);
 
   const sendNotification = useCallback((title: string, body: string) => {
-    if (settings.notificationsEnabled && Notification.permission === 'granted') {
-      new Notification(title, { body, icon: '/zenith-icon.png' }); // Placeholder icon
+    if (settings.notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: 'https://placehold.co/192x192.png' });
     }
   }, [settings.notificationsEnabled]);
 
@@ -119,14 +119,14 @@ export function useTimerCore({
     setMode(nextMode);
     setTimeLeft(getDurationForMode(nextMode));
     setCurrentCyclePomodoros(completedPomodorosUpdate);
-    onIntervalEnd(mode, completedPomodorosUpdate, sessionLog); // Pass sessionLog before it's updated by the next logSession
+    onIntervalEnd(mode, completedPomodorosUpdate, sessionLog); 
 
     const notificationTitle = mode === 'work' ? 'Work session ended!' : 'Break time is over!';
     const notificationBody = `Time for ${nextMode === 'work' ? 'work' : nextMode === 'shortBreak' ? 'a short break' : 'a long break'}.`;
     sendNotification(notificationTitle, notificationBody);
 
     if ((mode === 'work' && settings.autoStartBreaks) || (mode !== 'work' && settings.autoStartPomodoros)) {
-        setIsRunning(true); // Auto start next
+        setIsRunning(true); 
     } else {
         setIsRunning(false);
     }
@@ -163,17 +163,14 @@ export function useTimerCore({
     };
   }, [isRunning, mode, moveToNextMode, onTick]);
 
-  // Update timer timeLeft when settings or mode change, but only if the timer is not currently running.
-  // This ensures that pausing doesn't reset timeLeft to the full duration,
-  // but changing mode or settings while paused/stopped WILL update timeLeft correctly.
   useEffect(() => {
     if (!isRunning) {
       setTimeLeft(getDurationForMode(mode));
     }
-  }, [settings, mode, getDurationForMode]); // Key change: removed isRunning from dependency array
+  }, [settings, mode, getDurationForMode]);
 
   const startTimer = () => {
-    if (Tone.context.state !== 'running') { // Ensure audio context is started
+    if (Tone.context.state !== 'running') { 
       Tone.start().then(() => {
          console.log("AudioContext started by timer start.");
       });
@@ -192,15 +189,15 @@ export function useTimerCore({
     const nextMode = switchToWork ? 'work' : mode;
     setMode(nextMode);
     setTimeLeft(getDurationForMode(nextMode));
-    if (switchToWork) setCurrentCyclePomodoros(0); // Reset cycle if forced to work
+    if (switchToWork) setCurrentCyclePomodoros(0); 
     if (onTimerReset) onTimerReset(nextMode);
   };
 
   const skipTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     const previousMode = mode;
-    moveToNextMode(true); // true indicates skipped
-    if (onTimerSkip) onTimerSkip(previousMode, mode); // mode is now the nextMode
+    moveToNextMode(true); 
+    if (onTimerSkip) onTimerSkip(previousMode, mode); 
   };
 
   return {
