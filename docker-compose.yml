@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Map host port 3000 to container port 3000
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # Add any other necessary runtime environment variables here.
+      # For example, for Genkit and Google AI:
+      # GOOGLE_API_KEY: "your_actual_google_api_key_here"
+      # GENKIT_ENV: "production" # If Genkit uses such a variable
+
+      # Example for NextAuth.js if you were using it:
+      # NEXTAUTH_URL: "http://localhost:3000" # Or your production domain
+      # NEXTAUTH_SECRET: "your_nextauth_secret_here"
+    # volumes:
+      # If you have data that needs to persist outside the container's lifecycle,
+      # you can define volumes here. For a typical Next.js frontend, this is often not needed
+      # unless you are handling file uploads directly to the server's filesystem (not recommended for scalable apps).
+      # - ./uploads:/app/uploads # Example volume mount

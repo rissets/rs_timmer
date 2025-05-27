@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# Node modules (builder stage will install its own)
+node_modules
+
+# IDE / Editor specific
+.vscode
+*.swp
+*.swo
+
+# Next.js build artifacts (builder stage will create its own)
+.next
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local environment files (secrets should be injected at runtime, not built into image)
+# .env is empty in this project, but good practice.
+# .env*.local
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Test reports or coverage
+coverage
+.nyc_output
+
+# Docker compose file itself is not needed in the image
+docker-compose.yml
