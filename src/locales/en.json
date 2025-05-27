@@ -70,6 +70,11 @@
   "settingsDialog": {
     "title": "Timer Settings",
     "description": "Adjust your Pomodoro timer settings and preferences.",
+    "tabs": {
+      "timer": "Timer",
+      "sound": "Sound & Soundscapes",
+      "appearance": "Appearance"
+    },
     "showInitialGuide": "Show Initial Guide",
     "showInitialGuideDescription": "Display a helpful guided tour on first visit or if not completed.",
     "workMinutes": "Work (min)",
@@ -216,9 +221,9 @@
     "whiteNoise": "White Noise",
     "pinkNoise": "Pink Noise",
     "brownNoise": "Brown Noise",
-    "gentleRain": "Gentle Rain (Simulated)",
-    "oceanWaves": "Ocean Waves (Synth)",
-    "cracklingFireplace": "Crackling Fireplace (Synth)",
+    "gentleRainSimulated": "Gentle Rain (Simulated)",
+    "oceanWavesSynth": "Ocean Waves (Synth)",
+    "cracklingFireplaceSynth": "Crackling Fireplace (Synth)",
     "focusTone": "Focus Tone (440Hz Sine)",
     "deepDrone": "Deep Drone (80Hz Sine)",
     "windyAmbience": "Windy Ambience",
@@ -226,7 +231,7 @@
     "ambientPad": "Ambient Pad",
     "calmingChimes": "Calming Chimes",
     "gentlePianoChord": "Gentle Piano Chord",
-    "simplePianoMelody": "Simple Piano Melody (Synth)",
+    "simplePianoMelodySynth": "Simple Piano Melody (Synth)",
     "lofiBeatSynth": "Lofi Beat (Synth)",
     "classicalExcerptSynth": "Classical Snippet (Synth)",
     "dreamyLullabySynth": "Dreamy Lullaby (Synth)"
@@ -315,3 +320,5 @@
     }
   }
 }
+
+    

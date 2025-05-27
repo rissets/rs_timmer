@@ -70,6 +70,11 @@
   "settingsDialog": {
     "title": "Pengaturan Timer",
     "description": "Sesuaikan pengaturan dan preferensi timer Pomodoro Anda.",
+    "tabs": {
+      "timer": "Timer",
+      "sound": "Suara & Suara Latar",
+      "appearance": "Tampilan"
+    },
     "showInitialGuide": "Tampilkan Panduan Awal",
     "showInitialGuideDescription": "Tampilkan tur panduan yang membantu pada kunjungan pertama atau jika belum selesai.",
     "workMinutes": "Kerja (mnt)",
@@ -216,9 +221,9 @@
     "whiteNoise": "White Noise",
     "pinkNoise": "Pink Noise",
     "brownNoise": "Brown Noise",
-    "gentleRain": "Hujan Lembut (Simulasi)",
-    "oceanWaves": "Ombak Laut (Synth)",
-    "cracklingFireplace": "Api Unggun (Synth)",
+    "gentleRainSimulated": "Hujan Lembut (Simulasi)",
+    "oceanWavesSynth": "Ombak Laut (Synth)",
+    "cracklingFireplaceSynth": "Api Unggun (Synth)",
     "focusTone": "Nada Fokus (440Hz Sinus)",
     "deepDrone": "Drone Dalam (80Hz Sinus)",
     "windyAmbience": "Suasana Berangin",
@@ -226,7 +231,7 @@
     "ambientPad": "Ambient Pad",
     "calmingChimes": "Lonceng Menenangkan",
     "gentlePianoChord": "Akord Piano Lembut",
-    "simplePianoMelody": "Melodi Piano Sederhana (Synth)",
+    "simplePianoMelodySynth": "Melodi Piano Sederhana (Synth)",
     "lofiBeatSynth": "Lofi Beat (Synth)",
     "classicalExcerptSynth": "Cuplikan Klasik (Synth)",
     "dreamyLullabySynth": "Nina Bobo Melamun (Synth)"
@@ -315,3 +320,5 @@
     }
   }
 }
+
+    
