@@ -9,13 +9,12 @@ export const DEFAULT_SETTINGS: Settings = {
   autoStartBreaks: true,
   autoStartPomodoros: true,
   soundscapeWork: 'whiteNoise',
-  soundscapeBreak: 'gentleRain',
+  soundscapeBreak: 'gentleRainSimulated', // Renamed for clarity
   volume: 0.5,
   notificationsEnabled: true,
   backgroundAnimation: 'gradientFlow',
   mouseTrailEffectEnabled: false,
   showCoachMarks: true,
-  // customSoundscapeUrls: {}, // Removed
 };
 
 // Note: 'name' properties are now translation keys
@@ -25,8 +24,8 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   { id: 'pinkNoise', nameKey: 'soundscapes.pinkNoise', type: 'noise', params: { type: 'pink', volumeAdjustment: -6 } },
   { id: 'brownNoise', nameKey: 'soundscapes.brownNoise', type: 'noise', params: { type: 'brown', volumeAdjustment: -6 } },
   { 
-    id: 'gentleRain', 
-    nameKey: 'soundscapes.gentleRain', 
+    id: 'gentleRainSimulated', 
+    nameKey: 'soundscapes.gentleRainSimulated', 
     type: 'noise', 
     params: { 
       type: 'pink', 
@@ -34,42 +33,79 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
     } 
   },
   { 
-    id: 'oceanWaves', 
-    nameKey: 'soundscapes.oceanWaves', 
+    id: 'oceanWavesSynth', 
+    nameKey: 'soundscapes.oceanWavesSynth', 
     type: 'ocean', 
     params: { 
       volumeAdjustment: -12,
-      autoFilter: {
-        frequency: "2m",
-        baseFrequency: 200,
-        octaves: 4,
+      autoFilter: { // Parameters for the AutoFilter to simulate waves
+        frequency: "2m", // Speed of the LFO controlling the filter
+        baseFrequency: 200, // Center frequency of the filter
+        octaves: 4, // Range of the filter sweep
         filter: { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 },
       }
     } 
   },
   { 
-    id: 'cracklingFireplace', 
-    nameKey: 'soundscapes.cracklingFireplace', 
+    id: 'cracklingFireplaceSynth', 
+    nameKey: 'soundscapes.cracklingFireplaceSynth', 
     type: 'fireplace', 
     params: { 
       volumeAdjustment: -15,
-      synthOptions: { 
+      synthOptions: { // Parameters for the NoiseSynth
         noise: { type: 'pink' as const }, 
         envelope: { attack: 0.001, decay: 0.015, sustain: 0, release: 0.02 } 
       }
     } 
   },
-  { id: 'focusTone', nameKey: 'soundscapes.focusTone', type: 'tone', params: { frequency: 440, type: 'sine' } },
-  { id: 'deepDrone', nameKey: 'soundscapes.deepDrone', type: 'tone', params: { frequency: 80, type: 'sine', volumeAdjustment: -10 } },
-  { id: 'windyAmbience', nameKey: 'soundscapes.windyAmbience', type: 'noise', params: { type: 'pink', volumeAdjustment: -20 } },
-  { id: 'alphaBinaural', nameKey: 'soundscapes.alphaBinaural', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volumeAdjustment: -15 } },
+  { 
+    id: 'focusTone', 
+    nameKey: 'soundscapes.focusTone', 
+    type: 'tone', 
+    params: { 
+      frequency: 440, 
+      type: 'sine',
+      envelope: { attack: 0.005, decay: 0.1, sustain: 1, release: 0.5 } // Sustaining envelope
+    } 
+  },
+  { 
+    id: 'deepDrone', 
+    nameKey: 'soundscapes.deepDrone', 
+    type: 'tone', 
+    params: { 
+      frequency: 80, 
+      type: 'sine', 
+      volumeAdjustment: -10,
+      envelope: { attack: 0.5, decay: 0.1, sustain: 1, release: 1 } // Sustaining envelope
+    } 
+  },
+  { 
+    id: 'windyAmbience', 
+    nameKey: 'soundscapes.windyAmbience', 
+    type: 'noise', 
+    params: { 
+      type: 'pink', 
+      volumeAdjustment: -20 
+    } 
+  },
+  { 
+    id: 'alphaBinaural', 
+    nameKey: 'soundscapes.alphaBinaural', 
+    type: 'binaural', 
+    params: { 
+      baseFrequency: 100, 
+      beatFrequency: 8, 
+      volumeAdjustment: -15,
+      // Envelope is defined in the binaural setup in useSoundscapePlayer to ensure sustain
+    } 
+  },
   {
     id: 'ambientPad',
     nameKey: 'soundscapes.ambientPad',
-    type: 'tone', 
+    type: 'tone', // Will use PolySynth due to 'notes'
     params: {
       notes: ['C3', 'E3', 'G3', 'B4'],
-      oscillator: { type: 'fatsine' as const },
+      oscillator: { type: 'fatsine' as const }, // Use 'fatsine' for a richer pad sound
       envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 },
       volumeAdjustment: -20,
     }
@@ -77,28 +113,28 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   {
     id: 'calmingChimes',
     nameKey: 'soundscapes.calmingChimes',
-    type: 'tone', 
+    type: 'tone', // Will use PolySynth due to 'notes'
     params: {
-      notes: ['C6', 'E6', 'G6', 'A6'],
-      oscillator: { type: 'triangle' as const },
-      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 },
+      notes: ['C6', 'E6', 'G6', 'A6'], // Higher notes for chime-like quality
+      oscillator: { type: 'triangle' as const }, // Triangle wave is often good for bell/chime sounds
+      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 }, // Short sustain, long release
       volumeAdjustment: -18,
     }
   },
   {
-    id: 'gentlePianoChord',
+    id: 'gentlePianoChord', 
     nameKey: 'soundscapes.gentlePianoChord',
     type: 'tone', 
     params: {
-      notes: ['C4', 'G4', 'E5'],
-      oscillator: { type: 'triangle' as const },
+      notes: ['C4', 'G4', 'E5'], 
+      oscillator: { type: 'triangle' as const }, 
       envelope: { attack: 0.02, decay: 1, sustain: 0.3, release: 1.5 },
       volumeAdjustment: -16,
     }
   },
   {
-    id: 'simplePianoMelody',
-    nameKey: 'soundscapes.simplePianoMelody',
+    id: 'simplePianoMelodySynth', 
+    nameKey: 'soundscapes.simplePianoMelodySynth',
     type: 'patternLoop',
     params: {
       bpm: 70,
@@ -106,22 +142,22 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
       instruments: [
         {
           name: 'pianoMelody',
-          synthType: 'Synth',
+          synthType: 'Synth', 
           synthOptions: { oscillator: { type: 'triangle8' as const }, envelope: { attack: 0.01, decay: 0.6, sustain: 0.1, release: 1 } },
-          sequence: [
+          sequence: [ 
             { time: '0:0', notes: 'C4', duration: '4n' }, { time: '0:1', notes: 'E4', duration: '4n' },
             { time: '0:2', notes: 'G4', duration: '4n' }, { time: '0:3', notes: 'C5', duration: '4n' },
-            { time: '1:0', notes: 'B4', duration: '2n' }, { time: '1:2', notes: 'G4', duration: '2n.' },
+            { time: '1:0', notes: 'B4', duration: '2n' }, { time: '1:2', notes: 'G4', duration: '2n.' }, 
             { time: '2:0', notes: 'A4', duration: '4n' }, { time: '2:1', notes: 'F4', duration: '4n' },
             { time: '2:2', notes: 'D4', duration: '4n' }, { time: '2:3', notes: 'G4', duration: '4n' },
-            { time: '3:0', notes: 'C4', duration: '1m' }
+            { time: '3:0', notes: 'C4', duration: '1m' } 
           ],
         }
       ]
     }
   },
   {
-    id: 'lofiBeatSynth',
+    id: 'lofiBeatSynth', 
     nameKey: 'soundscapes.lofiBeatSynth',
     type: 'patternLoop',
     params: {
@@ -132,27 +168,30 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
           name: 'chords',
           synthType: 'PolySynth',
           synthOptions: { oscillator: { type: 'fmsquare' as const }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.3, release: 1 } },
-          sequence: [ { time: '0:0', notes: ['A#2', 'D3', 'F3', 'G#3'], duration: '1m' }, { time: '1:0', notes: ['G2', 'C3', 'D#3', 'F3'], duration: '1m' } ],
+          sequence: [ 
+            { time: '0:0', notes: ['A#2', 'D3', 'F3', 'G#3'], duration: '1m' }, 
+            { time: '1:0', notes: ['G2', 'C3', 'D#3', 'F3'], duration: '1m' }  
+          ],
         },
         {
           name: 'kick',
-          synthType: 'MembraneSynth',
+          synthType: 'MembraneSynth', 
           synthOptions: { octaves: 4, pitchDecay: 0.1, envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.2 } },
-          pattern: ['C1', null, 'C1', null, 'C1', 'C1', null, 'C1'],
+          pattern: ['C1', null, 'C1', null, 'C1', 'C1', null, 'C1'], 
           subdivision: '8n',
         },
         {
           name: 'snare',
-          synthType: 'NoiseSynth',
+          synthType: 'NoiseSynth', 
           synthOptions: { noise: { type: 'pink' as const }, envelope: { attack: 0.005, decay: 0.15, sustain: 0, release: 0.1 } },
-          pattern: [null, null, 'C2', null, null, null, 'C2', null],
+          pattern: [null, null, 'C2', null, null, null, 'C2', null], 
           subdivision: '8n',
         },
         {
           name: 'hihat',
           synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'white' as const }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 },
-          pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'],
+          synthOptions: { noise: { type: 'white' as const }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, 
+          pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'], 
           subdivision: '8n',
         }
       ],
@@ -170,19 +209,19 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
           name: 'stringsPad',
           synthType: 'PolySynth',
           synthOptions: {
-            oscillator: { type: 'fatsawtooth' as const, count: 3, spread: 30 },
-            envelope: { attack: 1.5, decay: 0.5, sustain: 1, release: 2.5 }
+            oscillator: { type: 'fatsawtooth' as const, count: 3, spread: 30 }, 
+            envelope: { attack: 1.5, decay: 0.5, sustain: 1, release: 2.5 } 
           },
-          sequence: [
-            { time: '0:0', notes: ['C3', 'E3', 'G3'], duration: '2m' },
-            { time: '2:0', notes: ['A2', 'C3', 'E3'], duration: '2m' },
-            { time: '4:0', notes: ['F2', 'A2', 'C3'], duration: '2m' },
-            { time: '6:0', notes: ['G2', 'B2', 'D3'], duration: '2m' },
+          sequence: [ 
+            { time: '0:0', notes: ['C3', 'E3', 'G3'], duration: '2m' }, 
+            { time: '2:0', notes: ['A2', 'C3', 'E3'], duration: '2m' }, 
+            { time: '4:0', notes: ['F2', 'A2', 'C3'], duration: '2m' }, 
+            { time: '6:0', notes: ['G2', 'B2', 'D3'], duration: '2m' }, 
           ]
         }
       ],
-      effects: {
-        reverb: { wet: 0.3, decay: 5 }
+      effects: { 
+        reverb: { wet: 0.3, decay: 5 } 
       }
     }
   },
@@ -191,7 +230,7 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
     nameKey: 'soundscapes.dreamyLullabySynth',
     type: 'patternLoop',
     params: {
-      bpm: 60,
+      bpm: 60, 
       volumeAdjustment: -22, 
       instruments: [
         {
@@ -201,7 +240,7 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
             oscillator: { type: 'triangle' as const }, 
             envelope: { attack: 0.1, decay: 0.5, sustain: 0.3, release: 1 },
           },
-          sequence: [
+          sequence: [ 
             { time: '0:0:0', notes: 'C5', duration: '2n' },
             { time: '0:2:0', notes: 'D5', duration: '2n' },
             { time: '1:0:0', notes: 'E5', duration: '1m' },
@@ -217,11 +256,11 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
           name: 'pad',
           synthType: 'PolySynth',
           synthOptions: {
-            oscillator: { type: 'fatsine' as const, count: 3, spread: 40 },
-            envelope: { attack: 2, decay: 1, sustain: 1, release: 3 },
-            volume: -6
+            oscillator: { type: 'fatsine' as const, count: 3, spread: 40 }, 
+            envelope: { attack: 2, decay: 1, sustain: 1, release: 3 }, 
+            volume: -6 
           },
-          sequence: [
+          sequence: [ 
             { time: '0:0:0', notes: ['C3', 'G3', 'E4'], duration: '1m' },
             { time: '2:0:0', notes: ['F3', 'C4', 'A4'], duration: '1m' },
             { time: '4:0:0', notes: ['G3', 'D4', 'B4'], duration: '1m' },
@@ -233,34 +272,6 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
       }
     }
   },
-  // URL-based soundscapes removed as per user request to switch to uploads
-  // {
-  //   id: 'lofiVibesUrl',
-  //   nameKey: 'soundscapes.lofiVibesUrl',
-  //   type: 'url', // This type will be handled differently by the player
-  //   params: {
-  //     audioSrc: '/sounds/placeholder_lofi.mp3', // Placeholder, user will override in settings
-  //     volumeAdjustment: 0,
-  //   }
-  // },
-  // {
-  //   id: 'smoothJazzUrl',
-  //   nameKey: 'soundscapes.smoothJazzUrl',
-  //   type: 'url',
-  //   params: {
-  //     audioSrc: '/sounds/placeholder_jazz.mp3',
-  //     volumeAdjustment: 0,
-  //   }
-  // },
-  // {
-  //   id: 'playfulTuneUrl',
-  //   nameKey: 'soundscapes.playfulTuneUrl',
-  //   type: 'url',
-  //   params: {
-  //     audioSrc: '/sounds/placeholder_child.mp3',
-  //     volumeAdjustment: 0,
-  //   }
-  // },
 ];
 
 export const BACKGROUND_ANIMATION_OPTIONS: BackgroundAnimationOption[] = [
