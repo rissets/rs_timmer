@@ -24,7 +24,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       if (storedSettings) {
         const parsedSettings = JSON.parse(storedSettings);
         // Merge with defaults to ensure all keys are present if new settings are added
-        setSettings(prev => ({ ...prev, ...parsedSettings }));
+        // and to apply new default values for settings not previously stored
+        setSettings(prev => ({ ...DEFAULT_SETTINGS, ...prev, ...parsedSettings }));
+      } else {
+        // If no stored settings, initialize with defaults
+        setSettings(DEFAULT_SETTINGS);
       }
     } catch (error) {
       console.error("Failed to load settings from localStorage:", error);

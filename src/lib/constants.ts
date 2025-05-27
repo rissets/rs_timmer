@@ -1,5 +1,5 @@
 
-import type { Settings, SoundscapeOption } from '@/lib/types';
+import type { Settings, SoundscapeOption, BackgroundAnimationOption } from '@/lib/types';
 
 export const DEFAULT_SETTINGS: Settings = {
   workMinutes: 25,
@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: Settings = {
   soundscapeBreak: 'gentleRain',
   volume: 0.5,
   notificationsEnabled: true,
+  backgroundAnimation: 'gradientFlow',
 };
 
 export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
@@ -24,6 +25,13 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   { id: 'deepDrone', name: 'Deep Drone (80Hz Sine)', type: 'tone', params: { frequency: 80, type: 'sine', volume: -10 } },
   { id: 'windyAmbience', name: 'Windy Ambience', type: 'noise', params: { type: 'pink', volume: -20 } }, // Quieter pink noise
   { id: 'alphaBinaural', name: 'Alpha Binaural (8Hz Beat)', type: 'binaural', params: { baseFrequency: 100, beatFrequency: 8, volume: -15 } },
+];
+
+export const BACKGROUND_ANIMATION_OPTIONS: BackgroundAnimationOption[] = [
+  { id: 'none', name: 'None' },
+  { id: 'gradientFlow', name: 'Gradient Flow' },
+  { id: 'rain', name: 'Rain Effect' },
+  { id: 'snow', name: 'Snow Effect' },
 ];
 
 export const APP_NAME = "Zenith Timer";

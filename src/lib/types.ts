@@ -1,5 +1,6 @@
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
+export type BackgroundAnimationType = 'none' | 'gradientFlow' | 'rain' | 'snow';
 
 export interface Settings {
   workMinutes: number;
@@ -12,6 +13,7 @@ export interface Settings {
   soundscapeBreak?: string; // ID of the soundscape
   volume: number; // 0 to 1
   notificationsEnabled: boolean;
+  backgroundAnimation: BackgroundAnimationType;
 }
 
 export interface SessionRecord {
@@ -33,4 +35,9 @@ export interface SoundscapeOption {
 export interface AiSessionSummary {
   summary: string;
   improvements: string;
+}
+
+export interface BackgroundAnimationOption {
+  id: BackgroundAnimationType;
+  name: string;
 }

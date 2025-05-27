@@ -13,6 +13,8 @@ import { ThemeToggleButton } from "@/components/theme-toggle-button";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SessionHistoryDrawer, addSessionToHistory } from "@/components/session-history-drawer";
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
+import RainEffect from "@/components/effects/RainEffect";
+import SnowEffect from "@/components/effects/SnowEffect";
 import { summarizeSession } from "@/ai/flows/summarize-session";
 import type { TimerMode, AiSessionSummary, SessionRecord } from "@/lib/types";
 import { APP_NAME } from "@/lib/constants";
@@ -49,7 +51,7 @@ export default function PomodoroPage() {
       soundscapePlayer.stopSound();
     }
 
-  }, [settings.longBreakInterval, settings.soundscapeWork, settings.soundscapeBreak, ]); // Removed soundscapePlayer and timer from deps as they are stable refs from hooks
+  }, [settings.longBreakInterval, settings.soundscapeWork, settings.soundscapeBreak, ]);
 
   const timer = useTimerCore({ 
     settings, 
@@ -86,7 +88,7 @@ export default function PomodoroPage() {
         soundscapePlayer.playSound(currentSoundscape);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps 
-  }, [settings.soundscapeWork, settings.soundscapeBreak, timer.mode, timer.isRunning, isMuted]); // soundscapePlayer removed from deps
+  }, [settings.soundscapeWork, settings.soundscapeBreak, timer.mode, timer.isRunning, isMuted]);
 
 
   const formatTime = (seconds: number) => {
@@ -173,107 +175,113 @@ export default function PomodoroPage() {
 
 
   return (
-    <div className={cn(
-        "flex flex-col min-h-screen text-foreground items-center p-4 selection:bg-primary/30",
-        "animated-gradient-background" // Added animation class
-      )}>
-      <header className="w-full max-w-2xl flex justify-between items-center py-4">
-        <div className="flex items-center space-x-2">
-          <LogoIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-semibold">{APP_NAME}</h1>
-        </div>
-        <div className="flex items-center space-x-1">
-          <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog)} title="Get AI Session Summary (if data available)">
-            <SparklesIcon className="h-5 w-5" />
-          </Button>
-          <SessionHistoryDrawer />
-          <SettingsDialog />
-          <ThemeToggleButton />
-        </div>
-      </header>
+    <>
+      <div className={cn(
+          "relative flex flex-col min-h-screen text-foreground items-center p-4 selection:bg-primary/30",
+          settings.backgroundAnimation === 'gradientFlow' && "animated-gradient-background"
+        )}>
 
-      <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md">
-        <Card className="w-full shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-medium text-primary">
-              {getModeDisplayName(timer.mode)}
-            </CardTitle>
-             <div className="flex justify-center mt-2" aria-label={`Completed ${timer.currentCyclePomodoros} of ${settings.longBreakInterval} pomodoros in this cycle.`}>
-                {pomodoroDots}
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-8">
-            <div className="relative w-48 h-48 sm:w-60 sm:h-60" role="timer" aria-live="assertive">
-              <Progress 
-                value={progressPercentage} 
-                className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" 
-                indicatorClassName="bg-primary!" 
-                style={{clipPath: 'circle(50% at 50% 50%)'}} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                 <span className="text-5xl sm:text-7xl font-mono font-bold text-foreground tabular-nums">
-                  {formatTime(timer.timeLeft)}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex space-x-3">
-              <Button 
-                size="lg" 
-                onClick={timer.isRunning ? timer.pauseTimer : timer.startTimer}
-                className="w-32 bg-primary hover:bg-primary/90 text-primary-foreground"
-                aria-label={timer.isRunning ? "Pause timer" : "Start timer"}
-              >
-                {timer.isRunning ? <Pause className="mr-2 h-5 w-5" /> : <Play className="mr-2 h-5 w-5" />}
-                {timer.isRunning ? 'Pause' : 'Start'}
-              </Button>
-              <Button variant="outline" size="lg" onClick={timer.skipTimer} aria-label="Skip current interval">
-                <SkipForward className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="lg" onClick={() => timer.resetTimer()} aria-label="Reset timer">
-                <RotateCcw className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="lg" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
-                {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {settings.backgroundAnimation === 'rain' && <RainEffect />}
+        {settings.backgroundAnimation === 'snow' && <SnowEffect />}
         
-        <Card className="w-full mt-6 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-lg">Session Notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              placeholder="Jot down tasks, distractions, or thoughts during your session..."
-              value={currentNotes}
-              onChange={(e) => setCurrentNotes(e.target.value)}
-              className="min-h-[100px] focus:ring-accent"
-            />
-             <Button 
-                variant="outline" 
-                className="mt-2"
-                onClick={() => triggerAiSummary(timer.sessionLog)} 
-                disabled={timer.sessionLog.length === 0 && !currentNotes}
-                title="Analyze current session notes and log"
-              >
-                <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Notes & Log
-              </Button>
-          </CardContent>
-        </Card>
+        <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
+          <div className="flex items-center space-x-2">
+            <LogoIcon className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-semibold">{APP_NAME}</h1>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog)} title="Get AI Session Summary (if data available)">
+              <SparklesIcon className="h-5 w-5" />
+            </Button>
+            <SessionHistoryDrawer />
+            <SettingsDialog />
+            <ThemeToggleButton />
+          </div>
+        </header>
 
-      </main>
+        <main className="flex-grow flex flex-col items-center justify-center w-full max-w-md relative z-[1]">
+          <Card className="w-full shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-medium text-primary">
+                {getModeDisplayName(timer.mode)}
+              </CardTitle>
+              <div className="flex justify-center mt-2" aria-label={`Completed ${timer.currentCyclePomodoros} of ${settings.longBreakInterval} pomodoros in this cycle.`}>
+                  {pomodoroDots}
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center space-y-8">
+              <div className="relative w-48 h-48 sm:w-60 sm:h-60" role="timer" aria-live="assertive">
+                <Progress 
+                  value={progressPercentage} 
+                  className="absolute inset-0 w-full h-full rounded-full [&>div]:bg-primary/30" 
+                  indicatorClassName="bg-primary!" 
+                  style={{clipPath: 'circle(50% at 50% 50%)'}} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-5xl sm:text-7xl font-mono font-bold text-foreground tabular-nums">
+                    {formatTime(timer.timeLeft)}
+                  </span>
+                </div>
+              </div>
 
-      <AiSummaryDialog 
-        summaryData={aiSummary} 
-        isOpen={isAiSummaryOpen} 
-        onOpenChange={setIsAiSummaryOpen}
-        isLoading={isAiLoading}
-      />
-      
-      <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} {APP_NAME}. Stay focused!</p>
-      </footer>
-    </div>
+              <div className="flex space-x-3">
+                <Button 
+                  size="lg" 
+                  onClick={timer.isRunning ? timer.pauseTimer : timer.startTimer}
+                  className="w-32 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  aria-label={timer.isRunning ? "Pause timer" : "Start timer"}
+                >
+                  {timer.isRunning ? <Pause className="mr-2 h-5 w-5" /> : <Play className="mr-2 h-5 w-5" />}
+                  {timer.isRunning ? 'Pause' : 'Start'}
+                </Button>
+                <Button variant="outline" size="lg" onClick={timer.skipTimer} aria-label="Skip current interval">
+                  <SkipForward className="h-5 w-5" />
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => timer.resetTimer()} aria-label="Reset timer">
+                  <RotateCcw className="h-5 w-5" />
+                </Button>
+                <Button variant="outline" size="lg" onClick={handleToggleMute} aria-label={isMuted ? "Unmute sound" : "Mute sound"}>
+                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="w-full mt-6 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg">Session Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                placeholder="Jot down tasks, distractions, or thoughts during your session..."
+                value={currentNotes}
+                onChange={(e) => setCurrentNotes(e.target.value)}
+                className="min-h-[100px] focus:ring-accent"
+              />
+              <Button 
+                  variant="outline" 
+                  className="mt-2"
+                  onClick={() => triggerAiSummary(timer.sessionLog)} 
+                  disabled={timer.sessionLog.length === 0 && !currentNotes}
+                  title="Analyze current session notes and log"
+                >
+                  <SparklesIcon className="mr-2 h-4 w-4" /> Analyze Notes & Log
+                </Button>
+            </CardContent>
+          </Card>
+
+        </main>
+
+        <AiSummaryDialog 
+          summaryData={aiSummary} 
+          isOpen={isAiSummaryOpen} 
+          onOpenChange={setIsAiSummaryOpen}
+          isLoading={isAiLoading}
+        />
+        
+        <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
+          <p>&copy; {new Date().getFullYear()} {APP_NAME}. Stay focused!</p>
+        </footer>
+      </div>
+    </>
   );
 }

@@ -35,8 +35,8 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useSettingsContext } from "@/contexts/settings-context";
-import { SOUNDSCAPE_OPTIONS } from "@/lib/constants";
-import type { Settings } from "@/lib/types";
+import { SOUNDSCAPE_OPTIONS, BACKGROUND_ANIMATION_OPTIONS } from "@/lib/constants";
+import type { Settings, BackgroundAnimationType } from "@/lib/types";
 import { Settings as SettingsIcon } from "lucide-react";
 import React from "react";
 
@@ -51,6 +51,9 @@ const settingsSchema = z.object({
   soundscapeBreak: z.string().optional(),
   volume: z.number().min(0).max(1),
   notificationsEnabled: z.boolean(),
+  backgroundAnimation: z.custom<BackgroundAnimationType>((val) => 
+    BACKGROUND_ANIMATION_OPTIONS.some(opt => opt.id === val)
+  ).default('gradientFlow'),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -61,12 +64,17 @@ export function SettingsDialog() {
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: settings,
+    defaultValues: settings, // Initialized with context settings
   });
 
   React.useEffect(() => {
     if (isSettingsLoaded) {
-      form.reset(settings);
+      // Ensure form is reset with potentially updated settings from context/localStorage
+      // including the new backgroundAnimation setting
+      form.reset({
+        ...settings,
+        backgroundAnimation: settings.backgroundAnimation || 'gradientFlow', // Ensure default if undefined
+      });
     }
   }, [settings, form, isSettingsLoaded]);
 
@@ -272,6 +280,28 @@ export function SettingsDialog() {
                   </FormItem>
                 )}
               />
+            <FormField
+              control={form.control}
+              name="backgroundAnimation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Background Animation</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select animation" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {BACKGROUND_ANIMATION_OPTIONS.map(opt => (
+                        <SelectItem key={opt.id} value={opt.id}>{opt.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button type="submit">Save Changes</Button>
             </DialogFooter>
