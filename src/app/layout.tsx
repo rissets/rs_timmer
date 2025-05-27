@@ -20,6 +20,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: `${APP_NAME} Timer`,
   description: `A Pomodoro timer to enhance focus and productivity, now called ${APP_NAME} Timer.`,
+  manifest: '/manifest.json', // Added for PWA
 };
 
 export default function RootLayout({
@@ -29,6 +30,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}>
+      <head>
+        <meta name="application-name" content={`${APP_NAME} Timer`} />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content={`${APP_NAME} Timer`} />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-config" content="/icons/browserconfig.xml" /> 
+        <meta name="msapplication-TileColor" content="#2B5797" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="theme-color" content="hsl(169, 20%, 56%)" />
+        {/* 
+          Note: For actual icons for favicon, apple-touch-icon, etc., 
+          you would typically place them in the /public/icons directory
+          and link them here. For this exercise, we are focusing on manifest.json
+          which uses placehold.co for icons.
+          Example:
+          <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+          <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+        */}
+      </head>
       <body>
         <ThemeProvider>
           <SettingsProvider>
