@@ -92,37 +92,46 @@
     "description": "Learn how to make the most of your focus sessions.",
     "sections": {
       "gettingStarted": {
-        "title": "Getting Started with Pomodoro"
+        "title": "Getting Started with Pomodoro",
+        "content": "The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.\\n{{appName}} Timer helps you implement this technique. Each work interval is a \"Pomodoro.\" After a set number of Pomodoros (usually 4), you take a longer break.\\nBenefits include improved focus, reduced burnout, and better time estimation."
       },
       "timerControls": {
-        "title": "Timer Controls"
+        "title": "Timer Controls",
+        "content": "Use these controls to manage your session:\\n* Start/Pause: Click the main button to start or pause the current timer (Work, Short Break, or Long Break).\\n* Skip: Click the skip button (icon with arrow pointing right) to end the current interval and move to the next one.\\n* Reset: Click the reset button (circular arrow icon) to reset the current interval to its full duration and pause the timer.\\n* Mute/Unmute: Toggle soundscapes on or off using the volume icon."
       },
       "customization": {
-        "title": "Customization (Settings)"
+        "title": "Customization (Settings)",
+        "content": "Click the gear icon in the header to open Settings. You can customize:\\n* Timer Durations: Set custom lengths for Work, Short Break, and Long Break intervals.\\n* Long Break Interval: Define how many work sessions occur before a long break.\\n* Auto-start: Enable/disable automatic starting of breaks and Pomodoros.\\n* Notifications: Toggle browser notifications for interval ends.\\n* Soundscapes: Choose different ambient sounds for work and break periods, and adjust the master volume.\\n* Background Animation: Select a visual background effect or none.\\n* Mouse Trail Effect: Enable or disable a particle effect that follows your mouse.\\n* Initial Guide: Toggle the helpful guided tour that appears on first visit."
       },
       "tasksAndNotes": {
-        "title": "Tasks & Notes"
+        "title": "Tasks & Notes",
+        "content": "Below the timer, you'll find sections for managing tasks and taking notes:\\n* Today's Tasks: Add tasks you want to accomplish during your focus sessions. Mark them as complete or delete them.\\n* Session Notes & Context: Use the textarea to jot down thoughts, distractions, or ideas that arise.\\nYour tasks and notes can be included in the AI Session Analysis."
       },
       "sessionContext": {
-        "title": "Session Context"
+        "title": "Session Context",
+        "content": "Before analyzing your session data (notes, tasks, or a full Pomodoro log), you can specify a \"Session Context\" (e.g., Work, Learning, General).\\nThis helps the AI provide more tailored feedback and suggestions relevant to your current activity."
       },
       "aiAnalysis": {
-        "title": "AI Session Analysis"
+        "title": "AI Session Analysis",
+        "content": "{{appName}} Timer features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant"
+        "title": "AI Chat Assistant",
+        "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant.\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
-        "title": "Session History"
+        "title": "Session History",
+        "content": "Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals.\\nThis helps you track your focus sessions over time. You can also clear the history from this panel."
       },
       "themeAndAppearance": {
-        "title": "Theme & Appearance"
+        "title": "Theme & Appearance",
+        "content": "* Dark/Light Mode: Toggle between dark and light themes using the sun/moon icon in the header.\\n* Background Effects: Choose various animated backgrounds or a simple gradient in the Settings menu to personalize your focus environment."
       }
     }
   },
   "interactiveTourDialog": {
     "stepProgress": "Step {{currentStep}} of {{totalSteps}}",
-    "welcomeTitle": "Welcome to RS Timer!",
+    "welcomeTitle": "Welcome to {{appName}}!",
     "welcomeContent": "{{appName}} is a Pomodoro timer designed to boost your focus and productivity. This quick tour will show you around.",
     "timerTitle": "The Timer",
     "timerContent": "This is your main countdown timer. It switches between Work, Short Break, and Long Break modes automatically or manually.",
@@ -158,10 +167,11 @@
     "noDataForSummary": "Not enough session data, tasks, or notes to generate a summary.",
     "noSessionLog": "No session log entries for this period.",
     "noNotes": "No notes taken.",
-    "errorTitle": "AI Summary Error",
-    "errorDescription": "Could not generate session summary.",
+    "errorTitle": "AI Processing Error",
+    "errorDescription": "Could not complete the AI request.",
     "errorSummary": "Error generating summary.",
-    "errorImprovements": "Please try again later."
+    "errorImprovements": "Please try again later.",
+    "errorChatResponse": "Sorry, I encountered an error and can't respond right now."
   },
   "sessionTypes": {
     "general": "General Reflection",

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import { APP_NAME } from '@/lib/constants';
 import { BookOpen } from 'lucide-react';
-import { useLanguageContext } from "@/contexts/language-context"; // Added
+import { useLanguageContext } from "@/contexts/language-context"; 
 
 interface UserGuideDialogProps {
   isOpen: boolean;
@@ -28,105 +28,75 @@ interface UserGuideDialogProps {
 }
 
 export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) {
-  const { t } = useLanguageContext(); // Added
+  const { t } = useLanguageContext(); 
 
   // For full content translation, you'd fetch these from en.json/id.json
-  // For now, only titles are translated.
   const guideSections = [
     {
       titleKey: "userGuideDialog.sections.gettingStarted.title",
-      content: (
-        <>
-          <p className="mb-2">The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.</p>
-          <p className="mb-2">{APP_NAME} Timer helps you implement this technique. Each work interval is a "Pomodoro." After a set number of Pomodoros (usually 4), you take a longer break.</p>
-          <p>Benefits include improved focus, reduced burnout, and better time estimation.</p>
-        </>
-      ),
+      contentKey: "userGuideDialog.sections.gettingStarted.content",
     },
     {
       titleKey: "userGuideDialog.sections.timerControls.title",
-      content: (
-        <ul className="list-disc pl-5 space-y-2">
-          <li><strong>Start/Pause:</strong> Click the main button to start or pause the current timer (Work, Short Break, or Long Break).</li>
-          <li><strong>Skip:</strong> Click the skip button (icon with arrow pointing right) to end the current interval and move to the next one.</li>
-          <li><strong>Reset:</strong> Click the reset button (circular arrow icon) to reset the current interval to its full duration and pause the timer.</li>
-          <li><strong>Mute/Unmute:</strong> Toggle soundscapes on or off using the volume icon.</li>
-        </ul>
-      ),
+      contentKey: "userGuideDialog.sections.timerControls.content",
     },
     {
       titleKey: "userGuideDialog.sections.customization.title",
-      content: (
-        <>
-          <p className="mb-2">Click the gear icon in the header to open Settings. You can customize:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Timer Durations:</strong> Set custom lengths for Work, Short Break, and Long Break intervals.</li>
-            <li><strong>Long Break Interval:</strong> Define how many work sessions occur before a long break.</li>
-            <li><strong>Auto-start:</strong> Enable/disable automatic starting of breaks and Pomodoros.</li>
-            <li><strong>Notifications:</strong> Toggle browser notifications for interval ends.</li>
-            <li><strong>Soundscapes:</strong> Choose different ambient sounds for work and break periods, and adjust the master volume.</li>
-            <li><strong>Background Animation:</strong> Select a visual background effect or none.</li>
-            <li><strong>Mouse Trail Effect:</strong> Enable or disable a particle effect that follows your mouse.</li>
-            <li><strong>Initial Guide:</strong> Toggle the helpful guided tour that appears on first visit.</li>
-          </ul>
-        </>
-      ),
+      contentKey: "userGuideDialog.sections.customization.content",
     },
      {
       titleKey: "userGuideDialog.sections.tasksAndNotes.title",
-      content: (
-        <>
-          <p className="mb-2">Below the timer, you'll find sections for managing tasks and taking notes:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Today's Tasks:</strong> Add tasks you want to accomplish during your focus sessions. Mark them as complete or delete them.</li>
-            <li><strong>Session Notes & Context:</strong> Use the textarea to jot down thoughts, distractions, or ideas that arise.</li>
-            <li>Your tasks and notes can be included in the AI Session Analysis.</li>
-          </ul>
-        </>
-      ),
+      contentKey: "userGuideDialog.sections.tasksAndNotes.content",
     },
     {
       titleKey: "userGuideDialog.sections.sessionContext.title",
-      content: (
-        <p className="mb-2">
-          Before analyzing your session data (notes, tasks, or a full Pomodoro log), you can specify a "Session Context" (e.g., Work, Learning, General).
-          This helps the AI provide more tailored feedback and suggestions relevant to your current activity.
-        </p>
-      ),
+      contentKey: "userGuideDialog.sections.sessionContext.content",
     },
     {
       titleKey: "userGuideDialog.sections.aiAnalysis.title",
-      content: (
-        <>
-          <p className="mb-2">
-            {APP_NAME} Timer features an AI-powered session analyzer. Click the sparkles icon in the header or the "Analyze Data" button in the notes section.
-          </p>
-          <p className="mb-2">
-            The AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.
-            It provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks.
-          </p>
-        </>
-      ),
+      contentKey: "userGuideDialog.sections.aiAnalysis.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.chatWidget.title", // Added chat widget section
+      contentKey: "userGuideDialog.sections.chatWidget.content",
     },
     {
       titleKey: "userGuideDialog.sections.sessionHistory.title",
-      content: (
-        <p className="mb-2">
-          Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals.
-          This helps you track your focus sessions over time. You can also clear the history from this panel.
-        </p>
-      ),
+      contentKey: "userGuideDialog.sections.sessionHistory.content",
     },
     {
         titleKey: "userGuideDialog.sections.themeAndAppearance.title",
-        content: (
-            <ul className="list-disc pl-5 space-y-2">
-                <li><strong>Dark/Light Mode:</strong> Toggle between dark and light themes using the sun/moon icon in the header.</li>
-                <li><strong>Background Effects:</strong> Choose various animated backgrounds or a simple gradient in the Settings menu to personalize your focus environment.</li>
-            </ul>
-        )
+        contentKey: "userGuideDialog.sections.themeAndAppearance.content",
     }
   ];
+
+  // Helper function to parse simple markdown-like list items
+  const renderContent = (contentKey: string) => {
+    const rawContent = t(contentKey, { appName: APP_NAME });
+    const lines = rawContent.split('\\n'); // Assuming \\n for newlines in JSON
+    
+    let inList = false;
+    const renderedLines = lines.map((line, index) => {
+      if (line.startsWith('* ')) {
+        if (!inList) {
+          inList = true;
+          // This is a bit of a hack for lists. Proper markdown parsing would be better.
+          return <ul key={`ul-${index}`} className="list-disc pl-5 space-y-1 mb-2">{<li key={index}>{line.substring(2)}</li>}</ul>;
+        }
+        return <li key={index}>{line.substring(2)}</li>;
+      } else {
+        if (inList) {
+          inList = false; 
+        }
+        return <p key={index} className="mb-2 last:mb-0">{line}</p>;
+      }
+    });
+    // This is a simplified renderer. If a list is the last element, 
+    // the closing </ul> might not be handled perfectly by this structure.
+    // For complex markdown, a dedicated library would be better.
+    return <>{renderedLines}</>;
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -146,7 +116,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
               <AccordionItem value={`item-${index}`} key={index}>
                 <AccordionTrigger>{t(section.titleKey)}</AccordionTrigger>
                 <AccordionContent className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none">
-                  {section.content} 
+                  {renderContent(section.contentKey)}
                 </AccordionContent>
               </AccordionItem>
             ))}

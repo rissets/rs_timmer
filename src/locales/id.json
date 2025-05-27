@@ -92,37 +92,46 @@
     "description": "Pelajari cara memaksimalkan sesi fokus Anda.",
     "sections": {
       "gettingStarted": {
-        "title": "Memulai dengan Pomodoro"
+        "title": "Memulai dengan Pomodoro",
+        "content": "Teknik Pomodoro adalah metode manajemen waktu yang menggunakan timer untuk membagi pekerjaan menjadi interval, biasanya 25 menit, dipisahkan oleh istirahat pendek.\\n{{appName}} Timer membantu Anda menerapkan teknik ini. Setiap interval kerja adalah \"Pomodoro.\" Setelah sejumlah Pomodoro tertentu (biasanya 4), Anda mengambil istirahat yang lebih panjang.\\nManfaatnya termasuk peningkatan fokus, pengurangan kelelahan, dan perkiraan waktu yang lebih baik."
       },
       "timerControls": {
-        "title": "Kontrol Timer"
+        "title": "Kontrol Timer",
+        "content": "Gunakan kontrol ini untuk mengatur sesi Anda:\\n* Mulai/Jeda: Klik tombol utama untuk memulai atau menjeda timer saat ini (Kerja, Istirahat Pendek, atau Istirahat Panjang).\\n* Lewati: Klik tombol lewati (ikon panah ke kanan) untuk mengakhiri interval saat ini dan pindah ke interval berikutnya.\\n* Atur Ulang: Klik tombol atur ulang (ikon panah melingkar) untuk mengatur ulang interval saat ini ke durasi penuhnya dan menjeda timer.\\n* Bisukan/Suarakan: Aktifkan atau nonaktifkan suara latar menggunakan ikon volume."
       },
       "customization": {
-        "title": "Kustomisasi (Pengaturan)"
+        "title": "Kustomisasi (Pengaturan)",
+        "content": "Klik ikon roda gigi di header untuk membuka Pengaturan. Anda dapat menyesuaikan:\\n* Durasi Timer: Atur durasi khusus untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang.\\n* Interval Istirahat Panjang: Tentukan berapa banyak sesi kerja yang terjadi sebelum istirahat panjang.\\n* Mulai Otomatis: Aktifkan/nonaktifkan memulai istirahat dan Pomodoro secara otomatis.\\n* Notifikasi: Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara Latar: Pilih suara sekitar yang berbeda untuk periode kerja dan istirahat, dan sesuaikan volume utama.\\n* Animasi Latar Belakang: Pilih efek latar belakang visual atau tidak sama sekali.\\n* Efek Jejak Mouse: Aktifkan atau nonaktifkan efek partikel yang mengikuti mouse Anda.\\n* Panduan Awal: Aktifkan/nonaktifkan tur panduan bermanfaat yang muncul pada kunjungan pertama."
       },
       "tasksAndNotes": {
-        "title": "Tugas & Catatan"
+        "title": "Tugas & Catatan",
+        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan selama sesi fokus Anda. Tandai selesai atau hapus.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran, gangguan, atau ide yang muncul.\\nTugas dan catatan Anda dapat disertakan dalam Analisis Sesi AI."
       },
       "sessionContext": {
-        "title": "Konteks Sesi"
+        "title": "Konteks Sesi",
+        "content": "Sebelum menganalisis data sesi Anda (catatan, tugas, atau log Pomodoro lengkap), Anda dapat menentukan \"Konteks Sesi\" (misalnya, Kerja, Belajar, Umum).\\nIni membantu AI memberikan umpan balik dan saran yang lebih disesuaikan dengan aktivitas Anda saat ini."
       },
       "aiAnalysis": {
-        "title": "Analisis Sesi AI"
+        "title": "Analisis Sesi AI",
+        "content": "{{appName}} Timer memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ini sangat berguna setelah Istirahat Panjang atau ketika Anda telah mengumpulkan beberapa catatan/tugas."
       },
       "chatWidget": {
-        "title": "Asisten Chat AI"
+        "title": "Asisten Chat AI",
+        "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami.\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
       "sessionHistory": {
-        "title": "Riwayat Sesi"
+        "title": "Riwayat Sesi",
+        "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai.\\nIni membantu Anda melacak sesi fokus Anda dari waktu ke waktu. Anda juga dapat menghapus riwayat dari panel ini."
       },
       "themeAndAppearance": {
-        "title": "Tema & Tampilan"
+        "title": "Tema & Tampilan",
+        "content": "* Mode Gelap/Terang: Beralih antara tema gelap dan terang menggunakan ikon matahari/bulan di header.\\n* Efek Latar Belakang: Pilih berbagai latar belakang animasi atau gradien sederhana di menu Pengaturan untuk mempersonalisasi lingkungan fokus Anda."
       }
     }
   },
   "interactiveTourDialog": {
     "stepProgress": "Langkah {{currentStep}} dari {{totalSteps}}",
-    "welcomeTitle": "Selamat Datang di RS Timer!",
+    "welcomeTitle": "Selamat Datang di {{appName}}!",
     "welcomeContent": "{{appName}} adalah timer Pomodoro yang dirancang untuk meningkatkan fokus dan produktivitas Anda. Tur singkat ini akan memandu Anda.",
     "timerTitle": "Timer",
     "timerContent": "Ini adalah timer hitung mundur utama Anda. Ini beralih antara mode Kerja, Istirahat Pendek, dan Istirahat Panjang secara otomatis atau manual.",
@@ -158,10 +167,11 @@
     "noDataForSummary": "Data sesi, tugas, atau catatan tidak cukup untuk menghasilkan ringkasan.",
     "noSessionLog": "Tidak ada entri log sesi untuk periode ini.",
     "noNotes": "Tidak ada catatan yang dibuat.",
-    "errorTitle": "Kesalahan Ringkasan AI",
-    "errorDescription": "Tidak dapat menghasilkan ringkasan sesi.",
+    "errorTitle": "Kesalahan Pemrosesan AI",
+    "errorDescription": "Tidak dapat menyelesaikan permintaan AI.",
     "errorSummary": "Kesalahan menghasilkan ringkasan.",
-    "errorImprovements": "Silakan coba lagi nanti."
+    "errorImprovements": "Silakan coba lagi nanti.",
+    "errorChatResponse": "Maaf, terjadi kesalahan dan saya tidak bisa merespons saat ini."
   },
   "sessionTypes": {
     "general": "Refleksi Umum",

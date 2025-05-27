@@ -30,7 +30,9 @@ import FloatingBubblesEffect from "@/components/effects/FloatingBubblesEffect";
 import MouseTrailEffect from "@/components/effects/MouseTrailEffect";
 import { SimpleTaskList } from "@/components/simple-task-list";
 import { summarizeSession } from "@/ai/flows/summarize-session";
+import { chatWithAI } from "@/ai/flows/chat-flow"; // Added
 import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage } from "@/lib/types";
+import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow"; // Added
 import { APP_NAME, SESSION_TYPE_OPTIONS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
 import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen } from "lucide-react";
@@ -298,21 +300,40 @@ export default function PomodoroPage() {
       timestamp: new Date(),
     };
     setChatMessages(prev => [...prev, newUserMessage]);
+    const currentInput = chatInputValue.trim();
     setChatInputValue("");
     setIsAiChatLoading(true);
 
-    // Placeholder for actual AI call
-    // TODO: Replace with Genkit flow call
-    setTimeout(() => {
+    try {
+      const genkitHistory: GenkitChatInput['history'] = chatMessages
+        .map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'model',
+          parts: [{text: msg.text}],
+        }));
+
+      const response = await chatWithAI({userInput: currentInput, history: genkitHistory});
+      
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
-        text: t('chatWidget.aiPlaceholderResponse', { userMessage: newUserMessage.text }),
+        text: response.aiResponse,
         timestamp: new Date(),
       };
       setChatMessages(prev => [...prev, aiResponse]);
+
+    } catch (error) {
+      console.error("AI Chat Error:", error);
+      toast({ title: t('ai.errorTitle'), description: t('ai.errorDescription'), variant: "destructive" });
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        text: t('ai.errorChatResponse') || "Sorry, I encountered an error.",
+        timestamp: new Date(),
+      };
+      setChatMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsAiChatLoading(false);
-    }, 1500);
+    }
   };
 
 
