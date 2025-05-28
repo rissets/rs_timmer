@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { useSettingsContext } from '@/contexts/settings-context';
@@ -27,50 +27,63 @@ const parseMarkdownToHtml = (markdown: string): string => {
 
   let html = markdown;
 
-  // Escape HTML to prevent XSS from user-pasted HTML, then selectively unescape for generated tags.
-  // For simplicity in this context (user's own notes), we'll skip full sanitization for now.
-  // A proper library would handle this much more robustly.
   html = html.replace(/&/g, '&amp;')
              .replace(/</g, '&lt;')
              .replace(/>/g, '&gt;');
 
-  // Headers (###, ##, #)
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
   html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
-  // Bold (**text** or __text__)
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
 
-  // Italic (*text* or _text_)
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
   html = html.replace(/_(.*?)_/g, '<em>$1</em>');
   
-  // Links [text](url)
   html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-
-  // Unordered lists (- item, * item) - basic, one level
-  html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
-  html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
-  // Wrap <li>s in <ul> if they are consecutive
-  html = html.replace(/(<li>.*<\/li>\s*)+/g, '<ul>$&</ul>');
   
-  // Ordered lists (1. item) - basic, one level
-  html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
-  // Wrap <li>s in <ol> if they are consecutive and part of an ordered list pattern
-  // This regex is tricky, for now we'll use the same ul wrapper and rely on CSS for numbering if needed,
-  // or accept that it only supports one type of list at a time effectively with this simple parser.
-  // A more sophisticated parser would handle mixed lists or nested lists.
+  // Blockquotes
+  html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+  
+  // Inline code
+  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
 
-  // Paragraphs (split by double newlines, then wrap lines not already in a block element)
-  // This is a simplified paragraph handling. A full parser is more complex.
-  html = html.split(/\n\s*\n/).map(paragraph => {
-    if (paragraph.trim() === "") return "";
-    if (paragraph.startsWith('<h3>') || paragraph.startsWith('<h2>') || paragraph.startsWith('<h1>') || paragraph.startsWith('<ul>') || paragraph.startsWith('<li>')) {
-      return paragraph;
+  // Code blocks (simple, no syntax highlighting)
+  html = html.replace(/```([\s\S]*?)```/g, (match, p1) => {
+    const codeContent = p1.trim().replace(/&lt;/g, '<').replace(/&gt;/g, '>'); // Allow HTML entities within code blocks for display
+    return `<pre><code>${codeContent}</code></pre>`;
+  });
+
+  // Handle lists more carefully to avoid double wrapping
+  // Unordered lists
+  html = html.replace(/^(?:-|\*|\+) (.*$)/gim, '<li>$1</li>');
+  // Ordered lists
+  html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
+
+  // Wrap consecutive <li> items only once. This is a simplified approach.
+  // A more robust solution would involve more complex parsing.
+  html = html.replace(/(<li>.*?<\/li>\s*)+(?=\s*[^<li]|$)/gs, (match) => {
+    // Determine if it's an ordered or unordered list based on the first item
+    // This is still a heuristic and might not be perfect for mixed/complex lists.
+    if (match.match(/^\s*<li>\d+\./)) { // Approximation for ordered list start
+        return `<ol>${match}</ol>`;
     }
-    return `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`; // Replace single newlines with <br> within paragraphs
+    return `<ul>${match}</ul>`;
+  });
+
+
+  // Paragraphs: Wrap lines that are not part of other block elements.
+  // Split by double newlines first to identify paragraph blocks.
+  html = html.split(/\n\s*\n/).map(paragraph => {
+    const trimmedParagraph = paragraph.trim();
+    if (trimmedParagraph === "") return "";
+    // Check if the paragraph already starts with a block-level tag we handle
+    if (/^<(h[1-3]|ul|ol|li|blockquote|pre)>/.test(trimmedParagraph)) {
+      return paragraph; // Return as is, assuming it's already formatted
+    }
+    // Otherwise, wrap in <p> and replace single newlines with <br>
+    return `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`;
   }).join('');
 
 
@@ -89,6 +102,9 @@ export default function NotebookPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('edit');
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
 
   // AI Content Generator Dialog State
   const [isAiGenerateDialogOpen, setIsAiGenerateDialogOpen] = useState(false);
@@ -118,6 +134,14 @@ export default function NotebookPage() {
         });
     }
   }, [currentUser, authLoading, isSettingsLoaded, toast, t]);
+
+  useEffect(() => {
+    if (textareaRef.current && selection) {
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(selection.start, selection.end);
+      setSelection(null); // Reset selection state after applying
+    }
+  }, [notesContent, selection]); // Rerun when notesContent changes (after state update) OR selection is set
 
   const handleSaveNotes = async () => {
     if (!currentUser) {
@@ -168,15 +192,29 @@ export default function NotebookPage() {
       toast({ title: t('aiNoteGeneratorDialog.nothingToAppend'), variant: "default" });
       return;
     }
-    // Insert at cursor or append. For simplicity, append for now.
-    // A real WYSIWYG editor would handle cursor insertion.
-    // Ensure we're in edit mode to see the change immediately in the textarea
-    setEditorMode('edit');
+    setEditorMode('edit'); // Ensure edit mode
+    
     const currentText = notesContent;
     const separator = currentText.length > 0 && !currentText.endsWith('\n\n') ? "\n\n" : "";
     const textToInsert = `${separator}--- ${t('aiNoteGeneratorDialog.appendedTextHeader', { dateTime: new Date().toLocaleString() })} ---\n${aiGeneratedText}\n--- ${t('aiNoteGeneratorDialog.appendedTextFooter')} ---\n`;
     
-    setNotesContent(prevNotes => prevNotes + textToInsert);
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newNotesContent = 
+        currentText.substring(0, start) + 
+        textToInsert + 
+        currentText.substring(end);
+      
+      setNotesContent(newNotesContent);
+      const newCursorPos = start + textToInsert.length;
+      setSelection({ start: newCursorPos, end: newCursorPos });
+    } else {
+      // Fallback if ref is not available (should not happen often)
+      setNotesContent(prevNotes => prevNotes + textToInsert);
+    }
+
     toast({ title: t('aiNoteGeneratorDialog.appendSuccessTitleToNotes'), description: t('aiNoteGeneratorDialog.appendSuccessDescToNotes') });
     setIsAiGenerateDialogOpen(false);
     setAiGeneratePrompt("");
@@ -196,6 +234,57 @@ export default function NotebookPage() {
         console.error("Failed to copy text:", err);
         toast({ title: t('aiNoteGeneratorDialog.copyErrorTitle'), variant: "destructive" });
       });
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const textarea = event.currentTarget;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+
+    let prefix = "";
+    let suffix = "";
+    let newSelectionStart = start;
+    let newSelectionEnd = end;
+
+    if (event.ctrlKey || event.metaKey) {
+      switch (event.key.toLowerCase()) {
+        case 'b':
+          event.preventDefault();
+          prefix = "**";
+          suffix = "**";
+          break;
+        case 'i':
+          event.preventDefault();
+          prefix = "*";
+          suffix = "*";
+          break;
+        default:
+          return; // Not a handled shortcut
+      }
+
+      if (selectedText) {
+        const newText = prefix + selectedText + suffix;
+        setNotesContent(
+          textarea.value.substring(0, start) +
+          newText +
+          textarea.value.substring(end)
+        );
+        newSelectionStart = start + prefix.length;
+        newSelectionEnd = start + prefix.length + selectedText.length;
+      } else {
+        // No text selected, insert markers and place cursor in between
+        const newText = prefix + suffix;
+        setNotesContent(
+          textarea.value.substring(0, start) +
+          newText +
+          textarea.value.substring(end)
+        );
+        newSelectionStart = start + prefix.length;
+        newSelectionEnd = start + prefix.length;
+      }
+      setSelection({ start: newSelectionStart, end: newSelectionEnd });
+    }
   };
 
 
@@ -260,15 +349,16 @@ export default function NotebookPage() {
                     {t('notebookPage.previewModeButton')}
                   </Button>
                 </div>
-                {/* Placeholder for more editor tools if needed */}
               </div>
             </CardHeader>
             <CardContent className="p-0 flex-grow flex">
               {editorMode === 'edit' ? (
                 <Textarea
+                  ref={textareaRef}
                   placeholder={t('notebookPage.notesPlaceholderMarkdown')}
                   value={notesContent}
                   onChange={(e) => setNotesContent(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="w-full h-full resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
                   aria-label={t('notebookPage.notesAreaLabel')}
                 />
@@ -360,5 +450,3 @@ export default function NotebookPage() {
     </div>
   );
 }
-
-    
