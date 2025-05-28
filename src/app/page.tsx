@@ -252,7 +252,7 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded || tasks === undefined) return;
-    if (tasks.length > 0 || (tasks.length === 0 && JSON.stringify(tasks) !== JSON.stringify([]))) { // Check if tasks is not initial undefined or truly empty
+    if (tasks.length > 0 || (tasks.length === 0 && JSON.stringify(tasks) !== JSON.stringify([]))) { 
         saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
         console.error("Error saving tasks to Firestore:", error);
         toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
@@ -403,34 +403,29 @@ export default function PomodoroPage() {
     if (isMuted) return 'none';
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
-
-  const playSoundRef = useRef(playSound);
-  const stopSoundRef = useRef(stopSound);
-  const isSoundPlayerReadyRef = useRef(isSoundPlayerReady);
-  const getActiveSoundscapeIdRef = useRef(getActiveSoundscapeId);
-
-  useEffect(() => {
-    playSoundRef.current = playSound;
-    stopSoundRef.current = stopSound;
-    isSoundPlayerReadyRef.current = isSoundPlayerReady;
-    getActiveSoundscapeIdRef.current = getActiveSoundscapeId;
-  });
   
   useEffect(() => {
-    if (!isSettingsLoaded || !isSoundPlayerReadyRef.current) {
-      stopSoundRef.current();
+    if (!isSettingsLoaded || !isSoundPlayerReady) {
+      stopSound();
       return;
     }
-    const soundId = getActiveSoundscapeIdRef.current(timer.mode);
+    const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-       playSoundRef.current(soundId);
+       playSound(soundId);
     } else {
-      stopSoundRef.current();
+      stopSound();
     }
   }, [
     timer.mode,
     timer.isRunning,
     isSettingsLoaded,
+    isSoundPlayerReady,
+    getActiveSoundscapeId, 
+    playSound, 
+    stopSound,
+    isMuted, 
+    settings.soundscapeWork, 
+    settings.soundscapeBreak 
   ]);
 
   const formatTime = (seconds: number) => {
@@ -465,42 +460,6 @@ export default function PomodoroPage() {
   
   const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
 
-  const sendTaskNotification = useCallback((title: string, body: string) => {
-    if (!settings.notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) {
-        console.log("Browser notifications not enabled in settings or not supported.");
-        return;
-    }
-
-    const showNotification = () => {
-        const notification = new Notification(title, { body, icon: '/icons/icon-192x192.png' });
-        notification.onclick = () => {
-            window.focus();
-        };
-    };
-
-    if (Notification.permission === 'granted') {
-        showNotification();
-    } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-                showNotification();
-            } else {
-                toast({
-                    title: t('notifications.permissionDeniedTitle'),
-                    description: t('notifications.permissionDeniedDescription'),
-                    variant: 'destructive'
-                });
-            }
-        });
-    } else { // permission === 'denied'
-         toast({
-            title: t('notifications.permissionDeniedTitle'),
-            description: t('notifications.permissionDeniedDescription'),
-            variant: 'destructive'
-        });
-    }
-  }, [settings.notificationsEnabled, t, toast]);
-
 
   useEffect(() => {
     if (!isSettingsLoaded || tasks.length === 0 || !settings.notificationsEnabled) return;
@@ -525,7 +484,7 @@ export default function PomodoroPage() {
     const intervalId = setInterval(checkReminders, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [tasks, isSettingsLoaded, settings.notificationsEnabled, sendTaskNotification]); 
+  }, [tasks, isSettingsLoaded, settings.notificationsEnabled, t, toast]); 
 
 
   const handleSendChatMessage = async () => {
@@ -594,7 +553,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
   setDefinedWordsList(updatedList); 
   toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
-
 
   try {
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
@@ -676,7 +634,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   };
 
   const handleLogout = async () => {
-    stopSoundRef.current(); 
+    stopSound(); 
     await logoutUser();
     router.push('/auth/login');
   };
@@ -973,15 +931,15 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             }}
           >
             <AlertDialogContent>
-              <AlertDialogHeader className="flex-row items-center">
-                <Clock className="h-6 w-6 text-primary mr-2" />
+              <AlertDialogHeader className="flex-row items-center space-x-2">
+                <Clock className="h-6 w-6 text-primary" />
                 <AlertDialogTitle>{t('alertDialog.taskReminderTitle')}</AlertDialogTitle>
               </AlertDialogHeader>
               <AlertDialogDescription>
-                {t('alertDialog.taskReminderDescription', { 
-                  taskText: taskForAlert.text, 
+                {t('alertDialog.taskReminderDescription.prompt', { 
                   reminderTime: taskForAlert.reminderTime || '' 
                 })}
+                <strong className="block mt-2 text-base text-foreground">{taskForAlert.text}</strong>
               </AlertDialogDescription>
               <AlertDialogFooter>
                 <AlertDialogAction onClick={() => setTaskForAlert(null)}>
@@ -1011,3 +969,4 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     </>
   );
 }
+
