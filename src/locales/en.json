@@ -31,7 +31,8 @@
     "back": "Back",
     "ok": "OK",
     "copy": "Copy",
-    "appendToNotes": "Append to Notes"
+    "appendToNotes": "Append to Notes",
+    "generateWithAI": "Generate with AI"
   },
   "tooltips": {
     "aiSummary": "Get AI Session Summary (if data available)",
@@ -43,7 +44,8 @@
     "analyzeCurrentData": "Analyze current session notes, tasks and log with selected context",
     "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle.",
     "viewPastData": "View Past Session Data",
-    "aiContentGenerator": "Open AI Content Generator Page"
+    "aiContentGenerator": "Open AI Content Generator Page",
+    "aiNoteGenerator": "Generate content with AI for your notes"
   },
   "cards": {
     "tasksTitle": "Today's Tasks",
@@ -96,7 +98,7 @@
     "statusCompleted": "Completed",
     "statusSkipped": "Skipped/Interrupted",
     "confirmClearToday": "Are you sure you want to clear all session history for today from the database? This action cannot be undone.",
-    "historyClearedTitle": "Today's History Cleared",
+    "historyClearedTitle": "Today's History Cleared Successfully",
     "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
     "clearErrorDescription": "Could not clear today's session history from the database. Please try again.",
     "clearingHistory": "Clearing history..."
@@ -176,12 +178,12 @@
         "content": "Your tasks, session notes, dictionary entries, session context, and session history (Pomodoro logs) are automatically saved to Firebase Firestore on a per-day basis, associated with your user account.\\nThis means when a new day begins, these sections will appear empty, ready for the new day's activities. Your data from previous days remains stored and accessible."
       },
       "tasks": {
-        "title": "Today's Tasks & Reminders",
+        "title": "Today's Tasks & Reminders", 
         "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted for this site, an in-app alert dialog will pop up when that time arrives. For this to work effectively, ensure you have allowed notifications for this site in your browser settings.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
-        "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog.\\n* AI-generated content from the 'AI Content Generator' page can also be copied and pasted into these notes."
+        "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog.\\n* AI-generated content from the 'Generate with AI' button in this section can also be appended to these notes."
       },
       "viewingPastNotes": {
         "title": "Viewing & Deleting Past Notes",
@@ -195,12 +197,12 @@
         "title": "AI Session Analysis (Summary)",
         "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day using the 'Save to Notes' button in the AI analysis popup."
       },
-      "aiContentGeneratorPage": {
-        "title": "AI Content Generator (Page)",
-        "content": "Click the Bot icon (🤖) in the header to navigate to the AI Content Generator page. Here, you can enter a prompt (e.g., 'Write a paragraph about time blocking') and the AI will generate text for you. You can then copy this text and paste it into your session notes or elsewhere."
+      "aiNoteGenerator": {
+        "title": "AI Note Generator (Integrated)",
+        "content": "Within the 'Session Notes & Context' card, click the 'Generate with AI' (Wand icon 🪄) button. This opens a dialog where you can enter a prompt (e.g., 'Write a paragraph about time blocking'). The AI will generate text for you, which you can then copy or directly append to your current session notes."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant",
+        "title": "AI Chat Assistant", 
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini via Genkit).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
@@ -243,10 +245,10 @@
     "taskRemindersContent": "You can now set an optional reminder time (HH:mm) for each task using the time input next to where you type your task. You'll get an in-app alert dialog when it's time for that task!",
     "notesContextTitle": "Session Notes & Context",
     "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
+    "aiNoteGeneratorTitle": "AI Note Generator (Wand Icon 🪄)",
+    "aiNoteGeneratorContent": "In the 'Session Notes & Context' card, click the 'Generate with AI' (Wand icon) button to open a dialog. Enter a prompt, and the AI will generate text that you can then append to your current notes.",
     "aiAnalysisTitle": "AI Session Analysis (Summary)",
     "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes, which get stored in Firebase.",
-    "aiContentGeneratorPageTitle": "AI Content Generator (Bot Icon 🤖)",
-    "aiContentGeneratorPageContent": "Click the Bot icon in the header to go to the AI Content Generator page. Ask it to write paragraphs, list ideas, or help with other text tasks. You can then copy the generated content and paste it into your notes.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant (Gemini) for quick questions or support related to your focus session.",
     "dictionaryCardTitle": "Session Dictionary",
@@ -256,7 +258,7 @@
     "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
     "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved tasks, notes, context, and dictionary entries for any past date from Firebase.",
     "headerToolsTitle": "Header Tools",
-    "headerToolsContent": "Access AI Summary (✨), AI Content Generator Page (🤖), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
+    "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
     "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow. Settings are organized into tabs.",
     "allSetTitle": "You're All Set!",
@@ -308,7 +310,10 @@
     "gentlePianoChord": "Gentle Piano Chord",
     "simplePianoMelodySynth": "Simple Piano Melody (Synth)",
     "classicalExcerptSynth": "Classical Snippet (Synth)",
-    "dreamyLullabySynth": "Dreamy Lullaby (Synth)"
+    "dreamyLullabySynth": "Dreamy Lullaby (Synth)",
+    "lofiVibesUrl": "Lofi Vibes (URL)",
+    "smoothJazzUrl": "Smooth Jazz (URL)",
+    "playfulTuneUrl": "Playful Tune (Child) (URL)"
   },
   "backgroundAnimations": {
     "none": "None",
@@ -437,13 +442,11 @@
       "prompt": "It's time for your task (scheduled for {{reminderTime}}):"
     }
   },
-  "aiContentGenerator": {
-    "pageTitle": "AI Content Generator",
-    "title": "AI Content Generator",
-    "description": "Use AI to help you draft or expand on your ideas. Generated text can be copied and pasted into your session notes or elsewhere.",
-    "pageDescription": "Use AI to help you draft or expand on your ideas. Generated text can be copied and pasted into your session notes or elsewhere.",
+  "aiNoteGeneratorDialog": {
+    "title": "AI Note Content Generator",
+    "description": "Use AI to help you draft or expand on your ideas for your notes.",
     "promptLabel": "Your Prompt for the AI:",
-    "promptPlaceholder": "e.g., Write a short paragraph about the benefits of taking regular breaks...",
+    "promptPlaceholder": "e.g., Write a short paragraph about the benefits of time blocking...",
     "generateButton": "Generate Content",
     "generatingButton": "Generating...",
     "generatingMessage": "AI is thinking...",
@@ -455,8 +458,7 @@
     "copySuccessTitle": "Content Copied!",
     "copyErrorTitle": "Copy Failed",
     "nothingToAppend": "No content to append.",
-    "appendSuccessTitle": "Content Appended to Notes!",
-    "appendSuccessTitleToNotes": "Content Appended",
+    "appendSuccessTitleToNotes": "Content Appended to Notes",
     "appendSuccessDescToNotes": "AI generated content has been appended to your session notes.",
     "appendedTextHeader": "AI Generated Content ({{dateTime}})",
     "appendedTextFooter": "End of AI Generated Content"

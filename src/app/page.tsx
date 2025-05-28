@@ -32,6 +32,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -46,7 +55,6 @@ import { SessionHistoryDrawer } from "@/components/session-history-drawer";
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
 import { UserGuideDialog } from "@/components/user-guide-dialog";
 import { InteractiveTourDialog } from "@/components/interactive-tour-dialog";
-// import { AiContentGeneratorDialog } from '@/components/ai-content-generator-dialog'; // Removed
 import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
@@ -58,11 +66,12 @@ import { DictionaryCard } from "@/components/dictionary-card";
 import { summarizeSession } from "@/ai/flows/summarize-session";
 import { chatWithAI } from "@/ai/flows/chat-flow";
 import { defineWord } from "@/ai/flows/define-word-flow";
+import { generateText } from '@/ai/flows/generate-text-flow'; // For integrated AI generator
 import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, ChatMessage, DefinedWordEntry } from "@/lib/types";
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock, Bot } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock, Bot, ClipboardCopy, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -70,6 +79,7 @@ import { useLanguageContext } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ChatWidgetButton } from '@/components/chat-widget-button';
 import { ChatPopup } from '@/components/chat-popup';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   saveTasksForDay, loadTasksForDay,
   saveNotesForDay, loadNotesForDay,
@@ -91,13 +101,10 @@ export default function PomodoroPage() {
 
   const [currentDateKey, setCurrentDateKey] = useState(getCurrentDateString());
 
-  // States for daily data
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentNotes, setCurrentNotes] = useState("");
   const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
   const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
-
-  // Loading states for daily data
   const [isLoadingDailyData, setIsLoadingDailyData] = useState(true);
 
   const [aiSummary, setAiSummary] = useState<AiSessionSummary | null>(null);
@@ -105,8 +112,6 @@ export default function PomodoroPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
-  // const [isAiContentGeneratorOpen, setIsAiContentGeneratorOpen] = useState(false); // Removed
-
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
   const isMobile = useIsMobile();
@@ -119,16 +124,20 @@ export default function PomodoroPage() {
 
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['tasks', 'dictionary', 'notes']);
   const [openPastNotesAccordion, setOpenPastNotesAccordion] = useState<string[]>([]);
-
-
-  // For viewing past notes
+  
   const [selectedPastDateForNotes, setSelectedPastDateForNotes] = useState<Date | undefined>();
   const [pastDateNotes, setPastDateNotes] = useState<string | null>(null);
   const [isLoadingPastNotes, setIsLoadingPastNotes] = useState(false);
   const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
   const [isDeletingPastNotes, setIsDeletingPastNotes] = useState(false);
-
   const [taskForAlert, setTaskForAlert] = useState<Task | null>(null);
+
+  // State for integrated AI Note Generator Dialog
+  const [isAiGenerateNoteDialogOpen, setIsAiGenerateNoteDialogOpen] = useState(false);
+  const [aiGenerateNotePrompt, setAiGenerateNotePrompt] = useState("");
+  const [aiGeneratedNoteText, setAiGeneratedNoteText] = useState("");
+  const [isGeneratingNoteText, setIsGeneratingNoteText] = useState(false);
+
 
   const handleTimerStartCb = useCallback(() => {}, []);
   const handleTimerPauseCb = useCallback(() => {}, []);
@@ -177,13 +186,13 @@ export default function PomodoroPage() {
   }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
-    if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
-       if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-        setTimeout(() => { // Defer to next tick
-          triggerAiSummary(sessionLogFromHook, currentSessionType);
-        }, 0);
-       }
-    }
+    setTimeout(() => {
+      if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
+        if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
+            triggerAiSummary(sessionLogFromHook, currentSessionType);
+        }
+      }
+    }, 0);
   }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType, settings.autoStartBreaks, settings.autoStartPomodoros]);
 
 
@@ -199,11 +208,7 @@ export default function PomodoroPage() {
     getTranslatedText: t,
   });
 
-  const soundscapePlayer = useSoundscapePlayer({
-    volume: settings.volume,
-    settings: settings,
-    isSettingsLoaded: isSettingsLoaded,
-  });
+  const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume, settings, isSettingsLoaded });
 
   const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
 
@@ -266,7 +271,8 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded || currentNotes === undefined) return;
-    if (currentNotes || (!currentNotes && currentNotes !== undefined)) {
+    // Save notes if they exist or if they were previously defined and are now cleared
+    if (currentNotes || (!currentNotes && typeof currentNotes === 'string')) {
         saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
             console.error("Error saving notes to Firestore:", error);
             toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
@@ -332,6 +338,10 @@ export default function PomodoroPage() {
     {
       title: t('interactiveTourDialog.notesContextTitle'),
       content: <p>{t('interactiveTourDialog.notesContextContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.aiNoteGeneratorTitle'), // New Step
+      content: <p>{t('interactiveTourDialog.aiNoteGeneratorContent')}</p>,
     },
     {
       title: t('interactiveTourDialog.aiAnalysisTitle'),
@@ -414,7 +424,7 @@ export default function PomodoroPage() {
     }
     const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-      playSound(soundId);
+        playSound(soundId);
     } else {
       stopSound();
     }
@@ -477,7 +487,7 @@ export default function PomodoroPage() {
             setTaskForAlert(task);
           } else if (Notification.permission === 'denied') {
              toast({ title: t('notifications.permissionDeniedTitle'), description: t('notifications.permissionDeniedDescription', { appName: APP_NAME }), variant: "destructive" });
-          } else { // default
+          } else {
             Notification.requestPermission().then(permission => {
               if (permission === 'granted') {
                 setTaskForAlert(task);
@@ -485,9 +495,8 @@ export default function PomodoroPage() {
                 toast({ title: t('notifications.permissionDeniedTitle'), description: t('notifications.permissionDeniedDescription', { appName: APP_NAME }), variant: "destructive" });
               }
             });
-             toast({ title: t('notifications.permissionRequestTitle', { appName: APP_NAME }), description: t('notifications.permissionRequestDescription', { appName: APP_NAME }) });
+            toast({ title: t('notifications.permissionRequestTitle', { appName: APP_NAME }), description: t('notifications.permissionRequestDescription', { appName: APP_NAME }) });
           }
-          // Mark as sent regardless of permission to avoid repeated prompts/checks for this specific reminder today
           setTasks(prevTasks =>
             prevTasks.map(t =>
               t.id === task.id ? { ...t, reminderSent: true } : t
@@ -521,6 +530,8 @@ export default function PomodoroPage() {
        if (error.message) {
           if (error.message.includes('API key not valid') || error.message.includes('UNAUTHENTICATED')) {
               errorMessage = "There seems to be an issue with the AI service configuration. Please contact support.";
+          } else if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
+            errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
           } else if (error.message.length < 150) {
               errorMessage = `Sorry, I encountered an issue: ${error.message}`;
           }
@@ -558,28 +569,26 @@ export default function PomodoroPage() {
     }
   };
 
-
-const handleRemoveDefinedWord = async (wordId: string) => {
-  if (!currentUser || isLoadingDailyData || !isSettingsLoaded) {
+  const handleRemoveDefinedWord = async (wordId: string) => {
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) {
       toast({ title: t("errors.actionUnavailableLoading"), variant: "destructive" });
       return;
-  }
-  const wordEntryToRemove = definedWordsList.find(w => w.id === wordId);
-  if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }))) {
+    }
+    const wordEntryToRemove = definedWordsList.find(w => w.id === wordId);
+    if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }))) {
       return;
-  }
-
-  const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList);
-  toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
-
-  try {
-    await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-  } catch (error: any) {
-    console.error("Error saving dictionary after deletion:", error);
-    toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-  }
-};
+    }
+    const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
+    setDefinedWordsList(updatedList); // Update local state first for responsiveness
+    toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
+    try {
+      await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
+    } catch (error: any) {
+      console.error("Error saving dictionary after deletion:", error);
+      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
+      // Optionally revert local state if save fails, or rely on next load to correct it
+    }
+  };
 
   const handleExportMarkdown = () => {
     if (definedWordsList.length === 0) {
@@ -629,13 +638,11 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     if (!confirm(t('notes.confirmDeletePastNotes', { date: format(selectedPastDateForNotes, "PPP") }))) {
         return;
     }
-
     setIsDeletingPastNotes(true);
     const dateKeyToDelete = formatDateToKey(selectedPastDateForNotes);
-
     try {
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.noNotesForDate'));
+      setPastDateNotes(t('notes.noNotesForDate')); // Reflect deletion in UI
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
     } catch (error: any) {
       console.error("Error deleting past notes:", error);
@@ -652,6 +659,61 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     setIsAiSummaryOpen(false);
   };
 
+  const handleGenerateNoteContent = async () => {
+    if (!aiGenerateNotePrompt.trim()) {
+      toast({ title: t('aiNoteGeneratorDialog.errorPromptEmptyTitle'), description: t('aiNoteGeneratorDialog.errorPromptEmptyDesc'), variant: "destructive" });
+      return;
+    }
+    setIsGeneratingNoteText(true);
+    setAiGeneratedNoteText("");
+    try {
+      const result = await generateText({ userPrompt: aiGenerateNotePrompt });
+      setAiGeneratedNoteText(result.generatedText);
+    } catch (error: any) {
+      console.error("AI Note Generation Error:", error);
+      let errorMessage = t('ai.errorDescription');
+       if (error.message) {
+         if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
+            errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
+         } else if (error.message.length < 200) {
+            errorMessage = error.message;
+         }
+       }
+      toast({ title: t('ai.errorTitle'), description: errorMessage, variant: "destructive" });
+      setAiGeneratedNoteText(t('aiNoteGeneratorDialog.errorGenerating'));
+    } finally {
+      setIsGeneratingNoteText(false);
+    }
+  };
+
+  const handleAppendGeneratedTextToNotes = () => {
+    if (!aiGeneratedNoteText) {
+      toast({ title: t('aiNoteGeneratorDialog.nothingToAppend'), variant: "default" });
+      return;
+    }
+    const textToAppend = `\n\n--- ${t('aiNoteGeneratorDialog.appendedTextHeader', { dateTime: new Date().toLocaleString() })} ---\n${aiGeneratedNoteText}\n--- ${t('aiNoteGeneratorDialog.appendedTextFooter')} ---`;
+    setCurrentNotes(prevNotes => prevNotes + textToAppend);
+    toast({ title: t('aiNoteGeneratorDialog.appendSuccessTitleToNotes'), description: t('aiNoteGeneratorDialog.appendSuccessDescToNotes') });
+    setIsAiGenerateNoteDialogOpen(false);
+    setAiGenerateNotePrompt("");
+    setAiGeneratedNoteText("");
+  };
+
+  const handleCopyGeneratedNoteText = () => {
+    if (!aiGeneratedNoteText) {
+      toast({ title: t('aiNoteGeneratorDialog.nothingToCopy'), variant: "default" });
+      return;
+    }
+    navigator.clipboard.writeText(aiGeneratedNoteText)
+      .then(() => {
+        toast({ title: t('aiNoteGeneratorDialog.copySuccessTitle') });
+      })
+      .catch(err => {
+        console.error("Failed to copy text:", err);
+        toast({ title: t('aiNoteGeneratorDialog.copyErrorTitle'), variant: "destructive" });
+      });
+  };
+
   const handleLogout = async () => {
     stopSound();
     await logoutUser();
@@ -666,6 +728,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     );
   }
   if (!currentUser) {
+      // This case should ideally be caught by the useEffect redirect, but as a fallback:
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -716,9 +779,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                 <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
                     <SparklesIcon className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => router.push('/ai-generator')} title={t('tooltips.aiContentGenerator')}>
-                    <Bot className="h-5 w-5" />
-                </Button>
+                {/* Removed AI Generator Page Button */}
                 <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
                 <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
                     <BookOpen className="h-5 w-5" />
@@ -857,21 +918,29 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                       placeholder={t('notes.textareaPlaceholder')}
                       value={currentNotes}
                       onChange={(e) => setCurrentNotes(e.target.value)}
-                      className="min-h-[100px] focus:ring-accent"
+                      className="min-h-[150px] focus:ring-accent" // Increased min-height
                       aria-label={t('notes.currentDayNotesAreaLabel')}
                     />
-                    <Button
-                        variant="outline"
-                        className="mt-3"
-                        onClick={() => triggerAiSummary(
-                          timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
-                          currentSessionType
-                        )}
-                        disabled={isLoadingDailyData || (timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0)}
-                        title={t('tooltips.analyzeCurrentData')}
-                      >
-                        <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => triggerAiSummary(
+                              timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
+                              currentSessionType
+                            )}
+                            disabled={isLoadingDailyData || (timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0)}
+                            title={t('tooltips.analyzeCurrentData')}
+                          >
+                            <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
+                        </Button>
+                         <Button
+                            variant="outline"
+                            onClick={() => setIsAiGenerateNoteDialogOpen(true)}
+                            title={t('tooltips.aiNoteGenerator')}
+                        >
+                            <Wand2 className="mr-2 h-4 w-4" /> {t('buttons.generateWithAI')}
+                        </Button>
+                    </div>
 
                     <Accordion type="multiple" value={openPastNotesAccordion} onValueChange={setOpenPastNotesAccordion} className="w-full pt-4 mt-4 border-t">
                       <AccordionItem value="view-past-notes" className="border-none">
@@ -977,11 +1046,77 @@ const handleRemoveDefinedWord = async (wordId: string) => {
           isLoading={isAiLoading}
           onSaveSummary={handleSaveAiSummaryToNotes}
         />
-        {/* <AiContentGeneratorDialog
-          isOpen={isAiContentGeneratorOpen}
-          onOpenChange={setIsAiContentGeneratorOpen}
-          onAppendToNotes={handleAppendGeneratedTextToNotes}
-        /> */}
+        
+        {/* AI Content Generator Dialog for Notes */}
+        <Dialog open={isAiGenerateNoteDialogOpen} onOpenChange={setIsAiGenerateNoteDialogOpen}>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center">
+                        <Wand2 className="mr-2 h-5 w-5 text-primary" />
+                        {t('aiNoteGeneratorDialog.title')}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {t('aiNoteGeneratorDialog.description')}
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div>
+                        <Label htmlFor="ai-note-prompt-textarea" className="text-sm font-medium">
+                            {t('aiNoteGeneratorDialog.promptLabel')}
+                        </Label>
+                        <Textarea
+                            id="ai-note-prompt-textarea"
+                            placeholder={t('aiNoteGeneratorDialog.promptPlaceholder')}
+                            value={aiGenerateNotePrompt}
+                            onChange={(e) => setAiGenerateNotePrompt(e.target.value)}
+                            className="min-h-[100px] mt-1 focus:ring-accent"
+                            disabled={isGeneratingNoteText}
+                        />
+                    </div>
+                    <Button onClick={handleGenerateNoteContent} disabled={isGeneratingNoteText || !aiGenerateNotePrompt.trim()} className="w-full">
+                        {isGeneratingNoteText ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <SparklesIcon className="mr-2 h-4 w-4" />
+                        )}
+                        {isGeneratingNoteText ? t('aiNoteGeneratorDialog.generatingButton') : t('aiNoteGeneratorDialog.generateButton')}
+                    </Button>
+
+                    {(aiGeneratedNoteText || isGeneratingNoteText) && (
+                        <div className="space-y-2 pt-2">
+                            <h3 className="text-md font-semibold">{t('aiNoteGeneratorDialog.generatedContentTitle')}</h3>
+                            {isGeneratingNoteText ? (
+                                <div className="flex justify-center items-center h-[150px] border rounded-md p-3 bg-muted/30">
+                                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                    <p className="ml-3">{t('aiNoteGeneratorDialog.generatingMessage')}</p>
+                                </div>
+                            ) : (
+                                <ScrollArea className="h-[200px] border rounded-md p-3 bg-muted/30">
+                                    <p className="text-sm whitespace-pre-wrap">{aiGeneratedNoteText}</p>
+                                </ScrollArea>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <DialogFooter className="sm:justify-between gap-2">
+                    <Button variant="outline" onClick={handleCopyGeneratedNoteText} disabled={!aiGeneratedNoteText || isGeneratingNoteText}>
+                        <ClipboardCopy className="mr-2 h-4 w-4" /> {t('buttons.copy')}
+                    </Button>
+                    <div className="flex gap-2">
+                        <DialogClose asChild>
+                            <Button type="button" variant="ghost">
+                                {t('buttons.close')}
+                            </Button>
+                        </DialogClose>
+                        <Button onClick={handleAppendGeneratedTextToNotes} disabled={!aiGeneratedNoteText || isGeneratingNoteText}>
+                            <Save className="mr-2 h-4 w-4" />
+                            {t('buttons.appendToNotes')}
+                        </Button>
+                    </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
         <UserGuideDialog isOpen={isUserGuideOpen} onOpenChange={setIsUserGuideOpen} />
         <InteractiveTourDialog isOpen={isInteractiveTourActive} currentStep={currentTourStep} totalSteps={tourSteps.length} stepData={tourSteps[currentTourStep]} onNext={handleNextTourStep} onSkip={handleFinishTour} />
         <ChatWidgetButton onClick={() => setIsChatOpen(prev => !prev)} />
