@@ -17,7 +17,7 @@ export interface Settings {
   backgroundAnimation: BackgroundAnimationType;
   mouseTrailEffectEnabled: boolean;
   showCoachMarks: boolean;
-  // customSoundscapeUrls: Record<string, string>; // Removed, will be handled by IndexedDB/Firebase Storage
+  customSoundscapeUrls: Record<string, string>;
 }
 
 export interface SessionRecord {
@@ -53,7 +53,6 @@ export interface SoundscapeOption {
     loopEnd?: string;
     indexedDbId?: number;
     mimeType?: string;
-    // audioSrc?: string; // Removed, direct URL input is replaced by uploads
   };
 }
 
@@ -73,6 +72,8 @@ export interface Task {
   id: string;
   text: string;
   completed: boolean;
+  reminderTime?: string; // e.g., "14:30"
+  reminderSent?: boolean;
 }
 
 export interface SummarizeSessionInput {

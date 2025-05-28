@@ -51,7 +51,9 @@
   "tasks": {
     "addTaskPlaceholder": "Tambah tugas baru...",
     "noTasks": "Belum ada tugas. Tambahkan beberapa!",
-    "deleteTask": "Hapus tugas: {{taskText}}"
+    "deleteTask": "Hapus tugas: {{taskText}}",
+    "reminderTimeLabel": "Waktu Pengingat (Opsional)",
+    "reminderSent": "Pengingat terkirim"
   },
   "notes": {
     "textareaPlaceholder": "Tulis tugas, gangguan, atau pemikiran selama sesi Anda...",
@@ -169,14 +171,14 @@
         "content": "Tugas, catatan sesi, entri kamus, dan riwayat sesi (log Pomodoro) Anda secara otomatis disimpan ke Firebase Firestore berdasarkan harian, terkait dengan akun pengguna Anda.\\nIni berarti ketika hari baru dimulai, bagian-bagian ini akan tampak kosong, siap untuk aktivitas hari baru. Data Anda dari hari-hari sebelumnya tetap tersimpan dan dapat diakses."
       },
       "tasks": {
-        "title": "Tugas Hari Ini",
-        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini.\\n* Tandai tugas sebagai selesai menggunakan kotak centang.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas disimpan ke Firestore untuk hari ini."
+        "title": "Tugas & Pengingat Hari Ini",
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas.\\n* Jika waktu pengingat diatur, Anda akan menerima notifikasi browser ketika waktu tersebut tiba (jika notifikasi diaktifkan untuk aplikasi dan browser Anda).\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
       },
       "sessionNotesContext": {
         "title": "Catatan & Konteks Sesi",
         "content": "Di kartu 'Catatan & Konteks Sesi':\\n* Gunakan area teks untuk mencatat pemikiran, ide, atau gangguan selama sesi Anda.\\n* Pilih 'Konteks Sesi' (Umum, Fokus Kerja, Fokus Belajar) dari menu dropdown. Konteks ini membantu AI memberikan umpan balik yang lebih disesuaikan jika Anda menggunakan fitur Analisis AI.\\n* Catatan dan konteks yang Anda pilih disimpan ke Firestore untuk hari ini.\\n* Ringkasan yang dihasilkan AI dapat ditambahkan ke catatan ini menggunakan tombol 'Simpan ke Catatan' di dialog Ringkasan AI."
       },
-      "viewingPastNotes": {
+       "viewingPastNotes": {
         "title": "Melihat & Menghapus Catatan Sebelumnya",
         "content": "Di dalam kartu 'Catatan & Konteks Sesi', Anda dapat memperluas bagian 'Lihat Catatan Sebelumnya'.\\n* Gunakan kalender untuk memilih tanggal sebelumnya.\\n* Catatan (termasuk ringkasan AI yang disimpan pada hari itu) untuk tanggal yang dipilih akan diambil dari Firestore dan ditampilkan di area hanya-baca.\\n* Tombol 'Hapus Catatan untuk [Tanggal]' memungkinkan Anda menghapus catatan untuk hari lampau yang dipilih dari Firestore setelah konfirmasi."
       },
@@ -184,12 +186,12 @@
         "title": "Kamus Sesi",
         "content": "Kartu 'Kamus Sesi' memungkinkan Anda mendapatkan definisi kata bertenaga AI:\\n* Masukkan kata dan klik 'Definisikan'. AI (Gemini) akan memberikan definisi dalam bahasa Inggris dan Indonesia.\\n* Kata yang didefinisikan dan definisinya disimpan untuk hari ini di Firestore.\\n* Anda dapat menghapus entri individual dari kamus hari ini menggunakan ikon tong sampah di sebelah setiap entri.\\n* Semua definisi untuk hari ini dapat diekspor ke file Markdown (.md)."
       },
-      "aiAnalysis": {
+       "aiAnalysis": {
         "title": "Analisis Sesi AI",
         "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI (Genkit dengan Gemini). Klik ikon Kilau (✨) di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti. Ringkasan ini dapat disimpan ke catatan harian Anda untuk hari ini."
       },
       "chatWidget": {
-        "title": "Asisten Chat AI",
+        "title": "Asisten Chat AI", 
         "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami (didukung oleh Gemini via Genkit).\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
       "sessionHistory": {
@@ -202,7 +204,7 @@
       },
       "settings": {
         "title": "Pengaturan (Kustomisasi)",
-        "content": "Klik ikon roda gigi (⚙️) di header untuk membuka Pengaturan. Pengaturan diatur ke dalam tab:\\n* Timer: Sesuaikan durasi untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang. Atur Interval Istirahat Panjang (jumlah sesi kerja sebelum istirahat panjang). Aktifkan/nonaktifkan mulai otomatis untuk istirahat dan Pomodoro. Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara: Pilih suara latar untuk periode kerja dan istirahat. Sesuaikan volume utama.\\n* Tampilan: Pilih animasi latar belakang visual. Aktifkan/nonaktifkan efek partikel yang mengikuti mouse Anda. Aktifkan/nonaktifkan tur panduan awal."
+        "content": "Klik ikon roda gigi (⚙️) di header untuk membuka Pengaturan. Pengaturan diatur ke dalam tab:\\n* Timer: Sesuaikan durasi untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang. Atur Interval Istirahat Panjang (jumlah sesi kerja sebelum istirahat panjang). Aktifkan/nonaktifkan mulai otomatis untuk istirahat dan Pomodoro. Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara: Pilih suara latar untuk periode kerja dan istirahat. Sesuaikan volume utama. Unggah suara latar kustom Anda sendiri.\\n* Tampilan: Pilih animasi latar belakang visual. Aktifkan/nonaktifkan efek partikel yang mengikuti mouse Anda. Aktifkan/nonaktifkan tur panduan awal."
       },
       "customSoundscapes": {
         "title": "Suara Latar Kustom (Pengaturan - Tab Suara)",
@@ -228,6 +230,8 @@
     "collapsibleCardsContent": "Bagian untuk Tugas, Kamus, dan Catatan di bawah timer dapat diperluas atau dilipat dengan mengklik judulnya.",
     "tasksTitle": "Tugas",
     "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas disimpan per hari ke database Firebase Anda.",
+    "taskRemindersTitle": "Pengingat Tugas",
+    "taskRemindersContent": "Anda sekarang dapat mengatur waktu pengingat opsional (JJ:mm) untuk setiap tugas. Anda akan mendapatkan notifikasi browser ketika tiba waktunya untuk tugas itu!",
     "notesContextTitle": "Catatan & Konteks Sesi",
     "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan dan konteks disimpan per hari ke Firebase.",
     "aiAnalysisTitle": "Analisis AI",
@@ -254,7 +258,8 @@
     "breakTimeOver": "Waktu istirahat habis!",
     "timeForWork": "Waktunya untuk kerja.",
     "timeForShortBreak": "Waktunya untuk istirahat pendek.",
-    "timeForLongBreak": "Waktunya untuk istirahat panjang."
+    "timeForLongBreak": "Waktunya untuk istirahat panjang.",
+    "taskReminderTitle": "Pengingat Tugas"
   },
   "ai": {
     "noDataForSummary": "Data sesi, tugas, atau catatan tidak cukup untuk menghasilkan ringkasan.",
@@ -392,7 +397,9 @@
     "firestoreSaveContextDescription": "Tidak dapat menyimpan konteks sesi ke database.",
     "firestoreSaveLogDescription": "Tidak dapat menyimpan log sesi ke database.",
     "firestoreDeleteTitle": "Kesalahan Menghapus Data",
-    "firestoreDeletePastNotesDescription": "Tidak dapat menghapus catatan sebelumnya dari database."
+    "firestoreDeletePastNotesDescription": "Tidak dapat menghapus catatan sebelumnya dari database.",
+    "googleAIAPIServiceDisabled": "Layanan {{serviceName}} saat ini tidak tersedia atau tidak diaktifkan untuk proyek Anda. Silakan periksa pengaturan proyek Google Cloud Anda atau coba lagi nanti.",
+    "actionUnavailableLoading": "Tindakan ini tidak tersedia saat data sedang dimuat atau jika belum masuk."
   },
    "pastDataPage": {
     "title": "Lihat Data Sesi Lampau",

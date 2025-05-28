@@ -123,6 +123,76 @@ export default function PomodoroPage() {
     isSettingsLoaded: isSettingsLoaded,
   });
 
+  const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
+
+  const handleTimerStart = useCallback(() => {}, []);
+  const handleTimerPause = useCallback(() => {}, []);
+  const handleTimerResetCb = useCallback(() => {}, []); // Renamed to avoid conflict if resetTimer name is used elsewhere
+  const handleTimerSkip = useCallback(() => {}, []);
+
+
+  const getModeDisplayName = useCallback((mode: TimerMode) => {
+    switch(mode) {
+      case 'work': return t('timerModes.work');
+      case 'shortBreak': return t('timerModes.shortBreak');
+      case 'longBreak': return t('timerModes.longBreak');
+      default: return t('timerModes.focus');
+    }
+  }, [t]);
+
+  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType) => {
+    if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
+      toast({ title: t('ai.noDataForSummary'), variant: "destructive" });
+      return;
+    }
+    setIsAiLoading(true);
+    setIsAiSummaryOpen(true);
+    setAiSummary(null);
+
+    const sessionDetailsString = logForSummary.map(s =>
+      `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? t('sessionHistoryDrawer.statusCompleted') : t('sessionHistoryDrawer.statusSkipped')})`
+    ).join('\n');
+
+    const tasksString = tasks.length > 0
+      ? `${t('cards.tasksTitle')}:\n` + tasks.map(task => `- [${task.completed ? 'x' : ' '}] ${task.text}`).join('\n')
+      : t('tasks.noTasks');
+
+    const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : t('ai.noSessionLog')}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || t('ai.noNotes')}`;
+
+    try {
+      const result = await summarizeSession({ sessionDetails: fullDetails, sessionType });
+      setAiSummary(result);
+    } catch (error: any) {
+      console.error("AI Summary Error:", error);
+      toast({ title: t('ai.errorTitle'), description: error.message || t('ai.errorDescription'), variant: "destructive" });
+      setAiSummary({ summary: t('ai.errorSummary'), improvements: t('ai.errorImprovements')});
+    } finally {
+      setIsAiLoading(false);
+    }
+  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
+
+  const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
+    if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
+       if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
+        setTimeout(() => { // Defer AI summary to avoid state update conflicts
+          triggerAiSummary(sessionLogFromHook, currentSessionType);
+        }, 0);
+       }
+    }
+  }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType]);
+
+
+  const timer = useTimerCore({
+    settings,
+    currentDateKey,
+    onIntervalEnd: handleIntervalEnd,
+    onTimerStart: handleTimerStart,
+    onTimerPause: handleTimerPause,
+    onTimerReset: handleTimerResetCb,
+    onTimerSkip: handleTimerSkip,
+    getTranslatedText: t,
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
       const newDateKey = getCurrentDateString();
@@ -131,6 +201,8 @@ export default function PomodoroPage() {
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
         setOpenPastNotesAccordion([]);
+        // When date changes, reset reminderSent status for all tasks for the new day
+        setTasks(prevTasks => prevTasks.map(task => ({ ...task, reminderSent: false })));
       }
     }, 60000); // Check every minute
     return () => clearInterval(interval);
@@ -148,7 +220,7 @@ export default function PomodoroPage() {
           loadDictionaryForDay(currentUser.uid, currentDateKey),
           loadSessionContextForDay(currentUser.uid, currentDateKey),
         ]);
-        setTasks(loadedTasks);
+        setTasks(loadedTasks.map(task => ({...task, reminderSent: task.reminderSent || false }))); // Ensure reminderSent is initialized
         setCurrentNotes(loadedNotes || "");
         setDefinedWordsList(loadedDict);
         setCurrentSessionType(loadedContext || 'general');
@@ -169,10 +241,13 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
-      console.error("Error saving tasks to Firestore:", error);
-      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
-    });
+    // Only save if tasks array is not empty or if it was previously non-empty (to clear it)
+    if (tasks.length > 0 || (tasks.length === 0 && tasks !== undefined)) {
+        saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
+        console.error("Error saving tasks to Firestore:", error);
+        toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
+        });
+    }
   }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
 
@@ -189,10 +264,12 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
-      console.error("Error saving dictionary to Firestore:", error);
-      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-    });
+    if(definedWordsList.length > 0 || (definedWordsList.length === 0 && definedWordsList !== undefined)) {
+        saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
+        console.error("Error saving dictionary to Firestore:", error);
+        toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
+        });
+    }
   }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
 
@@ -234,6 +311,10 @@ export default function PomodoroPage() {
     {
       title: t('interactiveTourDialog.tasksTitle'),
       content: <p>{t('interactiveTourDialog.tasksContent')}</p>,
+    },
+    {
+      title: t('interactiveTourDialog.taskRemindersTitle'),
+      content: <p>{t('interactiveTourDialog.taskRemindersContent')}</p>,
     },
     {
       title: t('interactiveTourDialog.notesContextTitle'),
@@ -296,80 +377,14 @@ export default function PomodoroPage() {
     localStorage.setItem(INTERACTIVE_TOUR_STORAGE_KEY, "true");
   };
 
-  const getModeDisplayName = useCallback((mode: TimerMode) => {
-    switch(mode) {
-      case 'work': return t('timerModes.work');
-      case 'shortBreak': return t('timerModes.shortBreak');
-      case 'longBreak': return t('timerModes.longBreak');
-      default: return t('timerModes.focus');
-    }
-  }, [t]);
-
-  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType) => {
-    if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
-      toast({ title: t('ai.noDataForSummary'), variant: "destructive" });
-      return;
-    }
-    setIsAiLoading(true);
-    setIsAiSummaryOpen(true);
-    setAiSummary(null);
-
-    const sessionDetailsString = logForSummary.map(s =>
-      `${getModeDisplayName(s.mode)}: ${s.durationMinutes} min (${s.completed ? t('sessionHistoryDrawer.statusCompleted') : t('sessionHistoryDrawer.statusSkipped')})`
-    ).join('\n');
-
-    const tasksString = tasks.length > 0
-      ? `${t('cards.tasksTitle')}:\n` + tasks.map(task => `- [${task.completed ? 'x' : ' '}] ${task.text}`).join('\n')
-      : t('tasks.noTasks');
-
-    const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : t('ai.noSessionLog')}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || t('ai.noNotes')}`;
-
-    try {
-      const result = await summarizeSession({ sessionDetails: fullDetails, sessionType });
-      setAiSummary(result);
-    } catch (error: any) {
-      console.error("AI Summary Error:", error);
-      toast({ title: t('ai.errorTitle'), description: error.message || t('ai.errorDescription'), variant: "destructive" });
-      setAiSummary({ summary: t('ai.errorSummary'), improvements: t('ai.errorImprovements')});
-    } finally {
-      setIsAiLoading(false);
-    }
-  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
-
-  const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
-    if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
-       if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-        setTimeout(() => {
-          triggerAiSummary(sessionLogFromHook, currentSessionType);
-        }, 0);
-       }
-    }
-  }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType]);
-
-  const handleTimerStart = useCallback(() => {}, []);
-  const handleTimerPause = useCallback(() => {}, []);
-  const handleTimerReset = useCallback(() => {}, []);
-  const handleTimerSkip = useCallback(() => {}, []);
-
-
-  const timer = useTimerCore({
-    settings,
-    currentDateKey,
-    onIntervalEnd: handleIntervalEnd,
-    onTimerStart: handleTimerStart,
-    onTimerPause: handleTimerPause,
-    onTimerReset: handleTimerReset,
-    onTimerSkip: handleTimerSkip,
-    getTranslatedText: t,
-  });
 
   useEffect(() => {
-    if (!currentUser || !isSettingsLoaded) return;
-    if (!isLoadingDailyData && timer.sessionLog.length > 0) {
-      saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
-        console.error("Error saving session log to Firestore:", error);
-        toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
-      });
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    if (timer.sessionLog.length > 0 || (timer.sessionLog.length === 0 && timer.sessionLog !== undefined)) {
+        saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
+            console.error("Error saving session log to Firestore:", error);
+            toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
+        });
     }
   }, [timer.sessionLog, currentDateKey, currentUser, isSettingsLoaded, isLoadingDailyData, toast, t]);
 
@@ -379,30 +394,28 @@ export default function PomodoroPage() {
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
-  const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
 
+  const { playSound: actualPlaySound, stopSound: actualStopSound, isReady: actualIsSoundPlayerReady } = soundscapePlayer;
+  
   useEffect(() => {
-    if (!isSettingsLoaded || !isSoundPlayerReady) {
-      stopSound();
+    if (!isSettingsLoaded || !actualIsSoundPlayerReady) {
+      actualStopSound();
       return;
     }
     const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-       playSound(soundId);
+       actualPlaySound(soundId);
     } else {
-      stopSound();
+      actualStopSound();
     }
   }, [
     timer.mode,
     timer.isRunning,
     isSettingsLoaded,
-    isSoundPlayerReady,
-    getActiveSoundscapeId,
-    playSound,
-    stopSound,
-    isMuted,
-    settings.soundscapeWork,
-    settings.soundscapeBreak
+    actualIsSoundPlayerReady,
+    getActiveSoundscapeId, 
+    actualPlaySound, 
+    actualStopSound, 
   ]);
 
   const formatTime = (seconds: number) => {
@@ -419,10 +432,66 @@ export default function PomodoroPage() {
   const progressPercentage = ((currentModeDuration - timer.timeLeft) / currentModeDuration) * 100;
 
   const handleToggleMute = () => setIsMuted(prevMuted => !prevMuted);
-  const handleAddTask = (taskText: string) => setTasks(prev => [...prev, { id: Date.now().toString(), text: taskText, completed: false }]);
+
+  const handleAddTask = (taskText: string, reminderTime?: string) => {
+    setTasks(prev => [...prev, {
+      id: Date.now().toString(),
+      text: taskText,
+      completed: false,
+      reminderTime: reminderTime || undefined,
+      reminderSent: false,
+    }]);
+  };
   const handleToggleTask = (taskId: string) => setTasks(prev => prev.map(task => task.id === taskId ? { ...task, completed: !task.completed } : task));
   const handleRemoveTask = (taskId: string) => setTasks(prev => prev.filter(task => task.id !== taskId));
   const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
+
+  // Task Reminder Notification Logic
+  const sendTaskNotification = useCallback((taskTitle: string) => {
+    if (!settings.notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission === "granted") {
+      new Notification(t('notifications.taskReminderTitle'), {
+        body: taskTitle,
+        icon: '/icons/icon-192x192.png', // Assuming you have this PWA icon
+      });
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          new Notification(t('notifications.taskReminderTitle'), {
+            body: taskTitle,
+            icon: '/icons/icon-192x192.png',
+          });
+        }
+      });
+    }
+  }, [settings.notificationsEnabled, t]);
+
+  useEffect(() => {
+    if (!isSettingsLoaded || tasks.length === 0) return;
+
+    const checkReminders = () => {
+      const now = new Date();
+      const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      tasks.forEach(task => {
+        if (task.reminderTime && !task.completed && !task.reminderSent && task.reminderTime === currentTime) {
+          sendTaskNotification(task.text);
+          setTasks(prevTasks =>
+            prevTasks.map(t =>
+              t.id === task.id ? { ...t, reminderSent: true } : t
+            )
+          );
+        }
+      });
+    };
+
+    // Check immediately on load and then set interval
+    checkReminders();
+    const intervalId = setInterval(checkReminders, 30000); // Check every 30 seconds
+
+    return () => clearInterval(intervalId);
+  }, [tasks, sendTaskNotification, isSettingsLoaded]);
+
 
   const handleSendChatMessage = async () => {
     if (!chatInputValue.trim()) return;
@@ -456,24 +525,43 @@ export default function PomodoroPage() {
       setDefinedWordsList(prev => [newEntry, ...prev.filter(w => w.word.toLowerCase() !== word.trim().toLowerCase())]);
     } catch (error: any) {
       console.error("Error defining word:", error);
-      toast({ title: t('dictionaryCard.errorDefiningTitle'), description: error.message || t('dictionaryCard.errorDefiningDescription'), variant: "destructive" });
+      let errorMessage = t('dictionaryCard.errorDefiningDescription');
+      if (error instanceof Error) {
+          if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
+              errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
+          } else if (error.message) {
+              errorMessage = error.message;
+          }
+      }
+      toast({ title: t('dictionaryCard.errorDefiningTitle'), description: errorMessage, variant: "destructive" });
     } finally {
       setIsDefiningWord(false);
     }
   };
 
 const handleRemoveDefinedWord = async (wordId: string) => {
-  if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+  if (!currentUser || isLoadingDailyData || !isSettingsLoaded) {
+      toast({ title: t("errors.actionUnavailableLoading"), variant: "destructive" });
+      return;
+  }
+  if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: definedWordsList.find(w => w.id === wordId)?.word || 'entry' }))) {
+      return;
+  }
   const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList);
+  setDefinedWordsList(updatedList); // Optimistic UI update
 
   try {
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordToRemove }) });
+    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
+    // Revert optimistic update if save fails by re-fetching or restoring previous state
+    // For simplicity here, we'll rely on next load or user action to correct if save fails badly
+    // Or, you could re-fetch:
+    // const reloadedDict = await loadDictionaryForDay(currentUser.uid, currentDateKey);
+    // setDefinedWordsList(reloadedDict);
   }
 };
 
@@ -531,7 +619,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
 
     try {
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.noNotesForDate'));
+      setPastDateNotes(t('notes.noNotesForDate')); // Update UI to show notes are gone
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
     } catch (error: any) {
       console.error("Error deleting past notes:", error);
@@ -549,6 +637,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   };
 
   const handleLogout = async () => {
+    actualStopSound(); // Stop sound before logging out
     await logoutUser();
     router.push('/auth/login');
   };
@@ -561,9 +650,8 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     );
   }
   if (!currentUser) {
-      if (typeof window !== 'undefined') {
-          router.push('/auth/login');
-      }
+      // This case should ideally be caught by the redirect effect,
+      // but as a fallback, render loading or null to prevent page content flash.
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -595,9 +683,8 @@ const handleRemoveDefinedWord = async (wordId: string) => {
         {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />}
 
         <header className="w-full max-w-2xl flex items-center py-4 relative z-[1]">
-          {/* Left: Logo */}
           <div className="flex-shrink-0">
-            {isMobile ? (
+             {isMobile ? (
               <h1 className="text-xl font-semibold animate-title-reveal">RS</h1>
             ) : (
               <div className="flex items-center space-x-2">
@@ -606,7 +693,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             )}
           </div>
 
-          {/* Center: Group of main action buttons */}
           <div className="flex-1 flex justify-center items-center space-x-1 px-2">
             <div className="flex items-center space-x-1">
               <LanguageSwitcher />
@@ -625,8 +711,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             </div>
           </div>
 
-          {/* Right: Logout button */}
-          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center"> {/* Ensures consistent spacing */}
+          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
             {currentUser && (
               <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
                 <LogOut className="h-5 w-5" />
@@ -762,7 +847,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                           timer.sessionLog.length > 0 ? timer.sessionLog : (currentNotes || tasks.length > 0 ? [{id: 'data-only', startTime:0, endTime:0, mode:'work', durationMinutes:0, completed:false}] : []),
                           currentSessionType
                         )}
-                        disabled={timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0}
+                        disabled={isLoadingDailyData || (timer.sessionLog.length === 0 && !currentNotes && tasks.length === 0)}
                         title={t('tooltips.analyzeCurrentData')}
                       >
                         <SparklesIcon className="mr-2 h-4 w-4" /> {t('buttons.analyzeData')}
@@ -856,3 +941,5 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     </>
   );
 }
+
+

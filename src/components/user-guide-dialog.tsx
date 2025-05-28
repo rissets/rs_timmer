@@ -56,8 +56,8 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       contentKey: "userGuideDialog.sections.dailyDataStorage.content",
     },
     {
-      titleKey: "userGuideDialog.sections.tasks.title",
-      contentKey: "userGuideDialog.sections.tasks.content",
+      titleKey: "userGuideDialog.sections.tasks.title", // Updated title
+      contentKey: "userGuideDialog.sections.tasks.content", // Updated content key
     },
     {
       titleKey: "userGuideDialog.sections.sessionNotesContext.title",
@@ -122,9 +122,7 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
         return <p key={index} className="mb-2 last:mb-0">{line}</p>;
       }
     });
-    // This is a simplified renderer. If a list is the last element, 
-    // the closing </ul> might not be handled perfectly by this structure.
-    // For complex markdown, a dedicated library would be better.
+
     return <>{renderedLines}</>;
   };
 

@@ -51,7 +51,9 @@
   "tasks": {
     "addTaskPlaceholder": "Add a new task...",
     "noTasks": "No tasks yet. Add some!",
-    "deleteTask": "Delete task: {{taskText}}"
+    "deleteTask": "Delete task: {{taskText}}",
+    "reminderTimeLabel": "Reminder Time (Optional)",
+    "reminderSent": "Reminder sent"
   },
   "notes": {
     "textareaPlaceholder": "Jot down tasks, distractions, or thoughts during your session...",
@@ -169,8 +171,8 @@
         "content": "Your tasks, session notes, dictionary entries, and session history (Pomodoro logs) are automatically saved to Firebase Firestore on a per-day basis, associated with your user account.\\nThis means when a new day begins, these sections will appear empty, ready for the new day's activities. Your data from previous days remains stored and accessible."
       },
       "tasks": {
-        "title": "Today's Tasks",
-        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day.\\n* Mark tasks as complete using the checkboxes.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks are saved to Firestore for the current day."
+        "title": "Today's Tasks & Reminders",
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task.\\n* If a reminder time is set, you'll receive a browser notification when that time arrives (if notifications are enabled for the app and your browser).\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
@@ -184,12 +186,12 @@
         "title": "Session Dictionary",
         "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore.\\n* You can remove individual entries from the current day's dictionary using the trash icon next to each entry.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
       },
-      "aiAnalysis": {
+       "aiAnalysis": {
         "title": "AI Session Analysis",
         "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant",
+        "title": "AI Chat Assistant", 
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini via Genkit).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
@@ -202,7 +204,7 @@
       },
       "settings": {
         "title": "Settings (Customization)",
-        "content": "Click the gear icon (⚙️) in the header to open Settings. The settings are organized into tabs:\\n* Timer: Customize lengths for Work, Short Break, and Long Break intervals. Set the Long Break Interval (number of work sessions before a long break). Toggle auto-start for breaks and Pomodoros. Enable/disable browser notifications for interval ends.\\n* Sound: Choose soundscapes for work and break periods. Adjust master volume.\\n* Appearance: Select visual background animations. Enable/disable a particle effect that follows your mouse. Toggle the initial guided tour on/off."
+        "content": "Click the gear icon (⚙️) in the header to open Settings. The settings are organized into tabs:\\n* Timer: Customize lengths for Work, Short Break, and Long Break intervals. Set the Long Break Interval (number of work sessions before a long break). Toggle auto-start for breaks and Pomodoros. Enable/disable browser notifications for interval ends.\\n* Sound: Choose soundscapes for work and break periods. Adjust master volume. Upload your own custom soundscapes.\\n* Appearance: Select visual background animations. Enable/disable a particle effect that follows your mouse. Toggle the initial guided tour on/off."
       },
       "customSoundscapes": {
         "title": "Custom Soundscapes (Settings - Sound Tab)",
@@ -228,6 +230,8 @@
     "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Notes below the timer can be expanded or collapsed by clicking their titles.",
     "tasksTitle": "Tasks",
     "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks are saved per day to your Firebase database.",
+    "taskRemindersTitle": "Task Reminders",
+    "taskRemindersContent": "You can now set an optional reminder time (HH:mm) for each task. You'll get a browser notification when it's time for that task!",
     "notesContextTitle": "Session Notes & Context",
     "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
     "aiAnalysisTitle": "AI Analysis",
@@ -254,7 +258,8 @@
     "breakTimeOver": "Break time is over!",
     "timeForWork": "Time for work.",
     "timeForShortBreak": "Time for a short break.",
-    "timeForLongBreak": "Time for a long break."
+    "timeForLongBreak": "Time for a long break.",
+    "taskReminderTitle": "Task Reminder"
   },
   "ai": {
     "noDataForSummary": "Not enough session data, tasks, or notes to generate a summary.",
@@ -392,7 +397,9 @@
     "firestoreSaveContextDescription": "Could not save session context to the database.",
     "firestoreSaveLogDescription": "Could not save session log to the database.",
     "firestoreDeleteTitle": "Data Deletion Error",
-    "firestoreDeletePastNotesDescription": "Could not delete past notes from the database."
+    "firestoreDeletePastNotesDescription": "Could not delete past notes from the database.",
+    "googleAIAPIServiceDisabled": "The {{serviceName}} is currently unavailable or not enabled for your project. Please check your Google Cloud project settings or try again later.",
+    "actionUnavailableLoading": "This action is unavailable while data is loading or if not logged in."
   },
   "pastDataPage": {
     "title": "View Past Session Data",
