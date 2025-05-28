@@ -56,8 +56,8 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       contentKey: "userGuideDialog.sections.dailyDataStorage.content",
     },
     {
-      titleKey: "userGuideDialog.sections.tasks.title", // Updated title
-      contentKey: "userGuideDialog.sections.tasks.content", // Updated content key
+      titleKey: "userGuideDialog.sections.tasks.title", 
+      contentKey: "userGuideDialog.sections.tasks.content", 
     },
     {
       titleKey: "userGuideDialog.sections.sessionNotesContext.title",
@@ -160,3 +160,4 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
     </Dialog>
   );
 }
+

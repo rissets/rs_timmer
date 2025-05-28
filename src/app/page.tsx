@@ -127,8 +127,8 @@ export default function PomodoroPage() {
 
   const handleTimerStart = useCallback(() => {}, []);
   const handleTimerPause = useCallback(() => {}, []);
-  const handleTimerResetCb = useCallback(() => {}, []); // Renamed to avoid conflict if resetTimer name is used elsewhere
-  const handleTimerSkip = useCallback(() => {}, []);
+  const handleTimerResetCb = useCallback(() => {}, []);
+  const handleTimerSkipCb = useCallback(() => {}, []);
 
 
   const getModeDisplayName = useCallback((mode: TimerMode) => {
@@ -174,7 +174,7 @@ export default function PomodoroPage() {
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
     if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
        if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-        setTimeout(() => { // Defer AI summary to avoid state update conflicts
+        setTimeout(() => {
           triggerAiSummary(sessionLogFromHook, currentSessionType);
         }, 0);
        }
@@ -189,7 +189,7 @@ export default function PomodoroPage() {
     onTimerStart: handleTimerStart,
     onTimerPause: handleTimerPause,
     onTimerReset: handleTimerResetCb,
-    onTimerSkip: handleTimerSkip,
+    onTimerSkip: handleTimerSkipCb,
     getTranslatedText: t,
   });
 
@@ -201,10 +201,9 @@ export default function PomodoroPage() {
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
         setOpenPastNotesAccordion([]);
-        // When date changes, reset reminderSent status for all tasks for the new day
         setTasks(prevTasks => prevTasks.map(task => ({ ...task, reminderSent: false })));
       }
-    }, 60000); // Check every minute
+    }, 60000);
     return () => clearInterval(interval);
   }, [currentDateKey]);
 
@@ -220,7 +219,7 @@ export default function PomodoroPage() {
           loadDictionaryForDay(currentUser.uid, currentDateKey),
           loadSessionContextForDay(currentUser.uid, currentDateKey),
         ]);
-        setTasks(loadedTasks.map(task => ({...task, reminderSent: task.reminderSent || false }))); // Ensure reminderSent is initialized
+        setTasks(loadedTasks.map(task => ({...task, reminderSent: task.reminderSent || false })));
         setCurrentNotes(loadedNotes || "");
         setDefinedWordsList(loadedDict);
         setCurrentSessionType(loadedContext || 'general');
@@ -241,7 +240,6 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    // Only save if tasks array is not empty or if it was previously non-empty (to clear it)
     if (tasks.length > 0 || (tasks.length === 0 && tasks !== undefined)) {
         saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
         console.error("Error saving tasks to Firestore:", error);
@@ -446,25 +444,41 @@ export default function PomodoroPage() {
   const handleRemoveTask = (taskId: string) => setTasks(prev => prev.filter(task => task.id !== taskId));
   const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
 
-  // Task Reminder Notification Logic
   const sendTaskNotification = useCallback((taskTitle: string) => {
     if (!settings.notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) return;
+
     if (Notification.permission === "granted") {
       new Notification(t('notifications.taskReminderTitle'), {
         body: taskTitle,
-        icon: '/icons/icon-192x192.png', // Assuming you have this PWA icon
+        icon: '/icons/icon-192x192.png',
       });
-    } else if (Notification.permission !== 'denied') {
+    } else if (Notification.permission === "denied") {
+      toast({
+        title: t('notifications.permissionDeniedTitle'),
+        description: t('notifications.permissionDeniedDescription'),
+        variant: 'destructive',
+      });
+    } else { // 'default'
+      toast({
+        title: t('notifications.permissionRequestTitle'),
+        description: t('notifications.permissionRequestDescription'),
+      });
       Notification.requestPermission().then(permission => {
         if (permission === "granted") {
           new Notification(t('notifications.taskReminderTitle'), {
             body: taskTitle,
             icon: '/icons/icon-192x192.png',
           });
+        } else if (permission === "denied") {
+          toast({
+            title: t('notifications.permissionDeniedTitle'),
+            description: t('notifications.permissionDeniedDescription'),
+            variant: 'destructive',
+          });
         }
       });
     }
-  }, [settings.notificationsEnabled, t]);
+  }, [settings.notificationsEnabled, t, toast]);
 
   useEffect(() => {
     if (!isSettingsLoaded || tasks.length === 0) return;
@@ -485,9 +499,8 @@ export default function PomodoroPage() {
       });
     };
 
-    // Check immediately on load and then set interval
     checkReminders();
-    const intervalId = setInterval(checkReminders, 30000); // Check every 30 seconds
+    const intervalId = setInterval(checkReminders, 30000);
 
     return () => clearInterval(intervalId);
   }, [tasks, sendTaskNotification, isSettingsLoaded]);
@@ -549,7 +562,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   }
   const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList); // Optimistic UI update
+  setDefinedWordsList(updatedList);
 
   try {
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
@@ -557,11 +570,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-    // Revert optimistic update if save fails by re-fetching or restoring previous state
-    // For simplicity here, we'll rely on next load or user action to correct if save fails badly
-    // Or, you could re-fetch:
-    // const reloadedDict = await loadDictionaryForDay(currentUser.uid, currentDateKey);
-    // setDefinedWordsList(reloadedDict);
   }
 };
 
@@ -619,7 +627,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
 
     try {
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.noNotesForDate')); // Update UI to show notes are gone
+      setPastDateNotes(t('notes.noNotesForDate')); 
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
     } catch (error: any) {
       console.error("Error deleting past notes:", error);
@@ -637,7 +645,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   };
 
   const handleLogout = async () => {
-    actualStopSound(); // Stop sound before logging out
+    actualStopSound();
     await logoutUser();
     router.push('/auth/login');
   };
@@ -650,8 +658,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     );
   }
   if (!currentUser) {
-      // This case should ideally be caught by the redirect effect,
-      // but as a fallback, render loading or null to prevent page content flash.
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -941,5 +947,4 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     </>
   );
 }
-
 

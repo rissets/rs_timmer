@@ -174,7 +174,7 @@
       },
       "tasks": {
         "title": "Tugas & Pengingat Hari Ini",
-        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur, Anda akan menerima notifikasi browser ketika waktu tersebut tiba (jika notifikasi diaktifkan untuk aplikasi dan browser Anda).\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur, Anda akan menerima notifikasi browser ketika waktu tersebut tiba (jika notifikasi diaktifkan untuk aplikasi dan browser Anda). Pastikan Anda telah memberikan izin notifikasi ke situs ini di pengaturan browser Anda.\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
       },
       "sessionNotesContext": {
         "title": "Catatan & Konteks Sesi",
@@ -206,7 +206,7 @@
       },
       "settings": {
         "title": "Pengaturan (Kustomisasi)",
-        "content": "Klik ikon roda gigi (⚙️) di header untuk membuka Pengaturan. Pengaturan diatur ke dalam tab:\\n* Timer: Sesuaikan durasi untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang. Atur Interval Istirahat Panjang (jumlah sesi kerja sebelum istirahat panjang). Aktifkan/nonaktifkan mulai otomatis untuk istirahat dan Pomodoro. Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara: Pilih suara latar untuk periode kerja dan istirahat. Sesuaikan volume utama. Unggah suara latar kustom Anda sendiri dari file lokal (disimpan di IndexedDB browser Anda).\\n* Tampilan: Pilih animasi latar belakang visual. Aktifkan/nonaktifkan efek partikel yang mengikuti mouse Anda. Aktifkan/nonaktifkan tur panduan awal."
+        "content": "Klik ikon roda gigi (⚙️) di header untuk membuka Pengaturan. Pengaturan diatur ke dalam tab:\\n* Timer: Sesuaikan durasi untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang. Atur Interval Istirahat Panjang (jumlah sesi kerja sebelum istirahat panjang). Aktifkan/nonaktifkan mulai otomatis untuk istirahat dan Pomodoro. Aktifkan/nonaktifkan notifikasi browser untuk akhir interval dan pengingat tugas.\\n* Suara: Pilih suara latar untuk periode kerja dan istirahat. Sesuaikan volume utama. Unggah suara latar kustom Anda sendiri dari file lokal (disimpan di IndexedDB browser Anda).\\n* Tampilan: Pilih animasi latar belakang visual. Aktifkan/nonaktifkan efek partikel yang mengikuti mouse Anda. Aktifkan/nonaktifkan tur panduan awal."
       },
       "customSoundscapes": {
         "title": "Suara Latar Kustom (Pengaturan - Tab Suara)",
@@ -261,7 +261,11 @@
     "timeForWork": "Waktunya untuk kerja.",
     "timeForShortBreak": "Waktunya untuk istirahat pendek.",
     "timeForLongBreak": "Waktunya untuk istirahat panjang.",
-    "taskReminderTitle": "Pengingat Tugas"
+    "taskReminderTitle": "Pengingat Tugas",
+    "permissionDeniedTitle": "Izin Notifikasi Ditolak",
+    "permissionDeniedDescription": "Pengingat tugas tidak akan ditampilkan. Harap aktifkan izin notifikasi untuk situs ini di pengaturan browser Anda.",
+    "permissionRequestTitle": "Aktifkan Notifikasi?",
+    "permissionRequestDescription": "RS Timer memerlukan izin untuk menampilkan pengingat tugas. Silakan periksa browser Anda untuk permintaan izin."
   },
   "ai": {
     "noDataForSummary": "Data sesi, tugas, atau catatan tidak cukup untuk menghasilkan ringkasan.",
@@ -419,3 +423,4 @@
     "noDictionaryForDay": "Tidak ada entri kamus yang disimpan untuk hari ini."
   }
 }
+

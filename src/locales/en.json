@@ -173,7 +173,7 @@
       },
       "tasks": {
         "title": "Today's Tasks & Reminders",
-        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set, you'll receive a browser notification when that time arrives (if notifications are enabled for the app and your browser).\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set, you'll receive a browser notification when that time arrives (if notifications are enabled for the app and your browser). Ensure you've granted notification permissions to this site in your browser settings.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
@@ -205,7 +205,7 @@
       },
       "settings": {
         "title": "Settings (Customization)",
-        "content": "Click the gear icon (⚙️) in the header to open Settings. The settings are organized into tabs:\\n* Timer: Customize lengths for Work, Short Break, and Long Break intervals. Set the Long Break Interval (number of work sessions before a long break). Toggle auto-start for breaks and Pomodoros. Enable/disable browser notifications for interval ends.\\n* Sound: Choose soundscapes for work and break periods. Adjust master volume. Upload your own custom soundscapes from local files (stored in your browser's IndexedDB).\\n* Appearance: Select visual background animations. Enable/disable a particle effect that follows your mouse. Toggle the initial guided tour on/off."
+        "content": "Click the gear icon (⚙️) in the header to open Settings. The settings are organized into tabs:\\n* Timer: Customize lengths for Work, Short Break, and Long Break intervals. Set the Long Break Interval (number of work sessions before a long break). Toggle auto-start for breaks and Pomodoros. Enable/disable browser notifications for interval ends and task reminders.\\n* Sound: Choose soundscapes for work and break periods. Adjust master volume. Upload your own custom soundscapes from local files (stored in your browser's IndexedDB).\\n* Appearance: Select visual background animations. Enable/disable a particle effect that follows your mouse. Toggle the initial guided tour on/off."
       },
       "customSoundscapes": {
         "title": "Custom Soundscapes (Settings - Sound Tab)",
@@ -260,7 +260,11 @@
     "timeForWork": "Time for work.",
     "timeForShortBreak": "Time for a short break.",
     "timeForLongBreak": "Time for a long break.",
-    "taskReminderTitle": "Task Reminder"
+    "taskReminderTitle": "Task Reminder",
+    "permissionDeniedTitle": "Notification Permission Denied",
+    "permissionDeniedDescription": "Task reminders will not be shown. Please enable notification permissions for this site in your browser settings.",
+    "permissionRequestTitle": "Enable Notifications?",
+    "permissionRequestDescription": "RS Timer needs permission to show task reminders. Please check your browser for a permission prompt."
   },
   "ai": {
     "noDataForSummary": "Not enough session data, tasks, or notes to generate a summary.",
@@ -418,3 +422,4 @@
     "noDictionaryForDay": "No dictionary entries were saved for this day."
   }
 }
+
