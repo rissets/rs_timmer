@@ -108,3 +108,11 @@ export interface UserSoundscapeListItem {
     id: number;
     name: string;
 }
+
+// For AI Content Generator Flow
+export interface GenerateTextPromptInput {
+  userPrompt: string;
+}
+export interface GenerateTextOutput {
+  generatedText: string;
+}

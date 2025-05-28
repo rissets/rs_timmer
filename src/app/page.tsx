@@ -46,6 +46,7 @@ import { SessionHistoryDrawer } from "@/components/session-history-drawer";
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
 import { UserGuideDialog } from "@/components/user-guide-dialog";
 import { InteractiveTourDialog } from "@/components/interactive-tour-dialog";
+import { AiContentGeneratorDialog } from '@/components/ai-content-generator-dialog'; // New Import
 import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
@@ -61,7 +62,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock, Bot } from "lucide-react"; // Added Bot icon
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -104,6 +105,7 @@ export default function PomodoroPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
+  const [isAiContentGeneratorOpen, setIsAiContentGeneratorOpen] = useState(false); // New state
 
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
@@ -177,7 +179,7 @@ export default function PomodoroPage() {
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
     if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
        if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-        setTimeout(() => {
+        setTimeout(() => { // Defer to next tick
           triggerAiSummary(sessionLogFromHook, currentSessionType);
         }, 0);
        }
@@ -188,7 +190,7 @@ export default function PomodoroPage() {
   const timer = useTimerCore({
     settings,
     currentDateKey,
-    appName: APP_NAME, // Pass APP_NAME
+    appName: APP_NAME,
     onIntervalEnd: handleIntervalEnd,
     onTimerStart: handleTimerStartCb,
     onTimerPause: handleTimerPauseCb,
@@ -214,7 +216,6 @@ export default function PomodoroPage() {
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
         setOpenPastNotesAccordion([]);
-        // Reset reminderSent status for tasks on a new day
         setTasks(prevTasks => prevTasks.map(task => ({ ...task, reminderSent: false })));
       }
     }, 60000);
@@ -502,8 +503,16 @@ export default function PomodoroPage() {
       setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: 'ai', text: response.aiResponse, timestamp: new Date() }]);
     } catch (error: any) {
       console.error("AI Chat Error:", error);
-      toast({ title: t('ai.errorTitle'), description: error.message || t('ai.errorDescription'), variant: "destructive" });
-      setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: 'ai', text: t('ai.errorChatResponse') || "Sorry, I encountered an error.", timestamp: new Date() }]);
+      let errorMessage = t('ai.errorChatResponse');
+       if (error.message) {
+          if (error.message.includes('API key not valid') || error.message.includes('UNAUTHENTICATED')) {
+              errorMessage = "There seems to be an issue with the AI service configuration. Please contact support.";
+          } else if (error.message.length < 150) { 
+              errorMessage = `Sorry, I encountered an issue: ${error.message}`;
+          }
+       }
+      toast({ title: t('ai.errorTitle'), description: errorMessage, variant: "destructive" });
+      setChatMessages(prev => [...prev, { id: (Date.now() + 1).toString(), sender: 'ai', text: errorMessage, timestamp: new Date() }]);
     } finally {
       setIsAiChatLoading(false);
     }
@@ -551,7 +560,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
 
   try {
-    // Ensure saveDictionaryForDay is called here to persist deletion
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
@@ -630,6 +638,13 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     setIsAiSummaryOpen(false);
   };
 
+  const handleAppendGeneratedTextToNotes = (textToAppend: string) => {
+    const formattedText = `\n\n--- ${t('aiContentGenerator.appendedTextHeader', { dateTime: new Date().toLocaleString() })} ---\n${textToAppend}\n--- ${t('aiContentGenerator.appendedTextFooter')} ---`;
+    setCurrentNotes(prevNotes => prevNotes + formattedText);
+    toast({ title: t('aiContentGenerator.appendSuccessTitleToNotes'), description: t('aiContentGenerator.appendSuccessDescToNotes') });
+  };
+
+
   const handleLogout = async () => {
     stopSound(); 
     await logoutUser();
@@ -644,8 +659,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     );
   }
   if (!currentUser) {
-      // This should ideally not be reached if the outer useEffect for redirection works,
-      // but it's a fallback.
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -677,7 +690,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
         {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />}
 
         <header className="w-full max-w-2xl flex items-center py-4 relative z-[1]">
-           <div className="flex-shrink-0 w-20"> {/* Increased width to prevent squishing of logo */}
+           <div className="flex-shrink-0 w-20">
              {isMobile ? (
               <h1 className="text-xl font-semibold animate-title-reveal">RS</h1>
             ) : (
@@ -695,6 +708,9 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                 <LanguageSwitcher />
                 <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
                     <SparklesIcon className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setIsAiContentGeneratorOpen(true)} title={t('tooltips.aiContentGenerator')}>
+                    <Bot className="h-5 w-5" />
                 </Button>
                 <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
                 <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
@@ -954,6 +970,11 @@ const handleRemoveDefinedWord = async (wordId: string) => {
           onOpenChange={setIsAiSummaryOpen}
           isLoading={isAiLoading}
           onSaveSummary={handleSaveAiSummaryToNotes}
+        />
+        <AiContentGeneratorDialog
+          isOpen={isAiContentGeneratorOpen}
+          onOpenChange={setIsAiContentGeneratorOpen}
+          onAppendToNotes={handleAppendGeneratedTextToNotes}
         />
         <UserGuideDialog isOpen={isUserGuideOpen} onOpenChange={setIsUserGuideOpen} />
         <InteractiveTourDialog isOpen={isInteractiveTourActive} currentStep={currentTourStep} totalSteps={tourSteps.length} stepData={tourSteps[currentTourStep]} onNext={handleNextTourStep} onSkip={handleFinishTour} />
