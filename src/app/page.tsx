@@ -30,7 +30,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"; // Added AlertDialog
+} from "@/components/ui/alert-dialog";
 import {
   Popover,
   PopoverContent,
@@ -61,7 +61,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2 } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -83,7 +83,7 @@ const INTERACTIVE_TOUR_STORAGE_KEY = "rs-timer-interactive-tour-completed";
 
 export default function PomodoroPage() {
   const { settings, isSettingsLoaded } = useSettingsContext();
-  const { t } = useLanguageContext();
+  const { language, t } = useLanguageContext();
   const { toast } = useToast();
   const { currentUser, loading: authLoading, logoutUser } = useAuth();
   const router = useRouter();
@@ -126,18 +126,10 @@ export default function PomodoroPage() {
   const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
   const [isDeletingPastNotes, setIsDeletingPastNotes] = useState(false);
 
-  const [taskForAlert, setTaskForAlert] = useState<Task | null>(null); // New state for AlertDialog
+  const [taskForAlert, setTaskForAlert] = useState<Task | null>(null); 
 
-  const soundscapePlayer = useSoundscapePlayer({
-    volume: settings.volume,
-    settings: settings,
-    isSettingsLoaded: isSettingsLoaded,
-  });
-
-  const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
-
-  const handleTimerStart = useCallback(() => {}, []);
-  const handleTimerPause = useCallback(() => {}, []);
+  const handleTimerStartCb = useCallback(() => {}, []);
+  const handleTimerPauseCb = useCallback(() => {}, []);
   const handleTimerResetCb = useCallback(() => {}, []);
   const handleTimerSkipCb = useCallback(() => {}, []);
 
@@ -197,12 +189,21 @@ export default function PomodoroPage() {
     settings,
     currentDateKey,
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: handleTimerStart,
-    onTimerPause: handleTimerPause,
+    onTimerStart: handleTimerStartCb,
+    onTimerPause: handleTimerPauseCb,
     onTimerReset: handleTimerResetCb,
     onTimerSkip: handleTimerSkipCb,
     getTranslatedText: t,
   });
+
+  const soundscapePlayer = useSoundscapePlayer({
+    volume: settings.volume,
+    settings: settings,
+    isSettingsLoaded: isSettingsLoaded,
+  });
+
+  const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -361,7 +362,7 @@ export default function PomodoroPage() {
       title: t('interactiveTourDialog.allSetTitle'),
       content: <p>{t('interactiveTourDialog.allSetContent', { appName: APP_NAME })}</p>,
     }
-  ], [t]);
+  ], [t, APP_NAME]);
 
   useEffect(() => {
     if (isSettingsLoaded && currentUser) {
@@ -403,30 +404,34 @@ export default function PomodoroPage() {
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
+  const playSoundRef = useRef(playSound);
+  const stopSoundRef = useRef(stopSound);
+  const isSoundPlayerReadyRef = useRef(isSoundPlayerReady);
+  const getActiveSoundscapeIdRef = useRef(getActiveSoundscapeId);
 
-  const actualPlaySound = playSound; // Alias to avoid conflict in useEffect dependency array
-  const actualStopSound = stopSound;
-  const actualIsSoundPlayerReady = isSoundPlayerReady;
+  useEffect(() => {
+    playSoundRef.current = playSound;
+    stopSoundRef.current = stopSound;
+    isSoundPlayerReadyRef.current = isSoundPlayerReady;
+    getActiveSoundscapeIdRef.current = getActiveSoundscapeId;
+  });
   
   useEffect(() => {
-    if (!isSettingsLoaded || !actualIsSoundPlayerReady) {
-      actualStopSound();
+    if (!isSettingsLoaded || !isSoundPlayerReadyRef.current) {
+      stopSoundRef.current();
       return;
     }
-    const soundId = getActiveSoundscapeId(timer.mode);
+    const soundId = getActiveSoundscapeIdRef.current(timer.mode);
     if (timer.isRunning) {
-       actualPlaySound(soundId);
+       playSoundRef.current(soundId);
     } else {
-      actualStopSound();
+      stopSoundRef.current();
     }
   }, [
     timer.mode,
     timer.isRunning,
     isSettingsLoaded,
-    actualIsSoundPlayerReady,
-    getActiveSoundscapeId, 
-    actualPlaySound, 
-    actualStopSound, 
+    // playSound, stopSound, isSoundPlayerReady, getActiveSoundscapeId are now stable via refs
   ]);
 
   const formatTime = (seconds: number) => {
@@ -463,7 +468,7 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!isSettingsLoaded || tasks.length === 0) return;
+    if (!isSettingsLoaded || tasks.length === 0 || !settings.notificationsEnabled) return;
 
     const checkReminders = () => {
       const now = new Date();
@@ -471,7 +476,7 @@ export default function PomodoroPage() {
 
       tasks.forEach(task => {
         if (task.reminderTime && !task.completed && !task.reminderSent && task.reminderTime === currentTime) {
-          setTaskForAlert(task); // Set task to trigger AlertDialog
+          setTaskForAlert(task); 
           setTasks(prevTasks =>
             prevTasks.map(t =>
               t.id === task.id ? { ...t, reminderSent: true } : t
@@ -481,11 +486,11 @@ export default function PomodoroPage() {
       });
     };
 
-    checkReminders(); // Check immediately on load/tasks change
-    const intervalId = setInterval(checkReminders, 30000); // Check every 30 seconds
+    checkReminders(); 
+    const intervalId = setInterval(checkReminders, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [tasks, isSettingsLoaded, t]); // Removed sendTaskNotification as it's replaced
+  }, [tasks, isSettingsLoaded, settings.notificationsEnabled]); 
 
 
   const handleSendChatMessage = async () => {
@@ -540,19 +545,18 @@ const handleRemoveDefinedWord = async (wordId: string) => {
       return;
   }
   const wordEntryToRemove = definedWordsList.find(w => w.id === wordId);
-  if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: wordEntryToRemove?.word || 'entry' }))) {
+  if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }))) {
       return;
   }
   
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList); // Optimistic UI update
+  setDefinedWordsList(updatedList); 
+  toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
+
 
   try {
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
   } catch (error: any) {
-    // Revert optimistic update if save fails (optional, or rely on next load)
-    // setDefinedWordsList(prevList => [...prevList, wordEntryToRemove]); // Example: Re-add
     console.error("Error saving dictionary after deletion:", error);
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
   }
@@ -630,7 +634,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   };
 
   const handleLogout = async () => {
-    actualStopSound();
+    stopSoundRef.current(); // Use the ref
     await logoutUser();
     router.push('/auth/login');
   };
@@ -684,25 +688,29 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             )}
           </div>
 
-          <div className="flex-1 flex justify-center items-center space-x-1 px-2">
-            <div className="flex items-center space-x-1">
-              <LanguageSwitcher />
-              <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
-                <SparklesIcon className="h-5 w-5" />
-              </Button>
-              <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
-              <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
-                  <BookOpen className="h-5 w-5" />
-              </Button>
-              <SettingsDialog />
-              <ThemeToggleButton />
-              <Button variant="ghost" size="icon" onClick={() => router.push('/past-data')} title={t('tooltips.viewPastData')}>
-                <CalendarIconLucide className="h-5 w-5" />
-              </Button>
+          <div className="flex-1 flex justify-center items-center px-1 overflow-hidden"> {/* Centered actions container */}
+            <div className={cn(
+                "flex items-center space-x-1 py-1", // Added py-1 for scrollbar clearance
+                isMobile && "overflow-x-auto" // Enable horizontal scroll only on mobile
+            )}>
+                <LanguageSwitcher />
+                <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
+                    <SparklesIcon className="h-5 w-5" />
+                </Button>
+                <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
+                <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
+                    <BookOpen className="h-5 w-5" />
+                </Button>
+                <SettingsDialog />
+                <ThemeToggleButton />
+                <Button variant="ghost" size="icon" onClick={() => router.push('/past-data')} title={t('tooltips.viewPastData')}>
+                    <CalendarIconLucide className="h-5 w-5" />
+                </Button>
             </div>
           </div>
+          
 
-          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center"> {/* Logout button container */}
             {currentUser && (
               <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
                 <LogOut className="h-5 w-5" />
