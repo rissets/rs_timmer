@@ -1,21 +1,14 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Trash2, Plus, Clock, XCircle } from "lucide-react";
+import { Trash2, Plus, Clock } from "lucide-react";
 import type { Task } from "@/lib/types";
 import { useLanguageContext } from "@/contexts/language-context";
 import { cn } from '@/lib/utils';
@@ -28,18 +21,6 @@ interface SimpleTaskListProps {
   onClearCompletedTasks: () => void;
 }
 
-const generateTimeOptions = (max: number, step: number = 1, pad: number = 2): { value: string; label: string }[] => {
-  const options = [];
-  for (let i = 0; i < max; i += step) {
-    const value = i.toString().padStart(pad, '0');
-    options.push({ value, label: value });
-  }
-  return options;
-};
-
-const hoursOptions = generateTimeOptions(24);
-const minutesOptions = generateTimeOptions(60);
-
 export function SimpleTaskList({
   tasks,
   onAddTask,
@@ -50,20 +31,6 @@ export function SimpleTaskList({
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskReminderTime, setNewTaskReminderTime] = useState<string>(""); // "HH:mm" or ""
   const { t } = useLanguageContext();
-
-  const handleHourChange = (hour: string) => {
-    const currentMinute = newTaskReminderTime ? newTaskReminderTime.split(':')[1] : "00";
-    setNewTaskReminderTime(`${hour}:${currentMinute}`);
-  };
-
-  const handleMinuteChange = (minute: string) => {
-    const currentHour = newTaskReminderTime ? newTaskReminderTime.split(':')[0] : "00";
-    setNewTaskReminderTime(`${currentHour}:${minute}`);
-  };
-
-  const clearReminderTime = () => {
-    setNewTaskReminderTime("");
-  };
 
   const handleAddTaskInternal = () => {
     if (newTaskText.trim()) {
@@ -79,14 +46,11 @@ export function SimpleTaskList({
     }
   };
 
-  const currentHourValue = newTaskReminderTime ? newTaskReminderTime.split(':')[0] : undefined;
-  const currentMinuteValue = newTaskReminderTime ? newTaskReminderTime.split(':')[1] : undefined;
-
   return (
     <>
       <CardContent className="space-y-4 pt-6">
         <div className="space-y-3">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:gap-3">
             <div className="flex-grow space-y-1">
               <Label htmlFor="new-task-text">{t('tasks.addTaskPlaceholder')}</Label>
               <Input
@@ -99,39 +63,19 @@ export function SimpleTaskList({
                 className="focus:ring-accent"
               />
             </div>
-            <div className="space-y-1">
-              <Label>{t('tasks.reminderTimeLabel')}</Label>
-              <div className="flex items-center gap-2">
-                <Select value={currentHourValue} onValueChange={handleHourChange}>
-                  <SelectTrigger className="w-[70px]" aria-label={t('tasks.hourLabel')}>
-                    <SelectValue placeholder={t('tasks.hourPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {hoursOptions.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <span>:</span>
-                <Select value={currentMinuteValue} onValueChange={handleMinuteChange}>
-                  <SelectTrigger className="w-[70px]" aria-label={t('tasks.minuteLabel')}>
-                    <SelectValue placeholder={t('tasks.minutePlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {minutesOptions.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {newTaskReminderTime && (
-                  <Button variant="ghost" size="icon" onClick={clearReminderTime} title={t('tasks.clearReminderTooltip')} className="h-8 w-8">
-                    <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                  </Button>
-                )}
-              </div>
+            <div className="space-y-1 sm:w-auto">
+              <Label htmlFor="new-task-reminder-time" className="text-xs">{t('tasks.reminderLabelShort')}</Label>
+              <Input
+                id="new-task-reminder-time"
+                type="time"
+                value={newTaskReminderTime}
+                onChange={(e) => setNewTaskReminderTime(e.target.value)}
+                className="focus:ring-accent w-full sm:w-auto" 
+                aria-label={t('tasks.reminderTimeLabel')}
+              />
             </div>
           </div>
-          <Button onClick={handleAddTaskInternal} aria-label={t('buttons.add')} className="w-full sm:w-auto">
+          <Button onClick={handleAddTaskInternal} aria-label={t('buttons.add')} className="w-full justify-center">
             <Plus className="h-4 w-4 mr-2" /> {t('buttons.add')}
           </Button>
         </div>
