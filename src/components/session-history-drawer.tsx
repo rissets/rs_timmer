@@ -66,17 +66,22 @@ export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryD
         console.warn("clearTodaysHistory: No userId, aborting.");
         return;
     }
+    console.log(`clearTodaysHistory: Attempting to clear for userId: ${userId}, dateKey: ${currentDateKey}`);
+    
     if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) {
+        console.log("clearTodaysHistory: User cancelled confirmation.");
         return;
     }
     try {
-      console.log(`Attempting to delete session log for userId: ${userId}, dateKey: ${currentDateKey}`);
+      console.log("clearTodaysHistory: Calling deleteSessionLogForDay...");
       await deleteSessionLogForDay(userId, currentDateKey);
+      console.log("clearTodaysHistory: deleteSessionLogForDay successful.");
       toast({ title: t('sessionHistoryDrawer.historyClearedTitle'), description: t('sessionHistoryDrawer.historyClearedDescription') });
-      // Re-fetch history to reflect the changes from Firestore
+      console.log("clearTodaysHistory: Calling fetchHistory to refresh...");
       await fetchHistory(); 
+      console.log("clearTodaysHistory: fetchHistory completed.");
     } catch (error: any) {
-      console.error("Failed to clear today's session history from Firestore:", error);
+      console.error("clearTodaysHistory: Error during deletion or re-fetch:", error);
       toast({ title: t('errors.firestoreDeleteTitle'), description: error.message || t('sessionHistoryDrawer.clearErrorDescription'), variant: "destructive" });
     }
   };
