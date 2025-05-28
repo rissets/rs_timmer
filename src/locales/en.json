@@ -27,7 +27,8 @@
     "finish": "Finish",
     "clearHistory": "Clear History",
     "clearTodaysHistory": "Clear Today's History",
-    "saveToNotes": "Save to Notes"
+    "saveToNotes": "Save to Notes",
+    "back": "Back"
   },
   "tooltips": {
     "aiSummary": "Get AI Session Summary (if data available)",
@@ -37,7 +38,8 @@
     "themeToggle": "Toggle theme",
     "languageSwitcher": "Switch language",
     "analyzeCurrentData": "Analyze current session notes, tasks and log with selected context",
-    "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle."
+    "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle.",
+    "viewPastData": "View Past Session Data"
   },
   "cards": {
     "tasksTitle": "Today's Tasks",
@@ -155,28 +157,32 @@
         "content": "The 'Today's Tasks', 'Session Dictionary', and 'Session Notes & Context' sections below the timer are collapsible. Click on their titles to expand or hide them, helping you manage your workspace view."
       },
       "tasksAndNotes": {
-        "title": "Tasks & Notes",
-        "content": "Below the timer, you'll find sections for managing tasks and taking notes:\\n* Today's Tasks: Add tasks you want to accomplish during your focus sessions. Mark them as complete or delete them.\\n* Session Notes & Context: Use the textarea to jot down thoughts, distractions, or ideas that arise. Your tasks and notes can be included in the AI Session Analysis. This data, along with the chosen session context, is stored per day in your Firebase database."
+        "title": "Tasks, Notes & Database",
+        "content": "Below the timer, you'll find sections for managing tasks and taking notes:\\n* Today's Tasks: Add tasks you want to accomplish. These are saved to your Firebase database for the current day.\\n* Session Notes & Context: Use the textarea to jot down thoughts. Select a 'Session Context' to tailor AI feedback. Notes and context are saved to Firebase for the current day.\\n* AI Summary: Generated summaries can be appended to your daily notes and saved."
       },
       "sessionContext": {
         "title": "Session Context",
-        "content": "Before analyzing your session data (notes, tasks, or a full Pomodoro log), you can specify a \"Session Context\" (e.g., Work, Learning, General).\\nThis helps the AI provide more tailored feedback and suggestions relevant to your current activity. This context is also stored per day in your Firebase database."
+        "content": "Before analyzing your session data, you can specify a \"Session Context\" (e.g., Work, Learning, General).\\nThis helps the AI provide more tailored feedback and suggestions relevant to your current activity. This context is also stored per day in your Firebase database."
       },
       "aiAnalysis": {
         "title": "AI Session Analysis",
-        "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This is especially useful after a Long Break or when you've accumulated some notes/tasks. The summary can be saved to your daily notes for the current day."
+        "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This summary can be saved to your daily notes, which are stored in Firebase."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant",
-        "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant.\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
+        "title": "AI Chat Assistant", 
+        "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "dictionaryCard": {
-        "title": "Session Dictionary",
-        "content": "Use the Dictionary Card to get definitions for words in English and Indonesian during your session. These definitions are stored per day in your Firebase database and can be exported to a Markdown file. You can also delete entries from the current day's dictionary."
+        "title": "Session Dictionary", 
+        "content": "Use the Dictionary Card to get definitions for words in English and Indonesian. These definitions are stored per day in your Firebase database and can be exported to a Markdown file. You can also delete entries from the current day's dictionary."
       },
       "viewPastNotes": {
         "title": "Viewing Past Notes",
-        "content": "Within the 'Session Notes & Context' card, you can find a collapsible section to 'View Past Notes'. Use the calendar to select a previous date and view the notes (including any saved AI summaries) from that day. You can also delete the notes for a selected past day."
+        "content": "Within the 'Session Notes & Context' card, you can find a collapsible section to 'View Past Notes'. Use the calendar to select a previous date and view the notes (including any saved AI summaries) from that day, read from your Firebase database. You can also delete the notes for a selected past day."
+      },
+      "viewPastData": {
+        "title": "Viewing Past Data",
+        "content": "Click the calendar icon in the header to navigate to a dedicated page where you can select any past date and view all your recorded tasks, notes, session context, and dictionary entries for that day, all retrieved from your Firebase database."
       },
       "sessionHistory": {
         "title": "Session History",
@@ -201,19 +207,21 @@
     "collapsibleCardsTitle": "Collapsible Sections",
     "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Notes below the timer can be expanded or collapsed by clicking their titles.",
     "tasksTitle": "Tasks",
-    "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks can be included in the AI Analysis and are saved for the current day in your Firebase database.",
+    "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks are saved per day to your Firebase database.",
     "notesContextTitle": "Session Notes & Context",
-    "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes, context, and the ability to view past notes are saved for the current day in your Firebase database.",
+    "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
     "aiAnalysisTitle": "AI Analysis",
-    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes.",
+    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes, which get stored in Firebase.",
     "chatWidgetTitle": "AI Chat Assistant",
-    "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant for quick questions or support related to your focus session.",
+    "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant (Gemini) for quick questions or support related to your focus session.",
     "dictionaryCardTitle": "Session Dictionary",
-    "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions are saved for the current day in your Firebase database, can be exported to Markdown, and individual entries can be deleted.",
+    "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions are saved per day to Firebase, can be exported to Markdown, and individual entries can be deleted.",
     "viewPastNotesTitle": "Viewing Past Notes",
-    "viewPastNotesContent": "In the 'Session Notes & Context' card, expand 'View Past Notes' to pick a date and see notes from that day. You can also delete notes for a viewed past day.",
+    "viewPastNotesContent": "In the 'Session Notes & Context' card, expand 'View Past Notes' to pick a date and see notes from that day (from Firebase). You can also delete notes for a viewed past day.",
+    "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
+    "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved tasks, notes, context, and dictionary entries for any past date from Firebase.",
     "headerToolsTitle": "Header Tools",
-    "headerToolsContent": "Access AI Summary (✨), Session History (🕒 for today), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), and Language Switcher (🌐) from the header.",
+    "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
     "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow.",
     "allSetTitle": "You're All Set!",
@@ -355,6 +363,7 @@
   "errors": {
     "firestoreLoadTitle": "Data Loading Error",
     "firestoreLoadDescription": "Could not load daily data from the database. Please check your connection or try again later.",
+    "firestoreLoadPastDataDescription": "Could not load data for the selected past date. Please try again.",
     "firestoreLoadPastNotesDescription": "Could not load notes for the selected date. Please try again.",
     "firestoreSaveTitle": "Data Saving Error",
     "firestoreSaveTasksDescription": "Could not save tasks to the database.",
@@ -364,6 +373,21 @@
     "firestoreSaveLogDescription": "Could not save session log to the database.",
     "firestoreDeleteTitle": "Data Deletion Error",
     "firestoreDeletePastNotesDescription": "Could not delete past notes from the database."
+  },
+  "pastDataPage": {
+    "title": "View Past Session Data",
+    "selectDateLabel": "Select Date to View",
+    "loadingData": "Loading data for selected date...",
+    "pleaseSelectDate": "Please select a date above to view its data.",
+    "tasksTitle": "Tasks",
+    "notesContextTitle": "Notes & Session Context",
+    "sessionContextLabel": "Session Context for this day:",
+    "notesTitle": "Notes for this day:",
+    "dictionaryTitle": "Dictionary Entries for this day:",
+    "noTasksForDay": "No tasks were recorded for this day.",
+    "noNotesForDay": "No notes were recorded for this day.",
+    "noContextForDay": "No specific session context was set for this day.",
+    "noDictionaryForDay": "No dictionary entries were saved for this day."
   }
 }
 

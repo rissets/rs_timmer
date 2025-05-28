@@ -52,7 +52,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon, Loader2, Save, Trash2 } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2 } from "lucide-react"; // Renamed CalendarIcon to avoid conflict
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -131,7 +131,7 @@ export default function PomodoroPage() {
         setCurrentDateKey(newDateKey);
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
-        setOpenPastNotesAccordion([]); // Close past notes accordion on day change
+        setOpenPastNotesAccordion([]); 
       }
     }, 60000);
     return () => clearInterval(interval);
@@ -150,9 +150,9 @@ export default function PomodoroPage() {
           loadSessionContextForDay(currentUser.uid, currentDateKey),
         ]);
         setTasks(loadedTasks);
-        setCurrentNotes(loadedNotes);
+        setCurrentNotes(loadedNotes || ""); // Ensure notes is at least an empty string
         setDefinedWordsList(loadedDict);
-        setCurrentSessionType(loadedContext);
+        setCurrentSessionType(loadedContext || 'general'); // Ensure context has a default
       } catch (error) {
         console.error("Error loading daily data from Firestore:", error);
         toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadDescription"), variant: "destructive" });
@@ -167,14 +167,19 @@ export default function PomodoroPage() {
     loadData();
   }, [currentDateKey, currentUser, isSettingsLoaded, toast, t]);
 
+  // Save Tasks
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    // Only save if tasks have actually changed from what might have been loaded
+    // This check might be complex to implement perfectly without deep comparison or dirty flags
+    // For now, we save if not loading, which is generally fine for small data.
     saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
       console.error("Error saving tasks to Firestore:", error);
       toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
     });
   }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
+  // Save Notes
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
@@ -183,6 +188,7 @@ export default function PomodoroPage() {
     });
   }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
+  // Save Dictionary
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
@@ -191,6 +197,7 @@ export default function PomodoroPage() {
     });
   }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
+  // Save Session Context
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
@@ -249,6 +256,10 @@ export default function PomodoroPage() {
     {
       title: t('interactiveTourDialog.viewPastNotesTitle'),
       content: <p>{t('interactiveTourDialog.viewPastNotesContent')}</p>,
+    },
+     {
+      title: t('interactiveTourDialog.viewPastDataTitle'),
+      content: <p>{t('interactiveTourDialog.viewPastDataContent')}</p>,
     },
     {
       title: t('interactiveTourDialog.headerToolsTitle'),
@@ -348,16 +359,10 @@ export default function PomodoroPage() {
   useEffect(() => {
     if (!currentUser || !isSettingsLoaded) return;
     if (!isLoadingDailyData && timer.sessionLog.length > 0) {
-      // Check if the log has actually changed to avoid unnecessary writes
-      const localStoredLog = JSON.parse(localStorage.getItem(`rs-timer-sessionHistory-${currentDateKey}`) || '[]');
-      if (timer.sessionLog.length !== localStoredLog.length || 
-          JSON.stringify(timer.sessionLog) !== JSON.stringify(localStoredLog) // More robust check
-      ) {
-          saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
-            console.error("Error saving session log to Firestore:", error);
-            toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
-          });
-      }
+      saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
+        console.error("Error saving session log to Firestore:", error);
+        toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
+      });
     }
   }, [timer.sessionLog, currentDateKey, currentUser, isSettingsLoaded, isLoadingDailyData, toast, t]);
 
@@ -430,7 +435,7 @@ export default function PomodoroPage() {
   };
 
   const handleDefineWord = async (word: string) => {
-    if (!word.trim()) return;
+    if (!word.trim() || !currentUser) return;
     setIsDefiningWord(true);
     try {
       const [engResult, indResult] = await Promise.all([
@@ -448,44 +453,19 @@ export default function PomodoroPage() {
   };
 
 const handleRemoveDefinedWord = async (wordId: string) => {
-  console.log("[DEBUG] handleRemoveDefinedWord: Called with wordId:", wordId);
-  console.log("[DEBUG] handleRemoveDefinedWord: definedWordsList before filter:", definedWordsList);
+  if (!currentUser) return;
   const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
-
-  let updatedList: DefinedWordEntry[] = [];
+  const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
+  setDefinedWordsList(updatedList); 
+  
   try {
-    // Filter the list to remove the word
-    updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-    console.log("[DEBUG] handleRemoveDefinedWord: definedWordsList after filter:", updatedList);
-
-    // Optimistically update the UI state
-    setDefinedWordsList(updatedList);
-    console.log("[DEBUG] handleRemoveDefinedWord: UI state updated optimistically.");
-
-  } catch (stateError: any) {
-    console.error("[DEBUG] handleRemoveDefinedWord: Error during state update:", stateError);
-    toast({ title: t("errors.generalErrorTitle"), description: t("errors.generalErrorDescription"), variant: "destructive" });
-    return; // Stop further execution if state update failed
+    await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
+    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+  } catch (error: any) {
+    console.error("Error saving dictionary after deletion:", error);
+    setDefinedWordsList(prev => [...prev, ...definedWordsList.filter(e => e.id === wordId)]); // Revert optimistic update
+    toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
   }
-
-  // Attempt to save the updated list to Firestore
-  if (currentUser && !isLoadingDailyData && isSettingsLoaded) {
-    try {
-      console.log(`[DEBUG] handleRemoveDefinedWord: Attempting to save dictionary after removing word: ${wordToRemove} (ID: ${wordId})`);
-      console.log("[DEBUG] handleRemoveDefinedWord: Calling saveDictionaryForDay with updatedList:", updatedList);
-      await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-      console.log("[DEBUG] handleRemoveDefinedWord: saveDictionaryForDay successful.");
-      toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
-
-    } catch (firestoreError: any) {
-      console.error("[DEBUG] handleRemoveDefinedWord: Error saving dictionary after deletion:", firestoreError);
-      // Revert the UI state if Firestore save fails? Or just show error? Let's show error for now.
-      toast({ title: t("errors.firestoreSaveTitle"), description: firestoreError.message || t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-      // Consider reverting state here if necessary
-      // setDefinedWordsList(definedWordsList);
-    } 
-  }
-  console.log("[DEBUG] handleRemoveDefinedWord: Function finished.");
 };
 
   const handleExportMarkdown = () => {
@@ -529,42 +509,26 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   };
 
   const handleDeletePastNotes = async () => {
-    console.log("[DEBUG] handleDeletePastNotes: Called.");
     if (!selectedPastDateForNotes || !currentUser) {
-      console.log("[DEBUG] handleDeletePastNotes: No date selected or user not logged in. Stopping.");
       toast({ title: t('notes.errorNoDateSelectedForDelete'), variant: 'destructive' });
       return;
     }
-    const dateKeyToDelete = formatDateToKey(selectedPastDateForNotes);
-    console.log("[DEBUG] handleDeletePastNotes: Date key to delete:", dateKeyToDelete);
-
-    // --- TEMPORARY: Removing confirmation for debugging ---
-    // if (!confirm(t('notes.confirmDeletePastNotes', { date: dateKeyToDelete }))) { /* ... */ }
+    if (!confirm(t('notes.confirmDeletePastNotes', { date: format(selectedPastDateForNotes, "PPP") }))) {
+        return;
+    }
+    
     setIsDeletingPastNotes(true);
-    console.log("[DEBUG] handleDeletePastNotes: Setting isDeletingPastNotes to true.");
+    const dateKeyToDelete = formatDateToKey(selectedPastDateForNotes);
 
     try {
-      console.log(`[DEBUG] handleDeletePastNotes: Attempting to delete notes for date: ${dateKeyToDelete}`);
-      console.log(`Attempting to delete notes for date: ${dateKeyToDelete}`);
-      console.log("[DEBUG] handleDeletePastNotes: Calling deleteNotesForDay...");
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      console.log("[DEBUG] handleDeletePastNotes: deleteNotesForDay successful.");
-
-      // Update UI state after successful deletion
-      setPastDateNotes(t('notes.noNotesForDate')); // Update UI state to show notes are gone
-      console.log("[DEBUG] handleDeletePastNotes: UI state updated to show no notes.");
-
+      setPastDateNotes(t('notes.noNotesForDate')); 
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
-      console.log("[DEBUG] handleDeletePastNotes: Success toast shown.");
-
     } catch (error: any) {
-      console.error("[DEBUG] handleDeletePastNotes: Error deleting past notes:", error);
+      console.error("Error deleting past notes:", error);
       toast({ title: t('errors.firestoreDeleteTitle'), description: error.message || t('errors.firestoreDeletePastNotesDescription'), variant: "destructive" });
-      console.log("[DEBUG] handleDeletePastNotes: Error toast shown.");
     } finally {
       setIsDeletingPastNotes(false);
-      console.log("[DEBUG] handleDeletePastNotes: Setting isDeletingPastNotes to false.");
-      console.log("[DEBUG] handleDeletePastNotes: Function finished.");
     }
   };
 
@@ -572,7 +536,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     const formattedSummary = `\n\n--- ${t('aiSummaryDialog.savedSummaryHeader', { dateTime: new Date().toLocaleString() })} ---\n${t('aiSummaryDialog.summaryTitle')}:\n${summary}\n\n${t('aiSummaryDialog.improvementsTitle')}:\n${improvements}\n--- ${t('aiSummaryDialog.savedSummaryFooter')} ---`;
     setCurrentNotes(prevNotes => prevNotes + formattedSummary);
     toast({ title: t('aiSummaryDialog.saveSuccessTitle'), description: t('aiSummaryDialog.saveSuccessDescription') });
-    setIsAiSummaryOpen(false); // Close dialog after saving
+    setIsAiSummaryOpen(false); 
   };
 
   const handleLogout = async () => {
@@ -645,6 +609,9 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                 <LogOut className="h-5 w-5" />
               </Button>
             )}
+            <Button variant="ghost" size="icon" onClick={() => router.push('/past-data')} title={t('tooltips.viewPastData')}>
+              <CalendarIconLucide className="h-5 w-5" /> 
+            </Button>
           </div>
         </header>
 
@@ -705,7 +672,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center">
                   <ListChecks className="mr-2 h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">{t('cards.tasksTitle')}</CardTitle>
+                  <span className="text-lg font-semibold">{t('cards.tasksTitle')}</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-0">
@@ -740,7 +707,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center">
                   <FileText className="mr-2 h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">{t('cards.notesTitle')}</CardTitle>
+                  <span className="text-lg font-semibold">{t('cards.notesTitle')}</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-0"> 
@@ -797,7 +764,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                                     !selectedPastDateForNotes && "text-muted-foreground"
                                   )}
                                 >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  <CalendarIconLucide className="mr-2 h-4 w-4" />
                                   {selectedPastDateForNotes ? format(selectedPastDateForNotes, "PPP") : <span>{t('notes.pickDate')}</span>}
                                 </Button>
                               </PopoverTrigger>
@@ -846,6 +813,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                   </CardContent>
               </AccordionContent>
             </AccordionItem>
+
           </Accordion>
         </main>
 
