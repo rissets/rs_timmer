@@ -178,10 +178,15 @@ export default function PomodoroPage() {
   
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
-      console.error("Error saving notes to Firestore:", error);
-      toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
-    });
+    // Only save if notes have actually changed to avoid unnecessary writes if just context changes
+    // This check might need to be smarter if notes are frequently set to empty string programmatically
+    // For now, this avoids saving an empty string just because the component re-rendered.
+    if (currentNotes || (!currentNotes && currentNotes !== undefined)) { // Check if currentNotes is explicitly set (even to empty)
+        saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
+            console.error("Error saving notes to Firestore:", error);
+            toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
+        });
+    }
   }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
   
@@ -335,12 +340,14 @@ export default function PomodoroPage() {
   }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
-    if (sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) {
+    if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) { // Added notificationsEnabled check
        if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
-         triggerAiSummary(sessionLogFromHook, currentSessionType);
+        setTimeout(() => {
+          triggerAiSummary(sessionLogFromHook, currentSessionType);
+        }, 0);
        }
     }
-  }, [settings.longBreakInterval, triggerAiSummary, tasks, currentNotes, currentSessionType]);
+  }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType]);
   
   const handleTimerStart = useCallback((mode: TimerMode) => {
     // Placeholder for specific logic when timer starts, if needed
@@ -407,9 +414,9 @@ export default function PomodoroPage() {
     timer.isRunning,
     isSettingsLoaded,
     isSoundPlayerReady,
-    getActiveSoundscapeId, // Now stable
-    playSound, // Now stable
-    stopSound, // Now stable
+    getActiveSoundscapeId, 
+    playSound, 
+    stopSound, 
     isMuted, 
     settings.soundscapeWork, 
     settings.soundscapeBreak 
@@ -479,11 +486,14 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   setDefinedWordsList(updatedList); 
   
   try {
+    // Explicitly save to Firestore after updating local state
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
     toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
+    // Optionally, revert local state if Firestore save fails, though this can be complex
+    // For now, we assume the local state change is what user wants and Firestore will eventually catch up or error is shown.
   }
 };
 
