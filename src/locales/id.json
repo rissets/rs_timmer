@@ -43,7 +43,7 @@
     "analyzeCurrentData": "Analisis catatan sesi, tugas, dan log saat ini dengan konteks yang dipilih",
     "pomodoroProgress": "{{completed}} dari {{total}} pomodoro selesai dalam siklus ini.",
     "viewPastData": "Lihat Data Sesi Sebelumnya",
-    "aiContentGenerator": "Buka Generator Konten AI"
+    "aiContentGenerator": "Buka Halaman Generator Konten AI"
   },
   "cards": {
     "tasksTitle": "Tugas Hari Ini",
@@ -96,9 +96,9 @@
     "statusCompleted": "Selesai",
     "statusSkipped": "Dilewati/Terinterupsi",
     "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini dari database? Tindakan ini tidak dapat dibatalkan.",
-    "historyClearedTitle": "Riwayat Hari Ini Dihapus",
-    "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus.",
-    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini. Silakan coba lagi.",
+    "historyClearedTitle": "Riwayat Hari Ini Dihapus dari Database",
+    "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus dari database.",
+    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini dari database. Silakan coba lagi.",
     "clearingHistory": "Menghapus riwayat..."
   },
   "settingsDialog": {
@@ -177,11 +177,11 @@
       },
       "tasks": {
         "title": "Tugas & Pengingat Hari Ini",
-        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur dan notifikasi browser diizinkan untuk situs ini, dialog peringatan di dalam aplikasi akan muncul ketika waktu tersebut tiba. Agar ini berfungsi efektif, pastikan Anda telah mengizinkan notifikasi untuk situs ini di pengaturan browser Anda (browser Anda seharusnya meminta izin jika diperlukan saat pengingat pertama kali mencoba muncul).\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur dan notifikasi browser diizinkan untuk situs ini, dialog peringatan di dalam aplikasi akan muncul ketika waktu tersebut tiba. Agar ini berfungsi efektif, pastikan Anda telah mengizinkan notifikasi untuk situs ini di pengaturan browser Anda.\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
       },
       "sessionNotesContext": {
         "title": "Catatan & Konteks Sesi",
-        "content": "Di kartu 'Catatan & Konteks Sesi':\\n* Gunakan area teks untuk mencatat pemikiran, ide, atau gangguan selama sesi Anda.\\n* Pilih 'Konteks Sesi' (Umum, Fokus Kerja, Fokus Belajar) dari menu dropdown. Konteks ini membantu AI memberikan umpan balik yang lebih disesuaikan jika Anda menggunakan fitur Analisis AI.\\n* Catatan dan konteks yang Anda pilih disimpan ke Firestore untuk hari ini.\\n* Ringkasan yang dihasilkan AI dapat ditambahkan ke catatan ini menggunakan tombol 'Simpan ke Catatan' di dialog Ringkasan AI.\\n* Konten yang dihasilkan AI dari 'Generator Konten AI' juga dapat ditambahkan ke catatan ini."
+        "content": "Di kartu 'Catatan & Konteks Sesi':\\n* Gunakan area teks untuk mencatat pemikiran, ide, atau gangguan selama sesi Anda.\\n* Pilih 'Konteks Sesi' (Umum, Fokus Kerja, Fokus Belajar) dari menu dropdown. Konteks ini membantu AI memberikan umpan balik yang lebih disesuaikan jika Anda menggunakan fitur Analisis AI.\\n* Catatan dan konteks yang Anda pilih disimpan ke Firestore untuk hari ini.\\n* Ringkasan yang dihasilkan AI dapat ditambahkan ke catatan ini menggunakan tombol 'Simpan ke Catatan' di dialog Ringkasan AI.\\n* Konten yang dihasilkan AI dari halaman 'Generator Konten AI' juga dapat disalin dan ditempelkan ke catatan ini."
       },
       "viewingPastNotes": {
         "title": "Melihat & Menghapus Catatan Sebelumnya",
@@ -191,13 +191,13 @@
         "title": "Kamus Sesi",
         "content": "Kartu 'Kamus Sesi' memungkinkan Anda mendapatkan definisi kata bertenaga AI:\\n* Masukkan kata dan klik 'Definisikan'. AI (Gemini) akan memberikan definisi dalam bahasa Inggris dan Indonesia.\\n* Kata yang didefinisikan dan definisinya disimpan untuk hari ini di Firestore. Setiap entri dapat dihapus secara individual menggunakan ikon tong sampah.\\n* Semua definisi untuk hari ini dapat diekspor ke file Markdown (.md)."
       },
-      "aiAnalysis": {
+       "aiAnalysis": {
         "title": "Analisis Sesi AI (Ringkasan)",
         "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI (Genkit dengan Gemini). Klik ikon Kilau (✨) di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti. Ringkasan ini dapat disimpan ke catatan harian Anda untuk hari ini menggunakan tombol 'Simpan ke Catatan' di popup analisis AI."
       },
-      "aiContentGenerator": {
-        "title": "Generator Konten AI (Pembantu)",
-        "content": "Klik ikon Bot (🤖) di header untuk membuka Generator Konten AI. Di sini, Anda dapat memasukkan prompt (mis., 'Tulis paragraf tentang manfaat pemblokiran waktu') dan AI akan menghasilkan teks untuk Anda. Anda kemudian dapat menyalin teks ini atau menambahkannya langsung ke catatan sesi hari ini."
+      "aiContentGeneratorPage": {
+        "title": "Generator Konten AI (Halaman)",
+        "content": "Klik ikon Bot (🤖) di header untuk menavigasi ke halaman Generator Konten AI. Di sini, Anda dapat memasukkan prompt (mis., 'Tulis paragraf tentang manfaat pemblokiran waktu') dan AI akan menghasilkan teks untuk Anda. Anda kemudian dapat menyalin teks ini dan menempelkannya ke catatan sesi Anda atau di tempat lain."
       },
       "chatWidget": {
         "title": "Asisten Chat AI",
@@ -245,8 +245,8 @@
     "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan dan konteks disimpan per hari ke Firebase.",
     "aiAnalysisTitle": "Analisis Sesi AI (Ringkasan)",
     "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan. Anda dapat menyimpan ringkasan ini ke catatan Anda, yang akan disimpan di Firebase.",
-    "aiContentHelperTitle": "Generator Konten AI (Ikon Bot 🤖)",
-    "aiContentHelperContent": "Klik ikon Bot di header untuk membuka Generator Konten AI. Minta untuk menulis paragraf, daftar ide, atau membantu dengan tugas teks lainnya. Anda kemudian dapat menambahkan konten yang dihasilkan ke catatan Anda.",
+    "aiContentGeneratorPageTitle": "Generator Konten AI (Ikon Bot 🤖)",
+    "aiContentGeneratorPageContent": "Klik ikon Bot di header untuk pergi ke halaman Generator Konten AI. Minta untuk menulis paragraf, daftar ide, atau membantu dengan tugas teks lainnya. Anda kemudian dapat menyalin konten yang dihasilkan dan menempelkannya ke catatan Anda.",
     "chatWidgetTitle": "Asisten Chat AI",
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI (Gemini) untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "dictionaryCardTitle": "Kamus Sesi",
@@ -256,7 +256,7 @@
     "viewPastDataTitle": "Lihat Data Sebelumnya (Ikon Kalender Header)",
     "viewPastDataContent": "Klik ikon kalender di header untuk pergi ke halaman di mana Anda dapat melihat semua tugas, catatan, konteks, dan entri kamus yang tersimpan untuk tanggal lampau dari Firebase.",
     "headerToolsTitle": "Alat Header",
-    "headerToolsContent": "Akses Ringkasan AI (✨), Generator Konten AI (🤖), Riwayat Sesi Hari Ini (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), Ganti Bahasa (🌐), dan Lihat Data Sebelumnya (🗓️) dari header.",
+    "headerToolsContent": "Akses Ringkasan AI (✨), Halaman Generator Konten AI (🤖), Riwayat Sesi Hari Ini (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), Ganti Bahasa (🌐), dan Lihat Data Sebelumnya (🗓️) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
     "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara (termasuk mengunggah milik Anda sendiri!), animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda. Pengaturan diatur ke dalam tab.",
     "allSetTitle": "Anda Sudah Siap!",
@@ -434,12 +434,14 @@
   "alertDialog": {
     "taskReminderTitle": "Pengingat Tugas!",
     "taskReminderDescription": {
-      "prompt": "Saatnya untuk tugas Anda: **{{taskText}}** (dijadwalkan untuk {{reminderTime}})."
+      "prompt": "Saatnya untuk tugas Anda (dijadwalkan untuk {{reminderTime}}):"
     }
   },
   "aiContentGenerator": {
+    "pageTitle": "Generator Konten AI",
     "title": "Generator Konten AI",
-    "description": "Gunakan AI untuk membantu Anda menyusun atau mengembangkan ide. Teks yang dihasilkan dapat ditambahkan ke catatan sesi Anda.",
+    "description": "Gunakan AI untuk membantu Anda menyusun atau mengembangkan ide. Teks yang dihasilkan dapat disalin dan ditempelkan ke catatan sesi Anda atau di tempat lain.",
+    "pageDescription": "Gunakan AI untuk membantu Anda menyusun atau mengembangkan ide. Teks yang dihasilkan dapat disalin dan ditempelkan ke catatan sesi Anda atau di tempat lain.",
     "promptLabel": "Prompt Anda untuk AI:",
     "promptPlaceholder": "misalnya, Tulis paragraf singkat tentang manfaat istirahat teratur...",
     "generateButton": "Hasilkan Konten",

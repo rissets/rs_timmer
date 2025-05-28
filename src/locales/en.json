@@ -43,7 +43,7 @@
     "analyzeCurrentData": "Analyze current session notes, tasks and log with selected context",
     "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle.",
     "viewPastData": "View Past Session Data",
-    "aiContentGenerator": "Open AI Content Generator"
+    "aiContentGenerator": "Open AI Content Generator Page"
   },
   "cards": {
     "tasksTitle": "Today's Tasks",
@@ -97,8 +97,8 @@
     "statusSkipped": "Skipped/Interrupted",
     "confirmClearToday": "Are you sure you want to clear all session history for today from the database? This action cannot be undone.",
     "historyClearedTitle": "Today's History Cleared",
-    "historyClearedDescription": "Today's session history has been successfully cleared.",
-    "clearErrorDescription": "Could not clear today's session history. Please try again.",
+    "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
+    "clearErrorDescription": "Could not clear today's session history from the database. Please try again.",
     "clearingHistory": "Clearing history..."
   },
   "settingsDialog": {
@@ -177,11 +177,11 @@
       },
       "tasks": {
         "title": "Today's Tasks & Reminders",
-        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted for this site, an in-app alert dialog will pop up when that time arrives. For this to work effectively, ensure you have allowed notifications for this site in your browser settings (your browser should prompt you if permission is needed the first time a reminder tries to show).\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted for this site, an in-app alert dialog will pop up when that time arrives. For this to work effectively, ensure you have allowed notifications for this site in your browser settings.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
-        "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog.\\n* AI-generated content from the 'AI Content Generator' can also be appended to these notes."
+        "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog.\\n* AI-generated content from the 'AI Content Generator' page can also be copied and pasted into these notes."
       },
       "viewingPastNotes": {
         "title": "Viewing & Deleting Past Notes",
@@ -191,13 +191,13 @@
         "title": "Session Dictionary",
         "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore. Each entry can be individually deleted using the trash icon.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
       },
-      "aiAnalysis": {
+       "aiAnalysis": {
         "title": "AI Session Analysis (Summary)",
         "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day using the 'Save to Notes' button in the AI analysis popup."
       },
-      "aiContentGenerator": {
-        "title": "AI Content Generator (Helper)",
-        "content": "Click the Bot icon (🤖) in the header to open the AI Content Generator. Here, you can enter a prompt (e.g., 'Write a paragraph about time blocking') and the AI will generate text for you. You can then copy this text or append it directly to your current day's session notes."
+      "aiContentGeneratorPage": {
+        "title": "AI Content Generator (Page)",
+        "content": "Click the Bot icon (🤖) in the header to navigate to the AI Content Generator page. Here, you can enter a prompt (e.g., 'Write a paragraph about time blocking') and the AI will generate text for you. You can then copy this text and paste it into your session notes or elsewhere."
       },
       "chatWidget": {
         "title": "AI Chat Assistant",
@@ -205,7 +205,7 @@
       },
       "sessionHistory": {
         "title": "Today's Session History (Pomodoro Log)",
-        "content": "Click the history icon (🕒) in the header to view a log of your completed Pomodoro intervals (Work, Short Break, Long Break) for the current day. This data is fetched from Firestore.\\nYou can also clear today's history from this drawer."
+        "content": "Click the history icon (🕒) in the header to view a log of your completed Pomodoro intervals (Work, Short Break, Long Break) for the current day. This data is fetched from Firestore.\\nVous pouvez également effacer l'historique d'aujourd'hui de ce tiroir."
       },
       "viewPastDataPage": {
         "title": "Viewing All Past Data",
@@ -245,8 +245,8 @@
     "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
     "aiAnalysisTitle": "AI Session Analysis (Summary)",
     "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes, which get stored in Firebase.",
-    "aiContentHelperTitle": "AI Content Generator (Bot Icon 🤖)",
-    "aiContentHelperContent": "Click the Bot icon in the header to open the AI Content Generator. Ask it to write paragraphs, list ideas, or help with other text tasks. You can then append the generated content to your notes.",
+    "aiContentGeneratorPageTitle": "AI Content Generator (Bot Icon 🤖)",
+    "aiContentGeneratorPageContent": "Click the Bot icon in the header to go to the AI Content Generator page. Ask it to write paragraphs, list ideas, or help with other text tasks. You can then copy the generated content and paste it into your notes.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant (Gemini) for quick questions or support related to your focus session.",
     "dictionaryCardTitle": "Session Dictionary",
@@ -256,7 +256,7 @@
     "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
     "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved tasks, notes, context, and dictionary entries for any past date from Firebase.",
     "headerToolsTitle": "Header Tools",
-    "headerToolsContent": "Access AI Summary (✨), AI Content Generator (🤖), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
+    "headerToolsContent": "Access AI Summary (✨), AI Content Generator Page (🤖), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
     "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow. Settings are organized into tabs.",
     "allSetTitle": "You're All Set!",
@@ -434,12 +434,14 @@
   "alertDialog": {
     "taskReminderTitle": "Task Reminder!",
     "taskReminderDescription": {
-      "prompt": "It's time for your task: **{{taskText}}** (scheduled for {{reminderTime}})."
+      "prompt": "It's time for your task (scheduled for {{reminderTime}}):"
     }
   },
   "aiContentGenerator": {
+    "pageTitle": "AI Content Generator",
     "title": "AI Content Generator",
-    "description": "Use AI to help you draft or expand on your ideas. Generated text can be appended to your session notes.",
+    "description": "Use AI to help you draft or expand on your ideas. Generated text can be copied and pasted into your session notes or elsewhere.",
+    "pageDescription": "Use AI to help you draft or expand on your ideas. Generated text can be copied and pasted into your session notes or elsewhere.",
     "promptLabel": "Your Prompt for the AI:",
     "promptPlaceholder": "e.g., Write a short paragraph about the benefits of taking regular breaks...",
     "generateButton": "Generate Content",

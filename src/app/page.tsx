@@ -46,7 +46,7 @@ import { SessionHistoryDrawer } from "@/components/session-history-drawer";
 import { AiSummaryDialog } from "@/components/ai-summary-dialog";
 import { UserGuideDialog } from "@/components/user-guide-dialog";
 import { InteractiveTourDialog } from "@/components/interactive-tour-dialog";
-import { AiContentGeneratorDialog } from '@/components/ai-content-generator-dialog'; // New Import
+// import { AiContentGeneratorDialog } from '@/components/ai-content-generator-dialog'; // Removed
 import RainEffect from "@/components/effects/RainEffect";
 import SnowEffect from "@/components/effects/SnowEffect";
 import StarfieldEffect from "@/components/effects/StarfieldEffect";
@@ -62,7 +62,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock, Bot } from "lucide-react"; // Added Bot icon
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock, Bot } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -105,7 +105,7 @@ export default function PomodoroPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
-  const [isAiContentGeneratorOpen, setIsAiContentGeneratorOpen] = useState(false); // New state
+  // const [isAiContentGeneratorOpen, setIsAiContentGeneratorOpen] = useState(false); // Removed
 
   const [isInteractiveTourActive, setIsInteractiveTourActive] = useState(false);
   const [currentTourStep, setCurrentTourStep] = useState(0);
@@ -128,7 +128,7 @@ export default function PomodoroPage() {
   const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
   const [isDeletingPastNotes, setIsDeletingPastNotes] = useState(false);
 
-  const [taskForAlert, setTaskForAlert] = useState<Task | null>(null); 
+  const [taskForAlert, setTaskForAlert] = useState<Task | null>(null);
 
   const handleTimerStartCb = useCallback(() => {}, []);
   const handleTimerPauseCb = useCallback(() => {}, []);
@@ -255,7 +255,7 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded || tasks === undefined) return;
-    if (tasks.length > 0 || (tasks.length === 0 && JSON.stringify(tasks) !== JSON.stringify([]))) { 
+    if (tasks.length > 0 || (tasks.length === 0 && JSON.stringify(tasks) !== JSON.stringify([]))) {
         saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
         console.error("Error saving tasks to Firestore:", error);
         toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
@@ -266,7 +266,7 @@ export default function PomodoroPage() {
 
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded || currentNotes === undefined) return;
-    if (currentNotes || (!currentNotes && currentNotes !== undefined)) { 
+    if (currentNotes || (!currentNotes && currentNotes !== undefined)) {
         saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
             console.error("Error saving notes to Firestore:", error);
             toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
@@ -406,15 +406,15 @@ export default function PomodoroPage() {
     if (isMuted) return 'none';
     return currentTimerMode === 'work' ? settings.soundscapeWork : settings.soundscapeBreak;
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
-  
+
   useEffect(() => {
-    if (!isSettingsLoaded || !isSoundPlayerReady) {
+    if (!isSoundPlayerReady || !isSettingsLoaded) {
       stopSound();
       return;
     }
     const soundId = getActiveSoundscapeId(timer.mode);
     if (timer.isRunning) {
-       playSound(soundId);
+      playSound(soundId);
     } else {
       stopSound();
     }
@@ -423,12 +423,12 @@ export default function PomodoroPage() {
     timer.isRunning,
     isSettingsLoaded,
     isSoundPlayerReady,
-    getActiveSoundscapeId, 
-    playSound, 
+    isMuted,
+    settings.soundscapeWork,
+    settings.soundscapeBreak,
+    getActiveSoundscapeId,
+    playSound,
     stopSound,
-    isMuted, 
-    settings.soundscapeWork, 
-    settings.soundscapeBreak 
   ]);
 
   const formatTime = (seconds: number) => {
@@ -456,16 +456,16 @@ export default function PomodoroPage() {
     }]);
   };
   const handleToggleTask = (taskId: string) => setTasks(prev => prev.map(task => task.id === taskId ? { ...task, completed: !task.completed } : task));
-  
+
   const handleRemoveTask = (taskId: string) => {
     setTasks(prev => prev.filter(task => task.id !== taskId));
   };
-  
+
   const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
 
 
   useEffect(() => {
-    if (!isSettingsLoaded || tasks.length === 0 || !settings.notificationsEnabled) return;
+    if (!isSettingsLoaded || tasks.length === 0 || !settings.notificationsEnabled || typeof window === 'undefined') return;
 
     const checkReminders = () => {
       const now = new Date();
@@ -473,7 +473,21 @@ export default function PomodoroPage() {
 
       tasks.forEach(task => {
         if (task.reminderTime && !task.completed && !task.reminderSent && task.reminderTime === currentTime) {
-          setTaskForAlert(task); 
+          if (Notification.permission === 'granted') {
+            setTaskForAlert(task);
+          } else if (Notification.permission === 'denied') {
+             toast({ title: t('notifications.permissionDeniedTitle'), description: t('notifications.permissionDeniedDescription', { appName: APP_NAME }), variant: "destructive" });
+          } else { // default
+            Notification.requestPermission().then(permission => {
+              if (permission === 'granted') {
+                setTaskForAlert(task);
+              } else {
+                toast({ title: t('notifications.permissionDeniedTitle'), description: t('notifications.permissionDeniedDescription', { appName: APP_NAME }), variant: "destructive" });
+              }
+            });
+             toast({ title: t('notifications.permissionRequestTitle', { appName: APP_NAME }), description: t('notifications.permissionRequestDescription', { appName: APP_NAME }) });
+          }
+          // Mark as sent regardless of permission to avoid repeated prompts/checks for this specific reminder today
           setTasks(prevTasks =>
             prevTasks.map(t =>
               t.id === task.id ? { ...t, reminderSent: true } : t
@@ -483,11 +497,11 @@ export default function PomodoroPage() {
       });
     };
 
-    checkReminders(); 
-    const intervalId = setInterval(checkReminders, 30000); 
+    checkReminders();
+    const intervalId = setInterval(checkReminders, 30000);
 
     return () => clearInterval(intervalId);
-  }, [tasks, isSettingsLoaded, settings.notificationsEnabled, t, toast]); 
+  }, [tasks, isSettingsLoaded, settings.notificationsEnabled, t, toast]);
 
 
   const handleSendChatMessage = async () => {
@@ -507,7 +521,7 @@ export default function PomodoroPage() {
        if (error.message) {
           if (error.message.includes('API key not valid') || error.message.includes('UNAUTHENTICATED')) {
               errorMessage = "There seems to be an issue with the AI service configuration. Please contact support.";
-          } else if (error.message.length < 150) { 
+          } else if (error.message.length < 150) {
               errorMessage = `Sorry, I encountered an issue: ${error.message}`;
           }
        }
@@ -531,7 +545,7 @@ export default function PomodoroPage() {
     } catch (error: any) {
       console.error("Error defining word:", error);
       let errorMessage = t('dictionaryCard.errorDefiningDescription');
-      if (error instanceof Error && typeof error.message === 'string') {
+      if (error && typeof error.message === 'string') {
           if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
               errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
           } else {
@@ -554,9 +568,9 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }))) {
       return;
   }
-  
+
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList); 
+  setDefinedWordsList(updatedList);
   toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
 
   try {
@@ -621,7 +635,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
 
     try {
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.noNotesForDate')); 
+      setPastDateNotes(t('notes.noNotesForDate'));
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
     } catch (error: any) {
       console.error("Error deleting past notes:", error);
@@ -638,15 +652,8 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     setIsAiSummaryOpen(false);
   };
 
-  const handleAppendGeneratedTextToNotes = (textToAppend: string) => {
-    const formattedText = `\n\n--- ${t('aiContentGenerator.appendedTextHeader', { dateTime: new Date().toLocaleString() })} ---\n${textToAppend}\n--- ${t('aiContentGenerator.appendedTextFooter')} ---`;
-    setCurrentNotes(prevNotes => prevNotes + formattedText);
-    toast({ title: t('aiContentGenerator.appendSuccessTitleToNotes'), description: t('aiContentGenerator.appendSuccessDescToNotes') });
-  };
-
-
   const handleLogout = async () => {
-    stopSound(); 
+    stopSound();
     await logoutUser();
     router.push('/auth/login');
   };
@@ -702,14 +709,14 @@ const handleRemoveDefinedWord = async (wordId: string) => {
 
           <div className="flex-1 flex justify-center items-center px-1 overflow-hidden">
             <div className={cn(
-                "flex items-center space-x-1 py-1", 
-                isMobile && "overflow-x-auto" 
+                "flex items-center space-x-1 py-1",
+                isMobile && "overflow-x-auto"
             )}>
                 <LanguageSwitcher />
                 <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
                     <SparklesIcon className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setIsAiContentGeneratorOpen(true)} title={t('tooltips.aiContentGenerator')}>
+                <Button variant="ghost" size="icon" onClick={() => router.push('/ai-generator')} title={t('tooltips.aiContentGenerator')}>
                     <Bot className="h-5 w-5" />
                 </Button>
                 <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
@@ -723,7 +730,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                 </Button>
             </div>
           </div>
-          
+
           <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
             {currentUser && (
               <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
@@ -950,10 +957,9 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                 <AlertDialogTitle>{t('alertDialog.taskReminderTitle')}</AlertDialogTitle>
               </AlertDialogHeader>
               <AlertDialogDescription>
-                {t('alertDialog.taskReminderDescription.prompt', { 
-                  reminderTime: taskForAlert.reminderTime || '' 
-                })}
-                <strong className="block mt-2 text-base text-foreground">{taskForAlert.text}</strong>
+                {t('alertDialog.taskReminderDescription.prompt', {
+                  reminderTime: taskForAlert.reminderTime || '',
+                })} <strong className="block mt-2 text-base text-foreground">{taskForAlert.text}</strong>
               </AlertDialogDescription>
               <AlertDialogFooter>
                 <AlertDialogAction onClick={() => setTaskForAlert(null)}>
@@ -971,11 +977,11 @@ const handleRemoveDefinedWord = async (wordId: string) => {
           isLoading={isAiLoading}
           onSaveSummary={handleSaveAiSummaryToNotes}
         />
-        <AiContentGeneratorDialog
+        {/* <AiContentGeneratorDialog
           isOpen={isAiContentGeneratorOpen}
           onOpenChange={setIsAiContentGeneratorOpen}
           onAppendToNotes={handleAppendGeneratedTextToNotes}
-        />
+        /> */}
         <UserGuideDialog isOpen={isUserGuideOpen} onOpenChange={setIsUserGuideOpen} />
         <InteractiveTourDialog isOpen={isInteractiveTourActive} currentStep={currentTourStep} totalSteps={tourSteps.length} stepData={tourSteps[currentTourStep]} onNext={handleNextTourStep} onSkip={handleFinishTour} />
         <ChatWidgetButton onClick={() => setIsChatOpen(prev => !prev)} />
