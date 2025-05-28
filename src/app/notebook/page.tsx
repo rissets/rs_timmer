@@ -315,7 +315,7 @@ export default function NotebookPage() {
       </header>
 
       {/* Main content area for the notebook, now wider */}
-      <main className="flex-grow py-6 px-4 sm:px-6 lg:px-8 flex flex-col">
+      <main className="flex-grow py-6 flex flex-col"> {/* Removed horizontal padding */}
         {isLoading ? (
           <div className="flex items-center justify-center flex-grow">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
@@ -449,3 +449,4 @@ export default function NotebookPage() {
 }
 
     
+
