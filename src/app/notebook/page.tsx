@@ -27,65 +27,65 @@ const parseMarkdownToHtml = (markdown: string): string => {
 
   let html = markdown;
 
+  // Escape HTML special characters
   html = html.replace(/&/g, '&amp;')
              .replace(/</g, '&lt;')
              .replace(/>/g, '&gt;');
 
+  // Headers (H1, H2, H3)
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
   html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
+  // Bold (**text** or __text__)
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
 
+  // Italic (*text* or _text_)
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
   html = html.replace(/_(.*?)_/g, '<em>$1</em>');
   
+  // Links ([text](url))
   html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
   
-  // Blockquotes
+  // Blockquotes (> text)
   html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
   
-  // Inline code
+  // Inline code (`code`)
   html = html.replace(/`(.*?)`/g, '<code>$1</code>');
 
-  // Code blocks (simple, no syntax highlighting)
+  // Code blocks (```code block```) - simple, no syntax highlighting
   html = html.replace(/```([\s\S]*?)```/g, (match, p1) => {
-    const codeContent = p1.trim().replace(/&lt;/g, '<').replace(/&gt;/g, '>'); // Allow HTML entities within code blocks for display
+    const codeContent = p1.trim().replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     return `<pre><code>${codeContent}</code></pre>`;
   });
 
-  // Handle lists more carefully to avoid double wrapping
+  // Lists (unordered and ordered)
+  // This is a simplified approach and might not handle complex nested lists perfectly.
   // Unordered lists
   html = html.replace(/^(?:-|\*|\+) (.*$)/gim, '<li>$1</li>');
   // Ordered lists
   html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
-
-  // Wrap consecutive <li> items only once. This is a simplified approach.
-  // A more robust solution would involve more complex parsing.
+  
+  // Wrap consecutive <li> items in <ul> or <ol>
+  // This regex is a heuristic and might need refinement for complex cases.
   html = html.replace(/(<li>.*?<\/li>\s*)+(?=\s*[^<li]|$)/gs, (match) => {
-    // Determine if it's an ordered or unordered list based on the first item
-    // This is still a heuristic and might not be perfect for mixed/complex lists.
-    if (match.match(/^\s*<li>\d+\./)) { // Approximation for ordered list start
-        return `<ol>${match}</ol>`;
+    if (match.match(/^\s*<li>\d+\./)) { 
+        return `<ol>${match.replace(/<li>(\d+\.)? /g, '<li>')}</ul>`; // Attempt to strip numbers for OL
     }
     return `<ul>${match}</ul>`;
   });
 
-
   // Paragraphs: Wrap lines that are not part of other block elements.
-  // Split by double newlines first to identify paragraph blocks.
+  // Process after other block elements to avoid wrapping them in <p>.
   html = html.split(/\n\s*\n/).map(paragraph => {
     const trimmedParagraph = paragraph.trim();
     if (trimmedParagraph === "") return "";
-    // Check if the paragraph already starts with a block-level tag we handle
-    if (/^<(h[1-3]|ul|ol|li|blockquote|pre)>/.test(trimmedParagraph)) {
-      return paragraph; // Return as is, assuming it's already formatted
+    if (/^<(h[1-3]|ul|ol|li|blockquote|pre|p)>/.test(trimmedParagraph) || /<\/(h[1-3]|ul|ol|li|blockquote|pre|p)>$/.test(trimmedParagraph)) {
+      return paragraph; 
     }
-    // Otherwise, wrap in <p> and replace single newlines with <br>
     return `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`;
   }).join('');
-
 
   return html;
 };
@@ -106,7 +106,6 @@ export default function NotebookPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
 
-  // AI Content Generator Dialog State
   const [isAiGenerateDialogOpen, setIsAiGenerateDialogOpen] = useState(false);
   const [aiGeneratePrompt, setAiGeneratePrompt] = useState("");
   const [aiGeneratedText, setAiGeneratedText] = useState("");
@@ -139,9 +138,9 @@ export default function NotebookPage() {
     if (textareaRef.current && selection) {
       textareaRef.current.focus();
       textareaRef.current.setSelectionRange(selection.start, selection.end);
-      setSelection(null); // Reset selection state after applying
+      setSelection(null); 
     }
-  }, [notesContent, selection]); // Rerun when notesContent changes (after state update) OR selection is set
+  }, [notesContent, selection]); 
 
   const handleSaveNotes = async () => {
     if (!currentUser) {
@@ -192,7 +191,7 @@ export default function NotebookPage() {
       toast({ title: t('aiNoteGeneratorDialog.nothingToAppend'), variant: "default" });
       return;
     }
-    setEditorMode('edit'); // Ensure edit mode
+    setEditorMode('edit'); 
     
     const currentText = notesContent;
     const separator = currentText.length > 0 && !currentText.endsWith('\n\n') ? "\n\n" : "";
@@ -211,7 +210,6 @@ export default function NotebookPage() {
       const newCursorPos = start + textToInsert.length;
       setSelection({ start: newCursorPos, end: newCursorPos });
     } else {
-      // Fallback if ref is not available (should not happen often)
       setNotesContent(prevNotes => prevNotes + textToInsert);
     }
 
@@ -260,7 +258,7 @@ export default function NotebookPage() {
           suffix = "*";
           break;
         default:
-          return; // Not a handled shortcut
+          return;
       }
 
       if (selectedText) {
@@ -273,7 +271,6 @@ export default function NotebookPage() {
         newSelectionStart = start + prefix.length;
         newSelectionEnd = start + prefix.length + selectedText.length;
       } else {
-        // No text selected, insert markers and place cursor in between
         const newText = prefix + suffix;
         setNotesContent(
           textarea.value.substring(0, start) +
@@ -287,7 +284,6 @@ export default function NotebookPage() {
     }
   };
 
-
   if (authLoading || !isSettingsLoaded || (!currentUser && !authLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
@@ -299,7 +295,7 @@ export default function NotebookPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center max-w-5xl">
+        <div className="container flex h-14 items-center max-w-5xl"> {/* Header content remains constrained */}
           <Button variant="outline" size="icon" onClick={() => router.push('/')} className="mr-4">
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">{t('buttons.back')}</span>
@@ -318,13 +314,14 @@ export default function NotebookPage() {
         </div>
       </header>
 
-      <main className="flex-grow container py-6 max-w-5xl flex flex-col">
+      {/* Main content area for the notebook, now wider */}
+      <main className="flex-grow py-6 px-4 sm:px-6 lg:px-8 flex flex-col">
         {isLoading ? (
           <div className="flex items-center justify-center flex-grow">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
         ) : (
-          <Card className="flex-grow flex flex-col shadow-lg">
+          <Card className="flex-grow flex flex-col shadow-lg"> {/* Card will take available width from main */}
             <CardHeader className="py-3 px-4 border-b">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1">
@@ -351,7 +348,7 @@ export default function NotebookPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-0 flex-grow flex">
+            <CardContent className="p-0 flex-grow flex"> {/* Ensures Textarea/ScrollArea take full height */}
               {editorMode === 'edit' ? (
                 <Textarea
                   ref={textareaRef}
@@ -450,3 +447,5 @@ export default function NotebookPage() {
     </div>
   );
 }
+
+    
