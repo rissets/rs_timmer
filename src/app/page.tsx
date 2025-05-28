@@ -117,7 +117,6 @@ export default function PomodoroPage() {
   const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
   const [isDeletingPastNotes, setIsDeletingPastNotes] = useState(false);
 
-
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
     settings: settings,
@@ -342,15 +341,35 @@ export default function PomodoroPage() {
        }
     }
   }, [settings.longBreakInterval, triggerAiSummary, tasks, currentNotes, currentSessionType]);
+  
+  const handleTimerStart = useCallback((mode: TimerMode) => {
+    // Placeholder for specific logic when timer starts, if needed
+    // console.log('Timer started in mode:', mode);
+  }, []);
+
+  const handleTimerPause = useCallback((mode: TimerMode) => {
+    // Placeholder for specific logic when timer pauses, if needed
+    // console.log('Timer paused in mode:', mode);
+  }, []);
+
+  const handleTimerReset = useCallback((mode: TimerMode) => {
+    // Placeholder for specific logic when timer resets, if needed
+    // console.log('Timer reset to mode:', mode);
+  }, []);
+
+  const handleTimerSkip = useCallback((skippedMode: TimerMode, nextMode: TimerMode) => {
+    // Placeholder for specific logic when timer skips, if needed
+    // console.log('Timer skipped from mode:', skippedMode, 'to mode:', nextMode);
+  }, []);
 
   const timer = useTimerCore({
     settings,
-    currentDateKey, // Pass currentDateKey to the hook
+    currentDateKey,
     onIntervalEnd: handleIntervalEnd,
-    onTimerStart: () => {},
-    onTimerPause: () => {},
-    onTimerReset: () => {},
-    onTimerSkip: () => {},
+    onTimerStart: handleTimerStart,
+    onTimerPause: handleTimerPause,
+    onTimerReset: handleTimerReset,
+    onTimerSkip: handleTimerSkip,
     getTranslatedText: t,
   });
 
@@ -388,12 +407,12 @@ export default function PomodoroPage() {
     timer.isRunning,
     isSettingsLoaded,
     isSoundPlayerReady,
-    getActiveSoundscapeId,
-    playSound,
-    stopSound,
-    isMuted, // Added isMuted
-    settings.soundscapeWork, // Added
-    settings.soundscapeBreak // Added
+    getActiveSoundscapeId, // Now stable
+    playSound, // Now stable
+    stopSound, // Now stable
+    isMuted, 
+    settings.soundscapeWork, 
+    settings.soundscapeBreak 
   ]);
 
   const formatTime = (seconds: number) => {
@@ -460,14 +479,10 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   setDefinedWordsList(updatedList); 
   
   try {
-    // Explicitly save to Firestore after local update
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
     toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
-    // Optionally revert local state if Firestore save fails, though this can be complex
-    // For now, we rely on the user retrying or the next general save cycle.
-    // setDefinedWordsList(definedWordsList); // This would revert to previous state
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
   }
 };
