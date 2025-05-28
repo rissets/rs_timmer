@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -308,60 +307,58 @@ export default function NotebookPage() {
       </header>
 
       <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="py-3 border-b bg-background sticky top-14 z-40">
+          <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+            <div className="flex items-center space-x-1">
+                <Button
+                    variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setEditorMode('edit')}
+                    className={cn("px-3", editorMode === 'edit' && "font-semibold")}
+                    aria-pressed={editorMode === 'edit'}
+                >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    {t('notebookPage.editModeButton')}
+                </Button>
+                <Button
+                    variant={editorMode === 'preview' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setEditorMode('preview')}
+                    className={cn("px-3", editorMode === 'preview' && "font-semibold")}
+                    aria-pressed={editorMode === 'preview'}
+                >
+                    <Eye className="mr-2 h-4 w-4" />
+                    {t('notebookPage.previewModeButton')}
+                </Button>
+            </div>
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
         ) : (
-          <>
-            <div className="py-3 border-b bg-background sticky top-14 z-40">
-              <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-                <div className="flex items-center space-x-1">
-                    <Button
-                        variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setEditorMode('edit')}
-                        className={cn("px-3", editorMode === 'edit' && "font-semibold")}
-                        aria-pressed={editorMode === 'edit'}
-                    >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        {t('notebookPage.editModeButton')}
-                    </Button>
-                    <Button
-                        variant={editorMode === 'preview' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setEditorMode('preview')}
-                        className={cn("px-3", editorMode === 'preview' && "font-semibold")}
-                        aria-pressed={editorMode === 'preview'}
-                    >
-                        <Eye className="mr-2 h-4 w-4" />
-                        {t('notebookPage.previewModeButton')}
-                    </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 flex flex-col min-h-0">
-              {editorMode === 'edit' ? (
-                <Textarea
-                  ref={textareaRef}
-                  placeholder={t('notebookPage.notesPlaceholderMarkdown')}
-                  value={notesContent}
-                  onChange={(e) => setNotesContent(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="w-full flex-1 resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
-                  aria-label={t('notebookPage.notesAreaLabel')}
+          <div className="flex-1 flex flex-col min-h-0 px-4 sm:px-6 lg:px-8">
+            {editorMode === 'edit' ? (
+              <Textarea
+                ref={textareaRef}
+                placeholder={t('notebookPage.notesPlaceholderMarkdown')}
+                value={notesContent}
+                onChange={(e) => setNotesContent(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full flex-1 resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
+                aria-label={t('notebookPage.notesAreaLabel')}
+              />
+            ) : (
+              <ScrollArea className="w-full flex-1 min-h-0">
+                <div
+                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview p-6"
+                  dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(notesContent) }}
                 />
-              ) : (
-                <ScrollArea className="w-full flex-1 min-h-0">
-                  <div
-                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview p-6"
-                    dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(notesContent) }}
-                  />
-                </ScrollArea>
-              )}
-            </div>
-          </>
+              </ScrollArea>
+            )}
+          </div>
         )}
       </main>
       <footer className="text-center py-4 text-sm text-muted-foreground border-t">
@@ -439,3 +436,5 @@ export default function NotebookPage() {
     </div>
   );
 }
+
+    
