@@ -85,51 +85,53 @@ export function SimpleTaskList({
   return (
     <>
       <CardContent className="space-y-4 pt-6">
-        <div className="space-y-2">
-          <div>
-            <Label htmlFor="new-task-text">{t('tasks.addTaskPlaceholder')}</Label>
-            <Input
-              id="new-task-text"
-              type="text"
-              placeholder={t('tasks.addTaskPlaceholder')}
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="focus:ring-accent mt-1"
-            />
-          </div>
-          <div>
-            <Label>{t('tasks.reminderTimeLabel')}</Label>
-            <div className="flex items-center gap-2 mt-1">
-              <Select value={currentHourValue} onValueChange={handleHourChange}>
-                <SelectTrigger className="w-[70px]" aria-label={t('tasks.hourLabel')}>
-                  <SelectValue placeholder={t('tasks.hourPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {hoursOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span>:</span>
-              <Select value={currentMinuteValue} onValueChange={handleMinuteChange}>
-                <SelectTrigger className="w-[70px]" aria-label={t('tasks.minuteLabel')}>
-                  <SelectValue placeholder={t('tasks.minutePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {minutesOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {newTaskReminderTime && (
-                <Button variant="ghost" size="icon" onClick={clearReminderTime} title={t('tasks.clearReminderTooltip')} className="h-8 w-8">
-                  <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                </Button>
-              )}
+        <div className="space-y-3">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-3">
+            <div className="flex-grow space-y-1">
+              <Label htmlFor="new-task-text">{t('tasks.addTaskPlaceholder')}</Label>
+              <Input
+                id="new-task-text"
+                type="text"
+                placeholder={t('tasks.addTaskPlaceholder')}
+                value={newTaskText}
+                onChange={(e) => setNewTaskText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="focus:ring-accent"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>{t('tasks.reminderTimeLabel')}</Label>
+              <div className="flex items-center gap-2">
+                <Select value={currentHourValue} onValueChange={handleHourChange}>
+                  <SelectTrigger className="w-[70px]" aria-label={t('tasks.hourLabel')}>
+                    <SelectValue placeholder={t('tasks.hourPlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {hoursOptions.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span>:</span>
+                <Select value={currentMinuteValue} onValueChange={handleMinuteChange}>
+                  <SelectTrigger className="w-[70px]" aria-label={t('tasks.minuteLabel')}>
+                    <SelectValue placeholder={t('tasks.minutePlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {minutesOptions.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {newTaskReminderTime && (
+                  <Button variant="ghost" size="icon" onClick={clearReminderTime} title={t('tasks.clearReminderTooltip')} className="h-8 w-8">
+                    <XCircle className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-          <Button onClick={handleAddTaskInternal} aria-label={t('buttons.add')} className="w-full sm:w-auto mt-3">
+          <Button onClick={handleAddTaskInternal} aria-label={t('buttons.add')} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" /> {t('buttons.add')}
           </Button>
         </div>
