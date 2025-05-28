@@ -88,7 +88,10 @@
     "noSessionsToday": "Belum ada sesi yang direkam untuk hari ini.",
     "statusCompleted": "Selesai",
     "statusSkipped": "Dilewati/Terinterupsi",
-    "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini? Tindakan ini tidak dapat dibatalkan."
+    "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini? Tindakan ini tidak dapat dibatalkan.",
+    "historyClearedTitle": "Riwayat Dihapus",
+    "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus dari database.",
+    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini dari database. Silakan coba lagi."
   },
   "settingsDialog": {
     "title": "Pengaturan Timer",

@@ -20,13 +20,13 @@ import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { useLanguageContext } from "@/contexts/language-context";
-import { loadSessionLogForDay, deleteSessionLogForDay } from '@/lib/firebase/firestore-service'; // Import Firestore service
+import { loadSessionLogForDay, deleteSessionLogForDay } from '@/lib/firebase/firestore-service';
 import { useToast } from '@/hooks/use-toast';
 
 
 interface SessionHistoryDrawerProps {
   currentDateKey: string;
-  userId: string | undefined; // User ID to fetch data for
+  userId: string | undefined; 
 }
 
 export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryDrawerProps) {
@@ -47,30 +47,37 @@ export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryD
       setHistory(loadedHistory);
     } catch (error) {
       console.error("Failed to load session history from Firestore:", error);
-      toast({ title: "Error", description: "Could not load session history.", variant: "destructive" });
+      toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadDescription"), variant: "destructive" });
       setHistory([]);
     } finally {
       setIsLoadingHistory(false);
     }
-  }, [userId, currentDateKey, toast]);
+  }, [userId, currentDateKey, toast, t]);
 
   useEffect(() => {
     if (isOpen && userId) {
       fetchHistory();
     }
-  }, [isOpen, userId, fetchHistory]); // fetchHistory is now stable
+  }, [isOpen, userId, fetchHistory]);
 
   const clearTodaysHistory = async () => {
-    console.log("clearTodaysHistory triggered");
-    if (!userId) return;
-    if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) return;
+    console.log("clearTodaysHistory triggered in SessionHistoryDrawer");
+    if (!userId) {
+        console.warn("clearTodaysHistory: No userId, aborting.");
+        return;
+    }
+    if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) {
+        return;
+    }
     try {
+      console.log(`Attempting to delete session log for userId: ${userId}, dateKey: ${currentDateKey}`);
       await deleteSessionLogForDay(userId, currentDateKey);
-      setHistory([]); // Clear local state
-      toast({ title: "History Cleared", description: "Today's session history has been cleared." });
-    } catch (error) {
+      toast({ title: t('sessionHistoryDrawer.historyClearedTitle'), description: t('sessionHistoryDrawer.historyClearedDescription') });
+      // Re-fetch history to reflect the changes from Firestore
+      await fetchHistory(); 
+    } catch (error: any) {
       console.error("Failed to clear today's session history from Firestore:", error);
-      toast({ title: "Error", description: "Could not clear session history.", variant: "destructive" });
+      toast({ title: t('errors.firestoreDeleteTitle'), description: error.message || t('sessionHistoryDrawer.clearErrorDescription'), variant: "destructive" });
     }
   };
   
@@ -126,8 +133,8 @@ export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryD
             )}
           </div>
           <SheetFooter className="pt-4">
-            {history.length > 0 && (
-              <Button variant="destructive" onClick={clearTodaysHistory} className="mb-2" disabled={isLoadingHistory}>
+            {history.length > 0 && !isLoadingHistory && (
+              <Button variant="destructive" onClick={clearTodaysHistory} className="mb-2">
                 <Trash2 className="mr-2 h-4 w-4" /> {t('buttons.clearTodaysHistory')}
               </Button>
             )}

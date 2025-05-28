@@ -88,7 +88,10 @@
     "noSessionsToday": "No sessions recorded for today yet.",
     "statusCompleted": "Completed",
     "statusSkipped": "Skipped/Interrupted",
-    "confirmClearToday": "Are you sure you want to clear all session history for today? This action cannot be undone."
+    "confirmClearToday": "Are you sure you want to clear all session history for today? This action cannot be undone.",
+    "historyClearedTitle": "History Cleared",
+    "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
+    "clearErrorDescription": "Could not clear today's session history from the database. Please try again."
   },
   "settingsDialog": {
     "title": "Timer Settings",
