@@ -62,14 +62,14 @@ export function SimpleTaskList({
               className="focus:ring-accent"
             />
           </div>
-          <div>
-            <Label htmlFor="new-task-reminder-time" className="text-xs text-muted-foreground">{t('tasks.reminderTimeLabel')}</Label>
+          <div className="space-y-1"> {/* Group label and input for time */}
+            <Label htmlFor="new-task-reminder-time" className="text-xs text-muted-foreground block">{t('tasks.reminderTimeLabel')}</Label>
             <Input
               id="new-task-reminder-time"
               type="time"
               value={newTaskReminderTime}
               onChange={(e) => setNewTaskReminderTime(e.target.value)}
-              className="focus:ring-accent w-full sm:w-auto"
+              className="focus:ring-accent w-full sm:w-32" /* Consistent width on sm+, full on xs */
               aria-label={t('tasks.reminderTimeLabel')}
             />
           </div>
