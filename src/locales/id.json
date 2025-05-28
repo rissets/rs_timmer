@@ -91,7 +91,8 @@
     "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini? Tindakan ini tidak dapat dibatalkan.",
     "historyClearedTitle": "Riwayat Dihapus",
     "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus dari database.",
-    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini dari database. Silakan coba lagi."
+    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini. Silakan coba lagi.",
+    "clearingHistory": "Menghapus riwayat..."
   },
   "settingsDialog": {
     "title": "Pengaturan Timer",
@@ -172,11 +173,11 @@
         "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ringkasan ini dapat disimpan ke catatan harian Anda, yang disimpan di Firebase."
       },
       "chatWidget": {
-        "title": "Asisten Chat AI", 
+        "title": "Asisten Chat AI",
         "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami (didukung oleh Gemini).\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
       "dictionaryCard": {
-        "title": "Kamus Sesi", 
+        "title": "Kamus Sesi",
         "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia. Definisi ini disimpan per hari di database Firebase Anda dan dapat diekspor ke file Markdown. Anda juga dapat menghapus entri dari kamus hari ini."
       },
       "viewPastNotes": {
@@ -393,5 +394,3 @@
     "noDictionaryForDay": "Tidak ada entri kamus yang disimpan untuk hari ini."
   }
 }
-
-    

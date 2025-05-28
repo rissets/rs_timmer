@@ -91,7 +91,8 @@
     "confirmClearToday": "Are you sure you want to clear all session history for today? This action cannot be undone.",
     "historyClearedTitle": "History Cleared",
     "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
-    "clearErrorDescription": "Could not clear today's session history from the database. Please try again."
+    "clearErrorDescription": "Could not clear today's session history. Please try again.",
+    "clearingHistory": "Clearing history..."
   },
   "settingsDialog": {
     "title": "Timer Settings",
@@ -172,11 +173,11 @@
         "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This summary can be saved to your daily notes, which are stored in Firebase."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant", 
+        "title": "AI Chat Assistant",
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "dictionaryCard": {
-        "title": "Session Dictionary", 
+        "title": "Session Dictionary",
         "content": "Use the Dictionary Card to get definitions for words in English and Indonesian. These definitions are stored per day in your Firebase database and can be exported to a Markdown file. You can also delete entries from the current day's dictionary."
       },
       "viewPastNotes": {
@@ -393,5 +394,3 @@
     "noDictionaryForDay": "No dictionary entries were saved for this day."
   }
 }
-
-    
