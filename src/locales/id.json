@@ -44,8 +44,8 @@
     "analyzeCurrentData": "Analisis catatan sesi, tugas, dan log saat ini dengan konteks yang dipilih",
     "pomodoroProgress": "{{completed}} dari {{total}} pomodoro selesai dalam siklus ini.",
     "viewPastData": "Lihat Data Sesi Sebelumnya",
-    "aiContentGenerator": "Buka Halaman Generator Konten AI",
-    "aiNoteGenerator": "Buat konten dengan AI untuk catatan Anda"
+    "aiNoteGenerator": "Buat konten dengan AI untuk catatan Anda",
+    "notebookPage": "Buka Buku Catatan"
   },
   "cards": {
     "tasksTitle": "Tugas Hari Ini",
@@ -258,7 +258,7 @@
     "viewPastDataTitle": "Lihat Data Sebelumnya (Ikon Kalender Header)",
     "viewPastDataContent": "Klik ikon kalender di header untuk pergi ke halaman di mana Anda dapat melihat semua tugas, catatan, konteks, dan entri kamus yang tersimpan untuk tanggal lampau dari Firebase.",
     "headerToolsTitle": "Alat Header",
-    "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi Hari Ini (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), Ganti Bahasa (🌐), dan Lihat Data Sebelumnya (🗓️) dari header.",
+    "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi Hari Ini (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), Ganti Bahasa (🌐), Buku Catatan (📓), dan Lihat Data Sebelumnya (🗓️) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
     "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara (termasuk mengunggah milik Anda sendiri!), animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda. Pengaturan diatur ke dalam tab.",
     "allSetTitle": "Anda Sudah Siap!",
@@ -310,10 +310,7 @@
     "gentlePianoChord": "Akord Piano Lembut",
     "simplePianoMelodySynth": "Melodi Piano Sederhana (Synth)",
     "classicalExcerptSynth": "Cuplikan Klasik (Synth)",
-    "dreamyLullabySynth": "Nina Bobo Melamun (Synth)",
-    "lofiVibesUrl": "Lofi Vibes (URL)",
-    "smoothJazzUrl": "Smooth Jazz (URL)",
-    "playfulTuneUrl": "Nada Ceria (Anak) (URL)"
+    "dreamyLullabySynth": "Nina Bobo Melamun (Synth)"
   },
   "backgroundAnimations": {
     "none": "Tidak Ada",
@@ -439,7 +436,7 @@
   "alertDialog": {
     "taskReminderTitle": "Pengingat Tugas!",
     "taskReminderDescription": {
-      "prompt": "Saatnya untuk tugas Anda (dijadwalkan untuk {{reminderTime}}):"
+      "prompt": "Saatnya untuk tugas Anda: **{{taskText}}** (dijadwalkan untuk {{reminderTime}})."
     }
   },
   "aiNoteGeneratorDialog": {
@@ -462,5 +459,16 @@
     "appendSuccessDescToNotes": "Konten yang dihasilkan AI telah ditambahkan ke catatan sesi Anda.",
     "appendedTextHeader": "Konten yang Dihasilkan AI ({{dateTime}})",
     "appendedTextFooter": "Akhir dari Konten yang Dihasilkan AI"
+  },
+  "notebookPage": {
+    "title": "Buku Catatan Saya",
+    "saveButton": "Simpan Catatan",
+    "savingButton": "Menyimpan...",
+    "saveSuccessTitle": "Buku Catatan Disimpan",
+    "saveSuccessDescription": "Catatan Anda telah berhasil disimpan.",
+    "aiGenerateButton": "Buat dengan AI",
+    "notesPlaceholder": "Mulai tulis pemikiran, ide, atau apa pun...",
+    "notesAreaLabel": "Area buku catatan umum",
+    "wysiwygPlaceholder": "Editor WYSIWYG akan ada di sini. Untuk saat ini, gunakan area teks biasa ini."
   }
 }

@@ -17,7 +17,7 @@ function getDailyDataDocRef(userId: string, dateKey: string) {
   return doc(db, "users", userId, "dailyData", dateKey);
 }
 
-// --- Generic Save Function ---
+// --- Generic Save Function for Daily Data ---
 async function saveDailyDataField(userId: string, dateKey: string, field: keyof DailyData, data: any) {
   if (!userId) throw new Error("User not authenticated for saving data.");
   const docRef = getDailyDataDocRef(userId, dateKey);
@@ -29,7 +29,7 @@ async function saveDailyDataField(userId: string, dateKey: string, field: keyof 
   }
 }
 
-// --- Generic Load Function ---
+// --- Generic Load Function for Daily Data ---
 async function loadDailyData(userId: string, dateKey: string): Promise<DailyData | null> {
   if (!userId) {
     console.warn("User not authenticated for loading data.");
@@ -48,7 +48,7 @@ async function loadDailyData(userId: string, dateKey: string): Promise<DailyData
   }
 }
 
-// --- Specific Save Functions ---
+// --- Specific Save Functions for Daily Data ---
 export const saveTasksForDay = async (userId: string, dateKey: string, tasks: Task[]) =>
   saveDailyDataField(userId, dateKey, 'tasks', tasks);
 
@@ -65,52 +65,90 @@ export const saveSessionLogForDay = async (userId: string, dateKey: string, sess
   saveDailyDataField(userId, dateKey, 'sessionLog', sessionLog);
 
 
-// --- Specific Load Functions using the generic loader ---
+// --- Specific Load Functions using the generic loader for Daily Data ---
 export const loadTasksForDay = async (userId: string, dateKey: string): Promise<Task[]> =>
   (await loadDailyData(userId, dateKey))?.tasks || [];
 
-export const loadNotesForDay = async (userId: string, dateKey: string): Promise<string> =>
-  (await loadDailyData(userId, dateKey))?.notes || "";
+export const loadNotesForDay = async (userId: string, dateKey: string): Promise<string | null> => // Allow null
+  (await loadDailyData(userId, dateKey))?.notes || null;
 
 export const loadDictionaryForDay = async (userId: string, dateKey: string): Promise<DefinedWordEntry[]> =>
   (await loadDailyData(userId, dateKey))?.dictionary || [];
 
-export const loadSessionContextForDay = async (userId: string, dateKey: string): Promise<SessionType> =>
-  (await loadDailyData(userId, dateKey))?.sessionContext || 'general';
+export const loadSessionContextForDay = async (userId: string, dateKey: string): Promise<SessionType | null> => // Allow null
+  (await loadDailyData(userId, dateKey))?.sessionContext || null;
 
 export const loadSessionLogForDay = async (userId: string, dateKey: string): Promise<SessionRecord[]> =>
   (await loadDailyData(userId, dateKey))?.sessionLog || [];
 
 
-// --- Delete Today's History (Session Log) ---
+// --- Delete Today's History (Session Log) for Daily Data ---
 export const deleteSessionLogForDay = async (userId: string, dateKey: string): Promise<void> => {
   if (!userId) throw new Error("User not authenticated for deleting data.");
   const docRef = getDailyDataDocRef(userId, dateKey);
   try {
-    await setDoc(docRef, { sessionLog: [] }, { merge: true });
+    // Set the sessionLog field to an empty array. Using updateDoc is safer if the doc might not exist.
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        await updateDoc(docRef, { sessionLog: [] });
+    }
   } catch (error) {
     console.error(`Error deleting session log for ${dateKey}:`, error);
     throw error;
   }
 };
 
-// --- Delete Notes for a Specific Day ---
+// --- Delete Notes for a Specific Day from Daily Data ---
 export const deleteNotesForDay = async (userId: string, dateKey: string): Promise<void> => {
   if (!userId) throw new Error("User not authenticated for deleting notes.");
   const docRef = getDailyDataDocRef(userId, dateKey);
   try {
-    // Using updateDoc with deleteField is more robust if the document might not exist
-    // or the field might not exist, though setDoc with merge:true and an empty string works too.
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       await updateDoc(docRef, {
         notes: deleteField()
       });
     }
-    // If doc doesn't exist, no action needed, notes are effectively "deleted" or non-existent.
   } catch (error) {
     console.error(`Error deleting notes for ${dateKey}:`, error);
     throw error;
   }
 };
 
+
+// --- General Notebook Service Functions ---
+const GENERAL_NOTEBOOK_DOC_ID = "mainContent"; // Using a fixed ID for the single notebook document
+
+function getGeneralNotebookDocRef(userId: string) {
+  return doc(db, "users", userId, "generalNotebook", GENERAL_NOTEBOOK_DOC_ID);
+}
+
+export const saveGeneralNotes = async (userId: string, content: string): Promise<void> => {
+  if (!userId) throw new Error("User not authenticated for saving general notes.");
+  const docRef = getGeneralNotebookDocRef(userId);
+  try {
+    await setDoc(docRef, { content: content, updatedAt: new Date() }, { merge: true });
+  } catch (error) {
+    console.error("Error saving general notes:", error);
+    throw error;
+  }
+};
+
+export const loadGeneralNotes = async (userId: string): Promise<string | null> => {
+  if (!userId) {
+    console.warn("User not authenticated for loading general notes.");
+    return null;
+  }
+  const docRef = getGeneralNotebookDocRef(userId);
+  try {
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.content || null;
+    }
+    return null; // No notes saved yet
+  } catch (error) {
+    console.error("Error loading general notes:", error);
+    throw error;
+  }
+};

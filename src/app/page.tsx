@@ -71,7 +71,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock, Bot, ClipboardCopy, Wand2 } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Clock, Bot, ClipboardCopy, Wand2, Notebook } from "lucide-react"; // Added Notebook icon
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -103,7 +103,7 @@ export default function PomodoroPage() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentNotes, setCurrentNotes] = useState("");
-  const [currentSessionType, setCurrentSessionType] = useState<SessionType>('general');
+  const [currentSessionType, setCurrentSessionType] = useState<SessionType | null>(null);
   const [definedWordsList, setDefinedWordsList] = useState<DefinedWordEntry[]>([]);
   const [isLoadingDailyData, setIsLoadingDailyData] = useState(true);
 
@@ -154,7 +154,7 @@ export default function PomodoroPage() {
     }
   }, [t]);
 
-  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType) => {
+  const triggerAiSummary = useCallback(async (logForSummary: SessionRecord[], sessionType: SessionType | null) => {
     if ((!logForSummary || logForSummary.length === 0) && tasks.length === 0 && !currentNotes) {
       toast({ title: t('ai.noDataForSummary'), variant: "destructive" });
       return;
@@ -174,7 +174,7 @@ export default function PomodoroPage() {
     const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : t('ai.noSessionLog')}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || t('ai.noNotes')}`;
 
     try {
-      const result = await summarizeSession({ sessionDetails: fullDetails, sessionType });
+      const result = await summarizeSession({ sessionDetails: fullDetails, sessionType: sessionType || undefined });
       setAiSummary(result);
     } catch (error: any) {
       console.error("AI Summary Error:", error);
@@ -183,7 +183,7 @@ export default function PomodoroPage() {
     } finally {
       setIsAiLoading(false);
     }
-  }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
+  }, [currentNotes, tasks, toast, t, getModeDisplayName]);
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
     setTimeout(() => {
@@ -208,7 +208,11 @@ export default function PomodoroPage() {
     getTranslatedText: t,
   });
 
-  const soundscapePlayer = useSoundscapePlayer({ volume: settings.volume, settings, isSettingsLoaded });
+  const soundscapePlayer = useSoundscapePlayer({
+    volume: settings.volume,
+    settings,
+    isSettingsLoaded,
+  });
 
   const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
 
@@ -270,14 +274,11 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || currentNotes === undefined) return;
-    // Save notes if they exist or if they were previously defined and are now cleared
-    if (currentNotes || (!currentNotes && typeof currentNotes === 'string')) {
-        saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
-            console.error("Error saving notes to Firestore:", error);
-            toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
-        });
-    }
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || typeof currentNotes !== 'string') return;
+      saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
+          console.error("Error saving notes to Firestore:", error);
+          toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
+      });
   }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
 
@@ -293,7 +294,7 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || currentSessionType === undefined) return;
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || typeof currentSessionType !== 'string') return;
     saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
       console.error("Error saving session context to Firestore:", error);
       toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveContextDescription"), variant: "destructive" });
@@ -340,7 +341,7 @@ export default function PomodoroPage() {
       content: <p>{t('interactiveTourDialog.notesContextContent')}</p>,
     },
     {
-      title: t('interactiveTourDialog.aiNoteGeneratorTitle'), // New Step
+      title: t('interactiveTourDialog.aiNoteGeneratorTitle'), 
       content: <p>{t('interactiveTourDialog.aiNoteGeneratorContent')}</p>,
     },
     {
@@ -418,7 +419,7 @@ export default function PomodoroPage() {
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
   useEffect(() => {
-    if (!isSoundPlayerReady || !isSettingsLoaded) {
+    if (!isSettingsLoaded || !isSoundPlayerReady) {
       stopSound();
       return;
     }
@@ -556,11 +557,11 @@ export default function PomodoroPage() {
     } catch (error: any) {
       console.error("Error defining word:", error);
       let errorMessage = t('dictionaryCard.errorDefiningDescription');
-      if (error && typeof error.message === 'string') {
+      if (error && error.message && typeof error.message === 'string') { // Check if error.message is a string
           if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
               errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
           } else {
-              errorMessage = error.message;
+              errorMessage = error.message; // Use the specific error message if not a service disabled type
           }
       }
       toast({ title: t('dictionaryCard.errorDefiningTitle'), description: errorMessage, variant: "destructive" });
@@ -579,14 +580,13 @@ export default function PomodoroPage() {
       return;
     }
     const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-    setDefinedWordsList(updatedList); // Update local state first for responsiveness
+    setDefinedWordsList(updatedList);
     toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
     try {
       await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
     } catch (error: any) {
       console.error("Error saving dictionary after deletion:", error);
       toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-      // Optionally revert local state if save fails, or rely on next load to correct it
     }
   };
 
@@ -723,15 +723,14 @@ export default function PomodoroPage() {
   if (authLoading || !isSettingsLoaded || (!currentUser && !authLoading) || (currentUser && isLoadingDailyData)) {
      return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-        <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <Loader2 className="h-16 w-16 text-primary animate-spin" />
       </div>
     );
   }
   if (!currentUser) {
-      // This case should ideally be caught by the useEffect redirect, but as a fallback:
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-            <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <Loader2 className="h-16 w-16 text-primary animate-spin" />
           </div>
       );
   }
@@ -779,7 +778,9 @@ export default function PomodoroPage() {
                 <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
                     <SparklesIcon className="h-5 w-5" />
                 </Button>
-                {/* Removed AI Generator Page Button */}
+                <Button variant="ghost" size="icon" onClick={() => router.push('/notebook')} title={t('tooltips.notebookPage')}>
+                  <Notebook className="h-5 w-5" />
+                </Button>
                 <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
                 <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
                     <BookOpen className="h-5 w-5" />
@@ -901,7 +902,7 @@ export default function PomodoroPage() {
                     <div>
                         <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
                         <Select
-                            value={currentSessionType}
+                            value={currentSessionType || 'general'}
                             onValueChange={(value) => setCurrentSessionType(value as SessionType)}
                           >
                             <SelectTrigger id="session-type-select" className="w-full mt-1">
@@ -918,7 +919,7 @@ export default function PomodoroPage() {
                       placeholder={t('notes.textareaPlaceholder')}
                       value={currentNotes}
                       onChange={(e) => setCurrentNotes(e.target.value)}
-                      className="min-h-[150px] focus:ring-accent" // Increased min-height
+                      className="min-h-[150px] focus:ring-accent" 
                       aria-label={t('notes.currentDayNotesAreaLabel')}
                     />
                     <div className="flex flex-wrap gap-2">

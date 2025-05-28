@@ -44,8 +44,8 @@
     "analyzeCurrentData": "Analyze current session notes, tasks and log with selected context",
     "pomodoroProgress": "Completed {{completed}} of {{total}} pomodoros in this cycle.",
     "viewPastData": "View Past Session Data",
-    "aiContentGenerator": "Open AI Content Generator Page",
-    "aiNoteGenerator": "Generate content with AI for your notes"
+    "aiNoteGenerator": "Generate content with AI for your notes",
+    "notebookPage": "Open Notebook"
   },
   "cards": {
     "tasksTitle": "Today's Tasks",
@@ -258,7 +258,7 @@
     "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
     "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved tasks, notes, context, and dictionary entries for any past date from Firebase.",
     "headerToolsTitle": "Header Tools",
-    "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
+    "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), Notebook (📓), and View Past Data (🗓️) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
     "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow. Settings are organized into tabs.",
     "allSetTitle": "You're All Set!",
@@ -272,7 +272,7 @@
     "timeForWork": "Time for work.",
     "timeForShortBreak": "Time for a short break.",
     "timeForLongBreak": "Time for a long break.",
-    "taskReminderTitle": "Task Reminder",
+    "taskReminderTitle": "Task Reminder!",
     "permissionDeniedTitle": "Notification Permission Denied",
     "permissionDeniedDescription": "Task reminders and timer alerts will not be shown. Please enable notification permissions for this site in your browser settings.",
     "permissionRequestTitle": "Enable Notifications?",
@@ -310,10 +310,7 @@
     "gentlePianoChord": "Gentle Piano Chord",
     "simplePianoMelodySynth": "Simple Piano Melody (Synth)",
     "classicalExcerptSynth": "Classical Snippet (Synth)",
-    "dreamyLullabySynth": "Dreamy Lullaby (Synth)",
-    "lofiVibesUrl": "Lofi Vibes (URL)",
-    "smoothJazzUrl": "Smooth Jazz (URL)",
-    "playfulTuneUrl": "Playful Tune (Child) (URL)"
+    "dreamyLullabySynth": "Dreamy Lullaby (Synth)"
   },
   "backgroundAnimations": {
     "none": "None",
@@ -439,7 +436,7 @@
   "alertDialog": {
     "taskReminderTitle": "Task Reminder!",
     "taskReminderDescription": {
-      "prompt": "It's time for your task (scheduled for {{reminderTime}}):"
+      "prompt": "It's time for your task: **{{taskText}}** (scheduled for {{reminderTime}})."
     }
   },
   "aiNoteGeneratorDialog": {
@@ -462,5 +459,16 @@
     "appendSuccessDescToNotes": "AI generated content has been appended to your session notes.",
     "appendedTextHeader": "AI Generated Content ({{dateTime}})",
     "appendedTextFooter": "End of AI Generated Content"
+  },
+  "notebookPage": {
+    "title": "My Notebook",
+    "saveButton": "Save Notes",
+    "savingButton": "Saving...",
+    "saveSuccessTitle": "Notebook Saved",
+    "saveSuccessDescription": "Your notes have been saved successfully.",
+    "aiGenerateButton": "AI Generate",
+    "notesPlaceholder": "Start writing your thoughts, ideas, or anything...",
+    "notesAreaLabel": "General notebook area",
+    "wysiwygPlaceholder": "WYSIWYG editor will be here. For now, use this plain text area."
   }
 }
