@@ -4,11 +4,11 @@
 import type { Settings, TimerMode, SessionRecord } from '@/lib/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import * as Tone from 'tone';
+// Removed import of Tone from here as it's not directly used for core timer logic
 
 interface UseTimerCoreProps {
   settings: Settings;
-  currentDateKey: string; // Added currentDateKey
+  currentDateKey: string; 
   onTimerStart?: (mode: TimerMode) => void;
   onTimerPause?: (mode: TimerMode) => void;
   onTimerReset?: (mode: TimerMode) => void;
@@ -34,7 +34,7 @@ interface TimerCore {
 
 export function useTimerCore({
   settings,
-  currentDateKey, // Destructure currentDateKey
+  currentDateKey, 
   onTimerStart,
   onTimerPause,
   onTimerReset,
@@ -139,9 +139,10 @@ export function useTimerCore({
     setTimeLeft(getDurationForMode(nextMode));
     setCurrentCyclePomodoros(completedPomodorosUpdate);
     
-    setSessionLog(prev => { 
-      onIntervalEnd(previousMode, completedPomodorosUpdate, prev); 
-      return prev; 
+    // Pass the updated session log to onIntervalEnd
+    setSessionLog(currentLog => {
+        onIntervalEnd(previousMode, completedPomodorosUpdate, currentLog);
+        return currentLog; // Return the same log, as addSessionLogEntry already updated it
     });
 
     const notificationTitle = previousMode === 'work' 
@@ -196,6 +197,8 @@ export function useTimerCore({
   }, [isRunning, mode, moveToNextMode, onTick]);
 
   useEffect(() => {
+    // This effect ensures that if settings related to durations change,
+    // and the timer is NOT running, the timeLeft is updated to reflect the new duration for the current mode.
     if (!isRunning) { 
       setTimeLeft(getDurationForMode(mode));
     }
@@ -204,19 +207,19 @@ export function useTimerCore({
 
   // Effect to reset timer state when currentDateKey changes (new day)
   useEffect(() => {
-    // This effect runs when currentDateKey changes.
-    // We don't want to reset if it's the initial load and currentDateKey is just being set.
-    // A simple way to check if it's not the initial setting is if sessionLog has entries from a "previous day" concept,
-    // but since sessionLog is now cleared here, we just run it.
-    // Or check if this is not the very first call to this effect for this component instance.
-    // For simplicity, we reset state if currentDateKey changes *after* initial setup.
-    console.log("useTimerCore: currentDateKey changed to", currentDateKey, ". Resetting session log and cycle pomodoros.");
+    console.log("useTimerCore: currentDateKey changed to", currentDateKey, ". Resetting timer for new day.");
     setSessionLog([]);
     setCurrentCyclePomodoros(0);
-    // Optionally, reset the timer to work mode and pause it
-    // This assumes a new day starts with a fresh work session.
-    resetTimer(true); 
-  }, [currentDateKey, resetTimer]); // resetTimer is memoized by useCallback
+    
+    // Directly set states instead of calling resetTimer to avoid loop
+    setIsRunning(false);
+    setMode('work');
+    setTimeLeft(getDurationForMode('work'));
+    
+    if (onTimerReset) {
+      onTimerReset('work'); // Call the onTimerReset callback
+    }
+  }, [currentDateKey, getDurationForMode, onTimerReset]); // Removed resetTimer from dependencies
 
 
   const startTimer = () => {
@@ -232,12 +235,12 @@ export function useTimerCore({
   const skipTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     const previousMode = mode;
-    moveToNextMode(true); 
+    moveToNextMode(true); // Pass true to indicate it was skipped
+    // Let onIntervalEnd handle the session log update indirectly
     if (onTimerSkip) {
-        setSessionLog(prev => {
-          onTimerSkip(previousMode, mode); // mode is now the nextMode
-          return prev;
-        });
+      // The mode state inside this callback might be stale if onTimerSkip is not memoized with mode
+      // It's better if onTimerSkip relies on parameters passed to it
+      onTimerSkip(previousMode, mode); // mode here will be the *next* mode after moveToNextMode
     }
   };
 
@@ -249,10 +252,9 @@ export function useTimerCore({
     currentCyclePomodoros,
     startTimer,
     pauseTimer,
-    resetTimer,
+    resetTimer, // Keep this function available for manual resets
     skipTimer,
     sessionLog,
-    setSessionLog,
+    setSessionLog, // Expose setSessionLog if PomodoroPage needs to clear it on new day (though hook now handles it)
   };
 }
-
