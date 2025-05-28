@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"; // Added AlertDialog
 import {
   Popover,
   PopoverContent,
@@ -117,6 +126,8 @@ export default function PomodoroPage() {
   const [isPastNotesPopoverOpen, setIsPastNotesPopoverOpen] = useState(false);
   const [isDeletingPastNotes, setIsDeletingPastNotes] = useState(false);
 
+  const [taskForAlert, setTaskForAlert] = useState<Task | null>(null); // New state for AlertDialog
+
   const soundscapePlayer = useSoundscapePlayer({
     volume: settings.volume,
     settings: settings,
@@ -179,7 +190,7 @@ export default function PomodoroPage() {
         }, 0);
        }
     }
-  }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType]);
+  }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType, settings.autoStartBreaks, settings.autoStartPomodoros]);
 
 
   const timer = useTimerCore({
@@ -393,7 +404,9 @@ export default function PomodoroPage() {
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
 
-  const { playSound: actualPlaySound, stopSound: actualStopSound, isReady: actualIsSoundPlayerReady } = soundscapePlayer;
+  const actualPlaySound = playSound; // Alias to avoid conflict in useEffect dependency array
+  const actualStopSound = stopSound;
+  const actualIsSoundPlayerReady = isSoundPlayerReady;
   
   useEffect(() => {
     if (!isSettingsLoaded || !actualIsSoundPlayerReady) {
@@ -441,44 +454,13 @@ export default function PomodoroPage() {
     }]);
   };
   const handleToggleTask = (taskId: string) => setTasks(prev => prev.map(task => task.id === taskId ? { ...task, completed: !task.completed } : task));
-  const handleRemoveTask = (taskId: string) => setTasks(prev => prev.filter(task => task.id !== taskId));
+  
+  const handleRemoveTask = (taskId: string) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  };
+  
   const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
 
-  const sendTaskNotification = useCallback((taskTitle: string) => {
-    if (!settings.notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) return;
-
-    if (Notification.permission === "granted") {
-      new Notification(t('notifications.taskReminderTitle'), {
-        body: taskTitle,
-        icon: '/icons/icon-192x192.png',
-      });
-    } else if (Notification.permission === "denied") {
-      toast({
-        title: t('notifications.permissionDeniedTitle'),
-        description: t('notifications.permissionDeniedDescription'),
-        variant: 'destructive',
-      });
-    } else { // 'default'
-      toast({
-        title: t('notifications.permissionRequestTitle'),
-        description: t('notifications.permissionRequestDescription'),
-      });
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          new Notification(t('notifications.taskReminderTitle'), {
-            body: taskTitle,
-            icon: '/icons/icon-192x192.png',
-          });
-        } else if (permission === "denied") {
-          toast({
-            title: t('notifications.permissionDeniedTitle'),
-            description: t('notifications.permissionDeniedDescription'),
-            variant: 'destructive',
-          });
-        }
-      });
-    }
-  }, [settings.notificationsEnabled, t, toast]);
 
   useEffect(() => {
     if (!isSettingsLoaded || tasks.length === 0) return;
@@ -489,7 +471,7 @@ export default function PomodoroPage() {
 
       tasks.forEach(task => {
         if (task.reminderTime && !task.completed && !task.reminderSent && task.reminderTime === currentTime) {
-          sendTaskNotification(task.text);
+          setTaskForAlert(task); // Set task to trigger AlertDialog
           setTasks(prevTasks =>
             prevTasks.map(t =>
               t.id === task.id ? { ...t, reminderSent: true } : t
@@ -499,11 +481,11 @@ export default function PomodoroPage() {
       });
     };
 
-    checkReminders();
-    const intervalId = setInterval(checkReminders, 30000);
+    checkReminders(); // Check immediately on load/tasks change
+    const intervalId = setInterval(checkReminders, 30000); // Check every 30 seconds
 
     return () => clearInterval(intervalId);
-  }, [tasks, sendTaskNotification, isSettingsLoaded]);
+  }, [tasks, isSettingsLoaded, t]); // Removed sendTaskNotification as it's replaced
 
 
   const handleSendChatMessage = async () => {
@@ -557,17 +539,20 @@ const handleRemoveDefinedWord = async (wordId: string) => {
       toast({ title: t("errors.actionUnavailableLoading"), variant: "destructive" });
       return;
   }
-  if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: definedWordsList.find(w => w.id === wordId)?.word || 'entry' }))) {
+  const wordEntryToRemove = definedWordsList.find(w => w.id === wordId);
+  if (!confirm(t('dictionaryCard.confirmDeleteEntry', { word: wordEntryToRemove?.word || 'entry' }))) {
       return;
   }
-  const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
+  
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList);
+  setDefinedWordsList(updatedList); // Optimistic UI update
 
   try {
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
   } catch (error: any) {
+    // Revert optimistic update if save fails (optional, or rely on next load)
+    // setDefinedWordsList(prevList => [...prevList, wordEntryToRemove]); // Example: Re-add
     console.error("Error saving dictionary after deletion:", error);
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
   }
@@ -927,6 +912,31 @@ const handleRemoveDefinedWord = async (wordId: string) => {
 
           </Accordion>
         </main>
+
+        {taskForAlert && (
+          <AlertDialog
+            open={!!taskForAlert}
+            onOpenChange={(open) => {
+              if (!open) {
+                setTaskForAlert(null);
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('alertDialog.taskReminderTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {taskForAlert.text}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction onClick={() => setTaskForAlert(null)}>
+                  {t('buttons.ok')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
 
         <AiSummaryDialog
           summaryData={aiSummary}

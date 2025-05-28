@@ -28,7 +28,8 @@
     "clearHistory": "Clear History",
     "clearTodaysHistory": "Clear Today's History",
     "saveToNotes": "Save to Notes",
-    "back": "Back"
+    "back": "Back",
+    "ok": "OK"
   },
   "tooltips": {
     "aiSummary": "Get AI Session Summary (if data available)",
@@ -172,8 +173,8 @@
         "content": "Your tasks, session notes, dictionary entries, session context, and session history (Pomodoro logs) are automatically saved to Firebase Firestore on a per-day basis, associated with your user account.\\nThis means when a new day begins, these sections will appear empty, ready for the new day's activities. Your data from previous days remains stored and accessible."
       },
       "tasks": {
-        "title": "Today's Tasks & Reminders",
-        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set, you'll receive a browser notification when that time arrives (if notifications are enabled for the app and your browser). Ensure you've granted notification permissions to this site in your browser settings.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
+        "title": "Today's Tasks & Reminders", 
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set, you'll receive an in-app alert dialog when that time arrives (if notifications are enabled for the app). \\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
@@ -192,7 +193,7 @@
         "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day using the 'Save to Notes' button in the AI analysis popup."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant",
+        "title": "AI Chat Assistant", 
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini via Genkit).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
@@ -232,7 +233,7 @@
     "tasksTitle": "Tasks",
     "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks are saved per day to your Firebase database.",
     "taskRemindersTitle": "Task Reminders",
-    "taskRemindersContent": "You can now set an optional reminder time (HH:mm) for each task using the time input next to where you type your task. You'll get a browser notification when it's time for that task!",
+    "taskRemindersContent": "You can now set an optional reminder time (HH:mm) for each task using the time input next to where you type your task. You'll get an in-app alert dialog when it's time for that task!",
     "notesContextTitle": "Session Notes & Context",
     "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
     "aiAnalysisTitle": "AI Analysis",
@@ -420,6 +421,9 @@
     "noNotesForDay": "No notes were recorded for this day.",
     "noContextForDay": "No specific session context was set for this day.",
     "noDictionaryForDay": "No dictionary entries were saved for this day."
+  },
+  "alertDialog": {
+    "taskReminderTitle": "Task Reminder!"
   }
 }
 

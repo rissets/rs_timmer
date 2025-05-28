@@ -28,7 +28,8 @@
     "clearHistory": "Hapus Riwayat",
     "clearTodaysHistory": "Hapus Riwayat Hari Ini",
     "saveToNotes": "Simpan ke Catatan",
-    "back": "Kembali"
+    "back": "Kembali",
+    "ok": "OKE"
   },
   "tooltips": {
     "aiSummary": "Dapatkan Ringkasan Sesi AI (jika data tersedia)",
@@ -173,8 +174,8 @@
         "content": "Tugas, catatan sesi, entri kamus, konteks sesi, dan riwayat sesi (log Pomodoro) Anda secara otomatis disimpan ke Firebase Firestore berdasarkan harian, terkait dengan akun pengguna Anda.\\nIni berarti ketika hari baru dimulai, bagian-bagian ini akan tampak kosong, siap untuk aktivitas hari baru. Data Anda dari hari-hari sebelumnya tetap tersimpan dan dapat diakses."
       },
       "tasks": {
-        "title": "Tugas & Pengingat Hari Ini",
-        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur, Anda akan menerima notifikasi browser ketika waktu tersebut tiba (jika notifikasi diaktifkan untuk aplikasi dan browser Anda). Pastikan Anda telah memberikan izin notifikasi ke situs ini di pengaturan browser Anda.\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
+        "title": "Tugas & Pengingat Hari Ini", 
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur, Anda akan menerima dialog peringatan di dalam aplikasi ketika waktu tersebut tiba. \\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
       },
       "sessionNotesContext": {
         "title": "Catatan & Konteks Sesi",
@@ -193,7 +194,7 @@
         "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI (Genkit dengan Gemini). Klik ikon Kilau (✨) di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti. Ringkasan ini dapat disimpan ke catatan harian Anda untuk hari ini menggunakan tombol 'Simpan ke Catatan' di popup analisis AI."
       },
       "chatWidget": {
-        "title": "Asisten Chat AI",
+        "title": "Asisten Chat AI", 
         "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami (didukung oleh Gemini via Genkit).\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
       "sessionHistory": {
@@ -233,7 +234,7 @@
     "tasksTitle": "Tugas",
     "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas disimpan per hari ke database Firebase Anda.",
     "taskRemindersTitle": "Pengingat Tugas",
-    "taskRemindersContent": "Anda sekarang dapat mengatur waktu pengingat opsional (JJ:mm) untuk setiap tugas menggunakan input waktu di sebelah tempat Anda mengetik tugas. Anda akan mendapatkan notifikasi browser ketika tiba waktunya untuk tugas itu!",
+    "taskRemindersContent": "Anda sekarang dapat mengatur waktu pengingat opsional (JJ:mm) untuk setiap tugas menggunakan input waktu di sebelah tempat Anda mengetik tugas. Anda akan mendapatkan dialog peringatan di dalam aplikasi ketika tiba waktunya untuk tugas itu!",
     "notesContextTitle": "Catatan & Konteks Sesi",
     "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan dan konteks disimpan per hari ke Firebase.",
     "aiAnalysisTitle": "Analisis AI",
@@ -421,6 +422,9 @@
     "noNotesForDay": "Tidak ada catatan yang direkam untuk hari ini.",
     "noContextForDay": "Tidak ada konteks sesi khusus yang diatur untuk hari ini.",
     "noDictionaryForDay": "Tidak ada entri kamus yang disimpan untuk hari ini."
+  },
+  "alertDialog": {
+    "taskReminderTitle": "Pengingat Tugas!"
   }
 }
 
