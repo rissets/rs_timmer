@@ -4,11 +4,10 @@
 import type { Settings, TimerMode, SessionRecord } from '@/lib/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
-// Removed import of Tone from here as it's not directly used for core timer logic
 
 interface UseTimerCoreProps {
   settings: Settings;
-  currentDateKey: string; 
+  currentDateKey: string;
   onTimerStart?: (mode: TimerMode) => void;
   onTimerPause?: (mode: TimerMode) => void;
   onTimerReset?: (mode: TimerMode) => void;
@@ -34,7 +33,7 @@ interface TimerCore {
 
 export function useTimerCore({
   settings,
-  currentDateKey, 
+  currentDateKey,
   onTimerStart,
   onTimerPause,
   onTimerReset,
@@ -49,7 +48,7 @@ export function useTimerCore({
   const [isRunning, setIsRunning] = useState(false);
   const [currentCyclePomodoros, setCurrentCyclePomodoros] = useState(0);
   const [sessionLog, setSessionLog] = useState<SessionRecord[]>([]);
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastTickTimeRef = useRef<number>(0);
 
@@ -58,9 +57,9 @@ export function useTimerCore({
     if (Notification.permission !== 'granted') {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        toast({ 
-            title: getTranslatedText('notifications.disabled'), 
-            description: getTranslatedText('notifications.disabledDescription') 
+        toast({
+            title: getTranslatedText('notifications.disabled'),
+            description: getTranslatedText('notifications.disabledDescription')
         });
       }
     }
@@ -98,22 +97,12 @@ export function useTimerCore({
       durationMinutes: actualDurationMinutes,
       completed: completed,
     };
-    setSessionLog(prevLog => [...prevLog, newLogEntry]); 
-    return newLogEntry; 
-  }, []); 
-  
-  const resetTimer = useCallback((switchToWork = false) => {
-    setIsRunning(false);
-    const nextMode = switchToWork ? 'work' : mode;
-    setMode(nextMode);
-    setTimeLeft(getDurationForMode(nextMode));
-    if (switchToWork) setCurrentCyclePomodoros(0); 
-    if (onTimerReset) onTimerReset(nextMode);
-  }, [mode, getDurationForMode, onTimerReset]);
-
+    setSessionLog(prevLog => [...prevLog, newLogEntry]);
+    return newLogEntry;
+  }, []);
 
   const moveToNextMode = useCallback((skipped = false) => {
-    const previousMode = mode; 
+    const previousMode = mode;
     const currentDuration = getDurationForMode(previousMode);
     const actualDurationSeconds = skipped ? currentDuration - timeLeft : currentDuration;
     addSessionLogEntry(!skipped, Math.round(actualDurationSeconds / 60), previousMode);
@@ -128,44 +117,43 @@ export function useTimerCore({
       } else {
         nextMode = 'shortBreak';
       }
-    } else { 
+    } else {
       nextMode = 'work';
       if (previousMode === 'longBreak') {
-        completedPomodorosUpdate = 0; 
+        completedPomodorosUpdate = 0;
       }
     }
-    
+
     setMode(nextMode);
     setTimeLeft(getDurationForMode(nextMode));
     setCurrentCyclePomodoros(completedPomodorosUpdate);
-    
+
     // Pass the updated session log to onIntervalEnd
     setSessionLog(currentLog => {
         onIntervalEnd(previousMode, completedPomodorosUpdate, currentLog);
-        return currentLog; // Return the same log, as addSessionLogEntry already updated it
+        return currentLog;
     });
 
-    const notificationTitle = previousMode === 'work' 
-        ? getTranslatedText('notifications.workSessionEnded') 
+    const notificationTitle = previousMode === 'work'
+        ? getTranslatedText('notifications.workSessionEnded')
         : getTranslatedText('notifications.breakTimeOver');
-    const notificationBody = nextMode === 'work' 
-        ? getTranslatedText('notifications.timeForWork') 
-        : nextMode === 'shortBreak' 
-            ? getTranslatedText('notifications.timeForShortBreak') 
+    const notificationBody = nextMode === 'work'
+        ? getTranslatedText('notifications.timeForWork')
+        : nextMode === 'shortBreak'
+            ? getTranslatedText('notifications.timeForShortBreak')
             : getTranslatedText('notifications.timeForLongBreak');
     sendNotification(notificationTitle, notificationBody);
 
     if ((previousMode === 'work' && settings.autoStartBreaks) || (previousMode !== 'work' && settings.autoStartPomodoros)) {
-        setIsRunning(true); 
+        setIsRunning(true);
     } else {
         setIsRunning(false);
     }
 
   }, [
-    mode, currentCyclePomodoros, settings.longBreakInterval, settings.autoStartBreaks, settings.autoStartPomodoros, 
+    mode, currentCyclePomodoros, settings.longBreakInterval, settings.autoStartBreaks, settings.autoStartPomodoros,
     timeLeft, getDurationForMode, onIntervalEnd, sendNotification, addSessionLogEntry, getTranslatedText
   ]);
-
 
   useEffect(() => {
     if (!isRunning) {
@@ -184,7 +172,7 @@ export function useTimerCore({
         if (newTimeLeft <= 0) {
           if (intervalRef.current) clearInterval(intervalRef.current);
           moveToNextMode();
-          return 0; 
+          return 0;
         }
         if (onTick) onTick(newTimeLeft, mode);
         return newTimeLeft;
@@ -196,30 +184,39 @@ export function useTimerCore({
     };
   }, [isRunning, mode, moveToNextMode, onTick]);
 
+
+  const resetTimer = useCallback((switchToWork = false) => {
+    setIsRunning(false);
+    const nextMode = switchToWork ? 'work' : mode;
+    setMode(nextMode);
+    setTimeLeft(getDurationForMode(nextMode));
+    if (switchToWork) setCurrentCyclePomodoros(0);
+    if (onTimerReset) onTimerReset(nextMode);
+  }, [mode, getDurationForMode, onTimerReset]);
+
   useEffect(() => {
     // This effect ensures that if settings related to durations change,
     // and the timer is NOT running, the timeLeft is updated to reflect the new duration for the current mode.
-    if (!isRunning) { 
+    if (!isRunning) {
       setTimeLeft(getDurationForMode(mode));
     }
-  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode, isRunning]);
-
+  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode]); // Removed isRunning from dependencies
 
   // Effect to reset timer state when currentDateKey changes (new day)
   useEffect(() => {
     console.log("useTimerCore: currentDateKey changed to", currentDateKey, ". Resetting timer for new day.");
     setSessionLog([]);
     setCurrentCyclePomodoros(0);
-    
+
     // Directly set states instead of calling resetTimer to avoid loop
     setIsRunning(false);
     setMode('work');
     setTimeLeft(getDurationForMode('work'));
-    
+
     if (onTimerReset) {
       onTimerReset('work'); // Call the onTimerReset callback
     }
-  }, [currentDateKey, getDurationForMode, onTimerReset]); // Removed resetTimer from dependencies
+  }, [currentDateKey, getDurationForMode, onTimerReset]);
 
 
   const startTimer = () => {
@@ -235,12 +232,12 @@ export function useTimerCore({
   const skipTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     const previousMode = mode;
-    moveToNextMode(true); // Pass true to indicate it was skipped
-    // Let onIntervalEnd handle the session log update indirectly
+    const nextModeAfterSkip = mode === 'work'
+      ? (currentCyclePomodoros + 1) % settings.longBreakInterval === 0 ? 'longBreak' : 'shortBreak'
+      : 'work';
+    moveToNextMode(true);
     if (onTimerSkip) {
-      // The mode state inside this callback might be stale if onTimerSkip is not memoized with mode
-      // It's better if onTimerSkip relies on parameters passed to it
-      onTimerSkip(previousMode, mode); // mode here will be the *next* mode after moveToNextMode
+      onTimerSkip(previousMode, nextModeAfterSkip);
     }
   };
 
@@ -252,9 +249,9 @@ export function useTimerCore({
     currentCyclePomodoros,
     startTimer,
     pauseTimer,
-    resetTimer, // Keep this function available for manual resets
+    resetTimer,
     skipTimer,
     sessionLog,
-    setSessionLog, // Expose setSessionLog if PomodoroPage needs to clear it on new day (though hook now handles it)
+    setSessionLog,
   };
 }
