@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark antialiased`} suppressHydrationWarning={true}>
       <head>
         <meta name="application-name" content={`${APP_NAME} Timer`} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -44,7 +44,7 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="hsl(169, 20%, 56%)" />
       </head>
-      <body>
+      <body suppressHydrationWarning={true}>
         <ThemeProvider>
           <SettingsProvider>
             <LanguageProvider>
