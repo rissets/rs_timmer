@@ -64,8 +64,6 @@ const parseMarkdownToHtml = (markdown: string): string => {
   html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
   
   html = html.replace(/(<li>.*?<\/li>\s*)+(?=\s*[^<li]|$)/gs, (match) => {
-    // Basic heuristic: if any li starts with a number, assume ordered list
-    // This is very simplified. A proper parser would build a tree.
     if (match.trim().startsWith('<li>1.') || match.trim().startsWith('<li>0.') || match.trim().startsWith('<li>2.') || match.trim().startsWith('<li>3.') || match.trim().startsWith('<li>4.') || match.trim().startsWith('<li>5.') || match.trim().startsWith('<li>6.') || match.trim().startsWith('<li>7.') || match.trim().startsWith('<li>8.') || match.trim().startsWith('<li>9.')) {
         return `<ol>${match}</ol>`;
     }
@@ -288,9 +286,9 @@ export default function NotebookPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen min-h-screen bg-background"> {/* Use h-screen for full viewport height */}
+    <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center max-w-5xl"> {/* Max-width for header content */}
+        <div className="flex h-14 items-center max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button variant="outline" size="icon" onClick={() => router.push('/')} className="mr-4">
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">{t('buttons.back')}</span>
@@ -309,17 +307,15 @@ export default function NotebookPage() {
         </div>
       </header>
 
-      {/* Main content area: flex-1 to grow, flex flex-col for vertical layout */}
-      <main className="flex-1 flex flex-col overflow-hidden"> {/* overflow-hidden to contain children */}
+      <main className="flex-1 flex flex-col overflow-hidden">
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
         ) : (
           <>
-            {/* Toolbar for Edit/Preview Toggle: No horizontal padding, sticky to top of main */}
-            <div className="py-3 border-b bg-background sticky top-0 z-30"> {/* Stick to top of 'main' scrollport */}
-              <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto"> {/* Inner container for max-width and padding */}
+            <div className="py-3 border-b bg-background sticky top-14 z-40">
+              <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
                 <div className="flex items-center space-x-1">
                     <Button
                         variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
@@ -345,7 +341,6 @@ export default function NotebookPage() {
               </div>
             </div>
 
-            {/* Editor/Preview Area: Use flex-1 and min-h-0 to take remaining space */}
             <div className="flex-1 flex flex-col min-h-0">
               {editorMode === 'edit' ? (
                 <Textarea
@@ -373,7 +368,6 @@ export default function NotebookPage() {
         <p>{t('footerCopyright', { year: new Date().getFullYear().toString(), appName: APP_NAME })}</p>
       </footer>
 
-      {/* AI Content Generator Dialog */}
       <Dialog open={isAiGenerateDialogOpen} onOpenChange={setIsAiGenerateDialogOpen}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
@@ -445,5 +439,3 @@ export default function NotebookPage() {
     </div>
   );
 }
-
-    
