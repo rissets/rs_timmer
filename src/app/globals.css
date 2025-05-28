@@ -275,5 +275,23 @@ body {
       transform: translateY(0);
     }
   }
+
+  /* Basic Markdown Preview Styling */
+  .notebook-preview h1 { @apply text-3xl font-bold my-4 border-b pb-2; }
+  .notebook-preview h2 { @apply text-2xl font-semibold my-3 border-b pb-1; }
+  .notebook-preview h3 { @apply text-xl font-semibold my-2; }
+  .notebook-preview p { @apply my-2 leading-relaxed; }
+  .notebook-preview ul { @apply list-disc pl-6 my-2 space-y-1; }
+  .notebook-preview ol { @apply list-decimal pl-6 my-2 space-y-1; }
+  .notebook-preview li { @apply mb-1; }
+  .notebook-preview a { @apply text-primary hover:underline; }
+  .notebook-preview strong { @apply font-bold; }
+  .notebook-preview em { @apply italic; }
+  .notebook-preview blockquote { @apply border-l-4 border-muted-foreground/50 pl-4 italic my-4 text-muted-foreground; }
+  .notebook-preview code { @apply bg-muted text-muted-foreground px-1 py-0.5 rounded text-sm; }
+  .notebook-preview pre { @apply bg-muted p-4 rounded-md overflow-x-auto my-4; }
+  .notebook-preview pre code { @apply bg-transparent p-0; }
 }
 
+
+    

@@ -31,7 +31,7 @@
     "back": "Back",
     "ok": "OK",
     "copy": "Copy",
-    "appendToNotes": "Append to Notes",
+    "appendToNotes": "Insert into Notes",
     "generateWithAI": "Generate with AI"
   },
   "tooltips": {
@@ -98,9 +98,9 @@
     "statusCompleted": "Completed",
     "statusSkipped": "Skipped/Interrupted",
     "confirmClearToday": "Are you sure you want to clear all session history for today from the database? This action cannot be undone.",
-    "historyClearedTitle": "Today's History Cleared Successfully",
-    "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
-    "clearErrorDescription": "Could not clear today's session history from the database. Please try again.",
+    "historyClearedTitle": "Today's History Cleared",
+    "historyClearedDescription": "Today's session history has been cleared from the database.",
+    "clearErrorDescription": "Could not clear today's session history. Please try again.",
     "clearingHistory": "Clearing history..."
   },
   "settingsDialog": {
@@ -178,40 +178,40 @@
         "content": "Your tasks, session notes, dictionary entries, session context, and session history (Pomodoro logs) are automatically saved to Firebase Firestore on a per-day basis, associated with your user account.\\nThis means when a new day begins, these sections will appear empty, ready for the new day's activities. Your data from previous days remains stored and accessible."
       },
       "tasks": {
-        "title": "Today's Tasks & Reminders", 
+        "title": "Today's Tasks & Reminders",
         "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted for this site, an in-app alert dialog will pop up when that time arrives. For this to work effectively, ensure you have allowed notifications for this site in your browser settings.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
-        "title": "Session Notes & Context",
-        "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog.\\n* AI-generated content from the 'Generate with AI' button in this section can also be appended to these notes."
+        "title": "Session Notes & Context (Main Page)",
+        "content": "On the main timer page, in the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts or ideas during your Pomodoro session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature on the main page.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries (from the main page's AI analysis) can be appended to these notes."
+      },
+      "notebookPage": {
+        "title": "Notebook Page (Markdown Editor)",
+        "content": "Navigate to the 'Notebook' page (Notebook icon 📓 in the header) for a more dedicated note-taking space.\\n* This page features a Markdown editor with 'Edit' and 'Preview' modes. Write your notes in Markdown syntax in 'Edit' mode and see the formatted output in 'Preview' mode.\\n* Use the integrated 'AI Generate' button (Wand icon 🪄) to open a dialog. Enter a prompt, and the AI will generate text for you. You can then copy this text or insert it directly into your Markdown notes.\\n* All notes written on the Notebook page are saved to a separate 'generalNotebook' document in Firebase Firestore (not per-day). This is for longer-form, general notes, separate from your daily session notes."
       },
       "viewingPastNotes": {
-        "title": "Viewing & Deleting Past Notes",
-        "content": "Within the 'Session Notes & Context' card, you can expand the 'View Past Notes' section (it's collapsible!).\\n* Use the calendar to select a previous date.\\n* The notes (including any AI summaries saved on that day) for the selected date will be fetched from Firestore and displayed in a read-only area.\\n* A 'Delete Notes for [Date]' button allows you to remove the notes for the selected past day from Firestore after confirmation."
+        "title": "Viewing & Deleting Past Daily Session Notes",
+        "content": "On the main timer page, within the 'Session Notes & Context' card, you can expand the 'View Past Notes' section (it's collapsible!).\\n* Use the calendar to select a previous date.\\n* The daily session notes (including any AI summaries saved on that day) for the selected date will be fetched from Firestore and displayed in a read-only area.\\n* A 'Delete Notes for [Date]' button allows you to remove the daily session notes for the selected past day from Firestore after confirmation. This does NOT affect notes on the dedicated Notebook page."
       },
       "dictionaryCard": {
-        "title": "Session Dictionary",
-        "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore. Each entry can be individually deleted using the trash icon.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
+        "title": "Session Dictionary (Main Page)",
+        "content": "The 'Session Dictionary' card on the main timer page allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore. Each entry can be individually deleted using the trash icon.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
       },
        "aiAnalysis": {
-        "title": "AI Session Analysis (Summary)",
-        "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day using the 'Save to Notes' button in the AI analysis popup."
-      },
-      "aiNoteGenerator": {
-        "title": "AI Note Generator (Integrated)",
-        "content": "Within the 'Session Notes & Context' card, click the 'Generate with AI' (Wand icon 🪄) button. This opens a dialog where you can enter a prompt (e.g., 'Write a paragraph about time blocking'). The AI will generate text for you, which you can then copy or directly append to your current session notes."
+        "title": "AI Session Analysis (Main Page)",
+        "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). On the main timer page, click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and daily session notes, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily session notes for the current day."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant", 
+        "title": "AI Chat Assistant",
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini via Genkit).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
-        "title": "Today's Session History (Pomodoro Log)",
-        "content": "Click the history icon (🕒) in the header to view a log of your completed Pomodoro intervals (Work, Short Break, Long Break) for the current day. This data is fetched from Firestore.\\nVous pouvez également effacer l'historique d'aujourd'hui de ce tiroir."
+        "title": "Today's Session History (Pomodoro Log - Main Page)",
+        "content": "Click the history icon (🕒) in the header to view a log of your completed Pomodoro intervals (Work, Short Break, Long Break) for the current day. This data is fetched from Firestore.\\nYou can also clear today's history from this drawer."
       },
       "viewPastDataPage": {
-        "title": "Viewing All Past Data",
-        "content": "Click the calendar icon (🗓️) in the header to navigate to the 'View Past Session Data' page.\\nHere, you can select any past date and view a comprehensive summary of all your recorded data for that day, including tasks, notes, session context, and dictionary entries, all retrieved from Firestore."
+        "title": "Viewing All Past Daily Data (Dedicated Page)",
+        "content": "Click the calendar icon (🗓️) in the header to navigate to the 'View Past Session Data' page.\\nHere, you can select any past date and view a comprehensive summary of all your recorded daily data for that day from Firestore, including tasks, daily session notes, session context, and dictionary entries. This does NOT show content from the separate Notebook page."
       },
       "settings": {
         "title": "Settings (Customization)",
@@ -237,26 +237,28 @@
     "timerControlsContent": "Use these buttons to Start/Pause, Skip to the next interval, Reset the current interval, or Mute/Unmute sounds.",
     "pomodoroDotsTitle": "Pomodoro Dots",
     "pomodoroDotsContent": "These dots track your progress through a Pomodoro cycle. A full cycle (usually 4 work sessions) earns you a Long Break.",
-    "collapsibleCardsTitle": "Collapsible Sections",
-    "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Notes below the timer can be expanded or collapsed by clicking their titles.",
-    "tasksTitle": "Tasks",
-    "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks are saved per day to your Firebase database.",
-    "taskRemindersTitle": "Task Reminders",
-    "taskRemindersContent": "You can now set an optional reminder time (HH:mm) for each task using the time input next to where you type your task. You'll get an in-app alert dialog when it's time for that task!",
-    "notesContextTitle": "Session Notes & Context",
-    "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
-    "aiNoteGeneratorTitle": "AI Note Generator (Wand Icon 🪄)",
-    "aiNoteGeneratorContent": "In the 'Session Notes & Context' card, click the 'Generate with AI' (Wand icon) button to open a dialog. Enter a prompt, and the AI will generate text that you can then append to your current notes.",
-    "aiAnalysisTitle": "AI Session Analysis (Summary)",
-    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes, which get stored in Firebase.",
+    "collapsibleCardsTitle": "Collapsible Sections (Main Page)",
+    "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Session Notes below the timer on the main page can be expanded or collapsed by clicking their titles.",
+    "tasksTitle": "Tasks (Main Page)",
+    "tasksContent": "Add your to-dos here for the current day. Mark them complete as you go. Tasks are saved per day to your Firebase database.",
+    "taskRemindersTitle": "Task Reminders (Main Page)",
+    "taskRemindersContent": "You can set an optional reminder time (HH:mm) for each task. You'll get an in-app alert dialog when it's time for that task if notifications are allowed!",
+    "notesContextTitle": "Daily Session Notes & Context (Main Page)",
+    "notesContent": "Jot down thoughts during your Pomodoro sessions. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. These notes and context are saved per day to Firebase.",
+    "aiNoteGeneratorTitle": "AI Note Generator (Notebook Page)",
+    "aiNoteGeneratorContent": "On the dedicated 'Notebook' page, click the 'AI Generate' (Wand icon 🪄) button. Enter a prompt, and the AI will generate text that you can then insert into your general notes.",
+    "aiAnalysisTitle": "AI Session Analysis (Main Page)",
+    "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button (on the main page) to get an AI summary and improvement tips for your daily session. You can save this summary to your daily notes.",
     "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant (Gemini) for quick questions or support related to your focus session.",
-    "dictionaryCardTitle": "Session Dictionary",
-    "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions are saved per day to Firebase, can be exported to Markdown, and individual entries can be deleted.",
-    "viewingPastNotesTitle": "Viewing Past Notes",
-    "viewingPastNotesContent": "In the 'Session Notes & Context' card, expand 'View Past Notes' (it's collapsible!) to pick a date and see notes from that day (from Firebase). You can also delete notes for a viewed past day.",
-    "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
-    "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved tasks, notes, context, and dictionary entries for any past date from Firebase.",
+    "dictionaryCardTitle": "Session Dictionary (Main Page)",
+    "dictionaryCardContent": "Define words in English and Indonesian. Your daily session's definitions are saved to Firebase, can be exported to Markdown, and individual entries can be deleted.",
+    "notebookPageTitle": "Notebook Page (Markdown Notes)",
+    "notebookPageContent": "Access the Notebook page (📓 icon in header) for general, long-form notes using a Markdown editor with Edit/Preview modes. These notes are saved separately in Firebase (not per-day).",
+    "viewingPastNotesTitle": "Viewing Past Daily Notes (Main Page)",
+    "viewingPastNotesContent": "In the 'Session Notes & Context' card on the main page, expand 'View Past Notes' to pick a date and see daily session notes from that day. You can also delete notes for a viewed past day.",
+    "viewPastDataTitle": "View Past Daily Data (Header Calendar Icon)",
+    "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved daily tasks, session notes, context, and dictionary entries for any past date from Firebase.",
     "headerToolsTitle": "Header Tools",
     "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), Notebook (📓), and View Past Data (🗓️) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
@@ -274,7 +276,7 @@
     "timeForLongBreak": "Time for a long break.",
     "taskReminderTitle": "Task Reminder!",
     "permissionDeniedTitle": "Notification Permission Denied",
-    "permissionDeniedDescription": "Task reminders and timer alerts will not be shown. Please enable notification permissions for this site in your browser settings.",
+    "permissionDeniedDescription": "Task reminders and timer alerts will not be shown. Please enable notification permissions for this site in your browser settings for {{appName}}.",
     "permissionRequestTitle": "Enable Notifications?",
     "permissionRequestDescription": "{{appName}} needs permission to show task reminders and timer alerts. Please check your browser for a permission prompt."
   },
@@ -344,9 +346,9 @@
     "deleteEntryTooltip": "Delete entry for '{{word}}'",
     "confirmDeleteEntry": "Are you sure you want to delete the definition for '{{word}}' from today's dictionary?",
     "entryDeletedTitle": "Entry Deleted",
-    "entryDeletedTitleLocal": "Entry Removed Locally",
+    "entryDeletedTitleLocal": "Entry Removed",
     "entryDeletedDesc": "The definition for '{{word}}' has been removed from this session's dictionary.",
-    "entryDeletedDescLocal": "The definition for '{{word}}' has been removed from the list. Changes will be saved to the database if possible.",
+    "entryDeletedDescLocal": "The definition for '{{word}}' has been removed and will be saved.",
     "theEntry": "the entry"
   },
   "auth": {
@@ -436,7 +438,8 @@
   "alertDialog": {
     "taskReminderTitle": "Task Reminder!",
     "taskReminderDescription": {
-      "prompt": "It's time for your task: **{{taskText}}** (scheduled for {{reminderTime}})."
+      "prompt": "It's time for your task scheduled at {{reminderTime}}:",
+      "task": "{{taskText}}"
     }
   },
   "aiNoteGeneratorDialog": {
@@ -455,8 +458,8 @@
     "copySuccessTitle": "Content Copied!",
     "copyErrorTitle": "Copy Failed",
     "nothingToAppend": "No content to append.",
-    "appendSuccessTitleToNotes": "Content Appended to Notes",
-    "appendSuccessDescToNotes": "AI generated content has been appended to your session notes.",
+    "appendSuccessTitleToNotes": "Content Inserted into Notes",
+    "appendSuccessDescToNotes": "AI generated content has been inserted into your notes.",
     "appendedTextHeader": "AI Generated Content ({{dateTime}})",
     "appendedTextFooter": "End of AI Generated Content"
   },
@@ -468,7 +471,13 @@
     "saveSuccessDescription": "Your notes have been saved successfully.",
     "aiGenerateButton": "AI Generate",
     "notesPlaceholder": "Start writing your thoughts, ideas, or anything...",
+    "notesPlaceholderMarkdown": "Start writing your notes in Markdown here...",
     "notesAreaLabel": "General notebook area",
-    "wysiwygPlaceholder": "WYSIWYG editor will be here. For now, use this plain text area."
+    "wysiwygPlaceholder": "WYSIWYG editor will be here. For now, use this plain text area.",
+    "editModeButton": "Edit",
+    "previewModeButton": "Preview"
   }
 }
+
+
+    

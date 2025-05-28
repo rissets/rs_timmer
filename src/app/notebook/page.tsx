@@ -16,7 +16,67 @@ import { useToast } from '@/hooks/use-toast';
 import { saveGeneralNotes, loadGeneralNotes } from '@/lib/firebase/firestore-service';
 import { generateText } from '@/ai/flows/generate-text-flow';
 import { APP_NAME } from '@/lib/constants';
-import { ArrowLeft, Save, Sparkles, Bot, Wand2, ClipboardCopy, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Sparkles, Wand2, ClipboardCopy, Loader2, Eye, Pencil } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type EditorMode = 'edit' | 'preview';
+
+// Basic Markdown to HTML parser
+const parseMarkdownToHtml = (markdown: string): string => {
+  if (!markdown) return "";
+
+  let html = markdown;
+
+  // Escape HTML to prevent XSS from user-pasted HTML, then selectively unescape for generated tags.
+  // For simplicity in this context (user's own notes), we'll skip full sanitization for now.
+  // A proper library would handle this much more robustly.
+  html = html.replace(/&/g, '&amp;')
+             .replace(/</g, '&lt;')
+             .replace(/>/g, '&gt;');
+
+  // Headers (###, ##, #)
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+  // Bold (**text** or __text__)
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+  // Italic (*text* or _text_)
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+  
+  // Links [text](url)
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  // Unordered lists (- item, * item) - basic, one level
+  html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
+  html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+  // Wrap <li>s in <ul> if they are consecutive
+  html = html.replace(/(<li>.*<\/li>\s*)+/g, '<ul>$&</ul>');
+  
+  // Ordered lists (1. item) - basic, one level
+  html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
+  // Wrap <li>s in <ol> if they are consecutive and part of an ordered list pattern
+  // This regex is tricky, for now we'll use the same ul wrapper and rely on CSS for numbering if needed,
+  // or accept that it only supports one type of list at a time effectively with this simple parser.
+  // A more sophisticated parser would handle mixed lists or nested lists.
+
+  // Paragraphs (split by double newlines, then wrap lines not already in a block element)
+  // This is a simplified paragraph handling. A full parser is more complex.
+  html = html.split(/\n\s*\n/).map(paragraph => {
+    if (paragraph.trim() === "") return "";
+    if (paragraph.startsWith('<h3>') || paragraph.startsWith('<h2>') || paragraph.startsWith('<h1>') || paragraph.startsWith('<ul>') || paragraph.startsWith('<li>')) {
+      return paragraph;
+    }
+    return `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`; // Replace single newlines with <br> within paragraphs
+  }).join('');
+
+
+  return html;
+};
+
 
 export default function NotebookPage() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -28,6 +88,7 @@ export default function NotebookPage() {
   const [notesContent, setNotesContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [editorMode, setEditorMode] = useState<EditorMode>('edit');
 
   // AI Content Generator Dialog State
   const [isAiGenerateDialogOpen, setIsAiGenerateDialogOpen] = useState(false);
@@ -109,6 +170,8 @@ export default function NotebookPage() {
     }
     // Insert at cursor or append. For simplicity, append for now.
     // A real WYSIWYG editor would handle cursor insertion.
+    // Ensure we're in edit mode to see the change immediately in the textarea
+    setEditorMode('edit');
     const currentText = notesContent;
     const separator = currentText.length > 0 && !currentText.endsWith('\n\n') ? "\n\n" : "";
     const textToInsert = `${separator}--- ${t('aiNoteGeneratorDialog.appendedTextHeader', { dateTime: new Date().toLocaleString() })} ---\n${aiGeneratedText}\n--- ${t('aiNoteGeneratorDialog.appendedTextFooter')} ---\n`;
@@ -166,25 +229,57 @@ export default function NotebookPage() {
         </div>
       </header>
 
-      <main className="flex-grow container py-6 max-w-5xl">
+      <main className="flex-grow container py-6 max-w-5xl flex flex-col">
         {isLoading ? (
-          <div className="flex items-center justify-center h-[calc(100vh-10rem)]">
+          <div className="flex items-center justify-center flex-grow">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
         ) : (
-          <Card className="h-full flex flex-col shadow-lg">
-            <CardContent className="p-0 flex-grow">
-              {/* WYSIWYG Editor Placeholder */}
-              <div className="p-4 border-b text-sm text-muted-foreground italic">
-                {t('notebookPage.wysiwygPlaceholder')}
+          <Card className="flex-grow flex flex-col shadow-lg">
+            <CardHeader className="py-3 px-4 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setEditorMode('edit')}
+                    className={cn("px-3", editorMode === 'edit' && "font-semibold")}
+                    aria-pressed={editorMode === 'edit'}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    {t('notebookPage.editModeButton')}
+                  </Button>
+                  <Button
+                    variant={editorMode === 'preview' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setEditorMode('preview')}
+                    className={cn("px-3", editorMode === 'preview' && "font-semibold")}
+                    aria-pressed={editorMode === 'preview'}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    {t('notebookPage.previewModeButton')}
+                  </Button>
+                </div>
+                {/* Placeholder for more editor tools if needed */}
               </div>
-              <Textarea
-                placeholder={t('notebookPage.notesPlaceholder')}
-                value={notesContent}
-                onChange={(e) => setNotesContent(e.target.value)}
-                className="w-full h-[calc(100vh-20rem)] min-h-[400px] resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
-                aria-label={t('notebookPage.notesAreaLabel')}
-              />
+            </CardHeader>
+            <CardContent className="p-0 flex-grow flex">
+              {editorMode === 'edit' ? (
+                <Textarea
+                  placeholder={t('notebookPage.notesPlaceholderMarkdown')}
+                  value={notesContent}
+                  onChange={(e) => setNotesContent(e.target.value)}
+                  className="w-full h-full resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
+                  aria-label={t('notebookPage.notesAreaLabel')}
+                />
+              ) : (
+                <ScrollArea className="w-full h-full p-6">
+                  <div
+                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview"
+                    dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(notesContent) }}
+                  />
+                </ScrollArea>
+              )}
             </CardContent>
           </Card>
         )}
@@ -256,7 +351,6 @@ export default function NotebookPage() {
                         </DialogClose>
                         <Button onClick={handleInsertAiTextToNotes} disabled={!aiGeneratedText || isGeneratingText}>
                             <Save className="mr-2 h-4 w-4" /> 
-                            {/* Using appendToNotes for consistency, can be changed to "Insert to Notes" */}
                             {t('buttons.appendToNotes')}
                         </Button>
                     </div>
@@ -266,3 +360,5 @@ export default function NotebookPage() {
     </div>
   );
 }
+
+    
