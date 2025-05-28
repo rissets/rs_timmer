@@ -53,8 +53,8 @@
     "addTaskPlaceholder": "Add a new task...",
     "noTasks": "No tasks yet. Add some!",
     "deleteTask": "Delete task: {{taskText}}",
-    "reminderTimeLabel": "Reminder Time (Optional)",
     "reminderLabelShort": "Reminder",
+    "reminderTimeLabel": "Reminder Time (Optional)",
     "reminderSent": "Reminder sent",
     "clearReminderTooltip": "Clear reminder time"
   },
@@ -94,8 +94,8 @@
     "statusSkipped": "Skipped/Interrupted",
     "confirmClearToday": "Are you sure you want to clear all session history for today from the database? This action cannot be undone.",
     "historyClearedTitle": "Today's History Cleared",
-    "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
-    "clearErrorDescription": "Could not clear today's session history from the database. Please try again.",
+    "historyClearedDescription": "Today's session history has been successfully cleared.",
+    "clearErrorDescription": "Could not clear today's session history. Please try again.",
     "clearingHistory": "Clearing history..."
   },
   "settingsDialog": {
@@ -173,14 +173,14 @@
         "content": "Your tasks, session notes, dictionary entries, session context, and session history (Pomodoro logs) are automatically saved to Firebase Firestore on a per-day basis, associated with your user account.\\nThis means when a new day begins, these sections will appear empty, ready for the new day's activities. Your data from previous days remains stored and accessible."
       },
       "tasks": {
-        "title": "Today's Tasks & Reminders", 
-        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted for this site, an in-app alert dialog will pop up when that time arrives. Ensure you've allowed notifications for this site in your browser settings for this to work effectively.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
+        "title": "Today's Tasks & Reminders",
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted for this site, an in-app alert dialog will pop up when that time arrives. For this to work effectively, ensure you have allowed notifications for this site in your browser settings (your browser should prompt you if permission is needed the first time a reminder tries to show).\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
         "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog."
       },
-       "viewingPastNotes": {
+      "viewingPastNotes": {
         "title": "Viewing & Deleting Past Notes",
         "content": "Within the 'Session Notes & Context' card, you can expand the 'View Past Notes' section (it's collapsible!).\\n* Use the calendar to select a previous date.\\n* The notes (including any AI summaries saved on that day) for the selected date will be fetched from Firestore and displayed in a read-only area.\\n* A 'Delete Notes for [Date]' button allows you to remove the notes for the selected past day from Firestore after confirmation."
       },
@@ -188,12 +188,12 @@
         "title": "Session Dictionary",
         "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore. Each entry can be individually deleted using the trash icon.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
       },
-       "aiAnalysis": {
+      "aiAnalysis": {
         "title": "AI Session Analysis",
         "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day using the 'Save to Notes' button in the AI analysis popup."
       },
       "chatWidget": {
-        "title": "AI Chat Assistant", 
+        "title": "AI Chat Assistant",
         "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini via Genkit).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
@@ -228,7 +228,7 @@
     "timerControlsContent": "Use these buttons to Start/Pause, Skip to the next interval, Reset the current interval, or Mute/Unmute sounds.",
     "pomodoroDotsTitle": "Pomodoro Dots",
     "pomodoroDotsContent": "These dots track your progress through a Pomodoro cycle. A full cycle (usually 4 work sessions) earns you a Long Break.",
-     "collapsibleCardsTitle": "Collapsible Sections",
+    "collapsibleCardsTitle": "Collapsible Sections",
     "collapsibleCardsContent": "The sections for Tasks, Dictionary, and Notes below the timer can be expanded or collapsed by clicking their titles.",
     "tasksTitle": "Tasks",
     "tasksContent": "Add your to-dos here for the current session. Mark them complete as you go. Tasks are saved per day to your Firebase database.",
@@ -238,13 +238,13 @@
     "notesContent": "Jot down thoughts or distractions here. Select a 'Session Context' (Work, Learning, General) to help the AI give more relevant feedback. Notes and context are saved per day to Firebase.",
     "aiAnalysisTitle": "AI Analysis",
     "aiAnalysisContent": "After a session or when you have notes/tasks, click the Sparkles icon (✨) in the header or 'Analyze Data' button to get an AI summary and improvement tips. You can save this summary to your notes, which get stored in Firebase.",
-     "chatWidgetTitle": "AI Chat Assistant",
+    "chatWidgetTitle": "AI Chat Assistant",
     "chatWidgetContent": "Click the chat icon in the bottom right to talk to an AI assistant (Gemini) for quick questions or support related to your focus session.",
     "dictionaryCardTitle": "Session Dictionary",
     "dictionaryCardContent": "Define words in English and Indonesian. Your session's definitions are saved per day to Firebase, can be exported to Markdown, and individual entries can be deleted.",
-    "viewPastNotesTitle": "Viewing Past Notes",
-    "viewPastNotesContent": "In the 'Session Notes & Context' card, expand 'View Past Notes' (it's collapsible!) to pick a date and see notes from that day (from Firebase). You can also delete notes for a viewed past day.",
-     "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
+    "viewingPastNotesTitle": "Viewing Past Notes",
+    "viewingPastNotesContent": "In the 'Session Notes & Context' card, expand 'View Past Notes' (it's collapsible!) to pick a date and see notes from that day (from Firebase). You can also delete notes for a viewed past day.",
+    "viewPastDataTitle": "View Past Data (Header Calendar Icon)",
     "viewPastDataContent": "Click the calendar icon in the header to go to a page where you can view all your saved tasks, notes, context, and dictionary entries for any past date from Firebase.",
     "headerToolsTitle": "Header Tools",
     "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
@@ -255,7 +255,7 @@
   },
   "notifications": {
     "disabled": "Notifications Disabled",
-    "disabledDescription": "You won't receive interval alerts.",
+    "disabledDescription": "You won't receive interval or task reminder alerts. Please check your browser's site settings for {{appName}} to enable them.",
     "workSessionEnded": "Work session ended!",
     "breakTimeOver": "Break time is over!",
     "timeForWork": "Time for work.",
@@ -263,9 +263,9 @@
     "timeForLongBreak": "Time for a long break.",
     "taskReminderTitle": "Task Reminder",
     "permissionDeniedTitle": "Notification Permission Denied",
-    "permissionDeniedDescription": "Task reminders will not be shown. Please enable notification permissions for this site in your browser settings.",
+    "permissionDeniedDescription": "Task reminders and timer alerts will not be shown. Please enable notification permissions for this site in your browser settings.",
     "permissionRequestTitle": "Enable Notifications?",
-    "permissionRequestDescription": "RS Timer needs permission to show task reminders. Please check your browser for a permission prompt."
+    "permissionRequestDescription": "{{appName}} needs permission to show task reminders and timer alerts. Please check your browser for a permission prompt."
   },
   "ai": {
     "noDataForSummary": "Not enough session data, tasks, or notes to generate a summary.",
@@ -298,7 +298,6 @@
     "calmingChimes": "Calming Chimes",
     "gentlePianoChord": "Gentle Piano Chord",
     "simplePianoMelodySynth": "Simple Piano Melody (Synth)",
-    "lofiBeatSynth": "Lofi Beat (Synth)",
     "classicalExcerptSynth": "Classical Snippet (Synth)",
     "dreamyLullabySynth": "Dreamy Lullaby (Synth)"
   },
@@ -431,3 +430,4 @@
   }
 }
 
+    

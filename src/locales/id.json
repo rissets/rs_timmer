@@ -53,8 +53,8 @@
     "addTaskPlaceholder": "Tambah tugas baru...",
     "noTasks": "Belum ada tugas. Tambahkan beberapa!",
     "deleteTask": "Hapus tugas: {{taskText}}",
-    "reminderTimeLabel": "Waktu Pengingat (Opsional)",
     "reminderLabelShort": "Pengingat",
+    "reminderTimeLabel": "Waktu Pengingat (Opsional)",
     "reminderSent": "Pengingat terkirim",
     "clearReminderTooltip": "Hapus waktu pengingat"
   },
@@ -94,8 +94,8 @@
     "statusSkipped": "Dilewati/Terinterupsi",
     "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini dari database? Tindakan ini tidak dapat dibatalkan.",
     "historyClearedTitle": "Riwayat Hari Ini Dihapus",
-    "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus dari database.",
-    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini dari database. Silakan coba lagi.",
+    "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus.",
+    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini. Silakan coba lagi.",
     "clearingHistory": "Menghapus riwayat..."
   },
   "settingsDialog": {
@@ -173,14 +173,14 @@
         "content": "Tugas, catatan sesi, entri kamus, konteks sesi, dan riwayat sesi (log Pomodoro) Anda secara otomatis disimpan ke Firebase Firestore berdasarkan harian, terkait dengan akun pengguna Anda.\\nIni berarti ketika hari baru dimulai, bagian-bagian ini akan tampak kosong, siap untuk aktivitas hari baru. Data Anda dari hari-hari sebelumnya tetap tersimpan dan dapat diakses."
       },
       "tasks": {
-        "title": "Tugas & Pengingat Hari Ini", 
-        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur dan notifikasi browser diizinkan untuk situs ini, dialog peringatan di dalam aplikasi akan muncul ketika waktu tersebut tiba. Pastikan Anda telah mengizinkan notifikasi untuk situs ini di pengaturan browser Anda agar fitur ini berfungsi efektif.\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
+        "title": "Tugas & Pengingat Hari Ini",
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur dan notifikasi browser diizinkan untuk situs ini, dialog peringatan di dalam aplikasi akan muncul ketika waktu tersebut tiba. Agar ini berfungsi efektif, pastikan Anda telah mengizinkan notifikasi untuk situs ini di pengaturan browser Anda (browser Anda seharusnya meminta izin jika diperlukan saat pengingat pertama kali mencoba muncul).\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
       },
       "sessionNotesContext": {
         "title": "Catatan & Konteks Sesi",
         "content": "Di kartu 'Catatan & Konteks Sesi':\\n* Gunakan area teks untuk mencatat pemikiran, ide, atau gangguan selama sesi Anda.\\n* Pilih 'Konteks Sesi' (Umum, Fokus Kerja, Fokus Belajar) dari menu dropdown. Konteks ini membantu AI memberikan umpan balik yang lebih disesuaikan jika Anda menggunakan fitur Analisis AI.\\n* Catatan dan konteks yang Anda pilih disimpan ke Firestore untuk hari ini.\\n* Ringkasan yang dihasilkan AI dapat ditambahkan ke catatan ini menggunakan tombol 'Simpan ke Catatan' di dialog Ringkasan AI."
       },
-       "viewingPastNotes": {
+      "viewingPastNotes": {
         "title": "Melihat & Menghapus Catatan Sebelumnya",
         "content": "Di dalam kartu 'Catatan & Konteks Sesi', Anda dapat memperluas bagian 'Lihat Catatan Sebelumnya' (ini dapat dilipat!).\\n* Gunakan kalender untuk memilih tanggal sebelumnya.\\n* Catatan (termasuk ringkasan AI yang disimpan pada hari itu) untuk tanggal yang dipilih akan diambil dari Firestore dan ditampilkan di area hanya-baca.\\n* Tombol 'Hapus Catatan untuk [Tanggal]' memungkinkan Anda menghapus catatan untuk hari lampau yang dipilih dari Firestore setelah konfirmasi."
       },
@@ -188,12 +188,12 @@
         "title": "Kamus Sesi",
         "content": "Kartu 'Kamus Sesi' memungkinkan Anda mendapatkan definisi kata bertenaga AI:\\n* Masukkan kata dan klik 'Definisikan'. AI (Gemini) akan memberikan definisi dalam bahasa Inggris dan Indonesia.\\n* Kata yang didefinisikan dan definisinya disimpan untuk hari ini di Firestore. Setiap entri dapat dihapus secara individual menggunakan ikon tong sampah.\\n* Semua definisi untuk hari ini dapat diekspor ke file Markdown (.md)."
       },
-       "aiAnalysis": {
+      "aiAnalysis": {
         "title": "Analisis Sesi AI",
         "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI (Genkit dengan Gemini). Klik ikon Kilau (✨) di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti. Ringkasan ini dapat disimpan ke catatan harian Anda untuk hari ini menggunakan tombol 'Simpan ke Catatan' di popup analisis AI."
       },
       "chatWidget": {
-        "title": "Asisten Chat AI", 
+        "title": "Asisten Chat AI",
         "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami (didukung oleh Gemini via Genkit).\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
       "sessionHistory": {
@@ -228,7 +228,7 @@
     "timerControlsContent": "Gunakan tombol ini untuk Mulai/Jeda, Lewati ke interval berikutnya, Atur Ulang interval saat ini, atau Bisukan/Aktifkan suara.",
     "pomodoroDotsTitle": "Titik Pomodoro",
     "pomodoroDotsContent": "Titik-titik ini melacak kemajuan Anda melalui siklus Pomodoro. Satu siklus penuh (biasanya 4 sesi kerja) memberi Anda Istirahat Panjang.",
-     "collapsibleCardsTitle": "Bagian yang Dapat Dilipat",
+    "collapsibleCardsTitle": "Bagian yang Dapat Dilipat",
     "collapsibleCardsContent": "Bagian untuk Tugas, Kamus, dan Catatan di bawah timer dapat diperluas atau dilipat dengan mengklik judulnya.",
     "tasksTitle": "Tugas",
     "tasksContent": "Tambahkan daftar tugas Anda di sini untuk sesi saat ini. Tandai selesai saat Anda mengerjakannya. Tugas disimpan per hari ke database Firebase Anda.",
@@ -238,13 +238,13 @@
     "notesContent": "Tuliskan pemikiran atau gangguan di sini. Pilih 'Konteks Sesi' (Kerja, Belajar, Umum) untuk membantu AI memberikan umpan balik yang lebih relevan. Catatan dan konteks disimpan per hari ke Firebase.",
     "aiAnalysisTitle": "Analisis AI",
     "aiAnalysisContent": "Setelah sesi atau ketika Anda memiliki catatan/tugas, klik ikon Kilau (✨) di header atau tombol 'Analisis Data' untuk mendapatkan ringkasan AI dan kiat perbaikan. Anda dapat menyimpan ringkasan ini ke catatan Anda, yang akan disimpan di Firebase.",
-     "chatWidgetTitle": "Asisten Chat AI",
+    "chatWidgetTitle": "Asisten Chat AI",
     "chatWidgetContent": "Klik ikon chat di kanan bawah untuk berbicara dengan asisten AI (Gemini) untuk pertanyaan cepat atau dukungan terkait sesi fokus Anda.",
     "dictionaryCardTitle": "Kamus Sesi",
     "dictionaryCardContent": "Definisikan kata dalam bahasa Inggris dan Indonesia. Definisi sesi Anda disimpan per hari ke Firebase, dapat diekspor ke Markdown, dan entri individual dapat dihapus.",
-    "viewPastNotesTitle": "Melihat Catatan Sebelumnya",
-    "viewPastNotesContent": "Di kartu 'Catatan & Konteks Sesi', perluas 'Lihat Catatan Sebelumnya' (ini dapat dilipat!) untuk memilih tanggal dan melihat catatan dari hari itu (dari Firebase). Anda juga dapat menghapus catatan untuk hari lampau yang dilihat.",
-     "viewPastDataTitle": "Lihat Data Sebelumnya (Ikon Kalender Header)",
+    "viewingPastNotesTitle": "Melihat Catatan Sebelumnya",
+    "viewingPastNotesContent": "Di kartu 'Catatan & Konteks Sesi', perluas 'Lihat Catatan Sebelumnya' (ini dapat dilipat!) untuk memilih tanggal dan melihat catatan dari hari itu (dari Firebase). Anda juga dapat menghapus catatan untuk hari lampau yang dilihat.",
+    "viewPastDataTitle": "Lihat Data Sebelumnya (Ikon Kalender Header)",
     "viewPastDataContent": "Klik ikon kalender di header untuk pergi ke halaman di mana Anda dapat melihat semua tugas, catatan, konteks, dan entri kamus yang tersimpan untuk tanggal lampau dari Firebase.",
     "headerToolsTitle": "Alat Header",
     "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi Hari Ini (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), Ganti Bahasa (🌐), dan Lihat Data Sebelumnya (🗓️) dari header.",
@@ -255,17 +255,17 @@
   },
   "notifications": {
     "disabled": "Notifikasi Dinonaktifkan",
-    "disabledDescription": "Anda tidak akan menerima peringatan interval.",
+    "disabledDescription": "Anda tidak akan menerima peringatan interval atau pengingat tugas. Silakan periksa pengaturan situs browser Anda untuk {{appName}} untuk mengaktifkannya.",
     "workSessionEnded": "Sesi kerja berakhir!",
     "breakTimeOver": "Waktu istirahat habis!",
     "timeForWork": "Waktunya untuk kerja.",
     "timeForShortBreak": "Waktunya untuk istirahat pendek.",
     "timeForLongBreak": "Waktunya untuk istirahat panjang.",
-    "taskReminderTitle": "Pengingat Tugas",
+    "taskReminderTitle": "Pengingat Tugas!",
     "permissionDeniedTitle": "Izin Notifikasi Ditolak",
-    "permissionDeniedDescription": "Pengingat tugas tidak akan ditampilkan. Harap aktifkan izin notifikasi untuk situs ini di pengaturan browser Anda.",
+    "permissionDeniedDescription": "Pengingat tugas dan peringatan timer tidak akan ditampilkan. Harap aktifkan izin notifikasi untuk situs ini di pengaturan browser Anda.",
     "permissionRequestTitle": "Aktifkan Notifikasi?",
-    "permissionRequestDescription": "RS Timer memerlukan izin untuk menampilkan pengingat tugas. Silakan periksa browser Anda untuk permintaan izin."
+    "permissionRequestDescription": "{{appName}} memerlukan izin untuk menampilkan pengingat tugas dan peringatan timer. Silakan periksa browser Anda untuk permintaan izin."
   },
   "ai": {
     "noDataForSummary": "Data sesi, tugas, atau catatan tidak cukup untuk menghasilkan ringkasan.",
@@ -298,7 +298,6 @@
     "calmingChimes": "Lonceng Menenangkan",
     "gentlePianoChord": "Akord Piano Lembut",
     "simplePianoMelodySynth": "Melodi Piano Sederhana (Synth)",
-    "lofiBeatSynth": "Lofi Beat (Synth)",
     "classicalExcerptSynth": "Cuplikan Klasik (Synth)",
     "dreamyLullabySynth": "Nina Bobo Melamun (Synth)"
   },
@@ -408,7 +407,7 @@
     "googleAIAPIServiceDisabled": "Layanan {{serviceName}} saat ini tidak tersedia atau tidak diaktifkan untuk proyek Anda. Silakan periksa pengaturan proyek Google Cloud Anda atau coba lagi nanti.",
     "actionUnavailableLoading": "Tindakan ini tidak tersedia saat data sedang dimuat atau jika belum masuk."
   },
-   "pastDataPage": {
+  "pastDataPage": {
     "title": "Lihat Data Sesi Lampau",
     "selectDateLabel": "Pilih Tanggal untuk Dilihat",
     "loadingData": "Memuat data untuk tanggal yang dipilih...",
@@ -426,8 +425,9 @@
   "alertDialog": {
     "taskReminderTitle": "Pengingat Tugas!",
     "taskReminderDescription": {
-        "prompt": "Saatnya untuk tugas Anda (dijadwalkan untuk {{reminderTime}}):"
+      "prompt": "Saatnya untuk tugas Anda (dijadwalkan untuk {{reminderTime}}):"
     }
   }
 }
 
+    

@@ -9,12 +9,13 @@ export const DEFAULT_SETTINGS: Settings = {
   autoStartBreaks: true,
   autoStartPomodoros: true,
   soundscapeWork: 'whiteNoise',
-  soundscapeBreak: 'gentleRainSimulated', // Renamed for clarity
+  soundscapeBreak: 'gentleRainSimulated',
   volume: 0.5,
   notificationsEnabled: true,
   backgroundAnimation: 'gradientFlow',
   mouseTrailEffectEnabled: false,
   showCoachMarks: true,
+  customSoundscapeUrls: {},
 };
 
 // Note: 'name' properties are now translation keys
@@ -39,10 +40,10 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
     params: { 
       volumeAdjustment: -12,
       autoFilter: { // Parameters for the AutoFilter to simulate waves
-        frequency: "2m", // Speed of the LFO controlling the filter
+        frequency: "4m", // Speed of the LFO controlling the filter
         baseFrequency: 200, // Center frequency of the filter
-        octaves: 4, // Range of the filter sweep
-        filter: { type: "lowpass" as const, rolloff: -12 as const, Q: 1.5 },
+        octaves: 5, // Range of the filter sweep
+        filter: { type: "lowpass" as const, rolloff: -24 as const, Q: 3 },
       }
     } 
   },
@@ -65,7 +66,7 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
     params: { 
       frequency: 440, 
       type: 'sine',
-      envelope: { attack: 0.005, decay: 0.1, sustain: 1, release: 0.5 } // Sustaining envelope
+      envelope: { attack: 0.005, decay: 0.1, sustain: 1, release: 0.5 }
     } 
   },
   { 
@@ -76,7 +77,7 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
       frequency: 80, 
       type: 'sine', 
       volumeAdjustment: -10,
-      envelope: { attack: 0.5, decay: 0.1, sustain: 1, release: 1 } // Sustaining envelope
+      envelope: { attack: 0.5, decay: 0.1, sustain: 1, release: 1 }
     } 
   },
   { 
@@ -96,16 +97,15 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
       baseFrequency: 100, 
       beatFrequency: 8, 
       volumeAdjustment: -15,
-      // Envelope is defined in the binaural setup in useSoundscapePlayer to ensure sustain
     } 
   },
   {
     id: 'ambientPad',
     nameKey: 'soundscapes.ambientPad',
-    type: 'tone', // Will use PolySynth due to 'notes'
+    type: 'tone', 
     params: {
       notes: ['C3', 'E3', 'G3', 'B4'],
-      oscillator: { type: 'fatsine' as const }, // Use 'fatsine' for a richer pad sound
+      oscillator: { type: 'fatsine' as const }, 
       envelope: { attack: 2, decay: 1, sustain: 0.9, release: 4 },
       volumeAdjustment: -20,
     }
@@ -113,11 +113,11 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
   {
     id: 'calmingChimes',
     nameKey: 'soundscapes.calmingChimes',
-    type: 'tone', // Will use PolySynth due to 'notes'
+    type: 'tone', 
     params: {
-      notes: ['C6', 'E6', 'G6', 'A6'], // Higher notes for chime-like quality
-      oscillator: { type: 'triangle' as const }, // Triangle wave is often good for bell/chime sounds
-      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 }, // Short sustain, long release
+      notes: ['C6', 'E6', 'G6', 'A6'], 
+      oscillator: { type: 'triangle' as const }, 
+      envelope: { attack: 0.01, decay: 1.5, sustain: 0.05, release: 2 },
       volumeAdjustment: -18,
     }
   },
@@ -154,47 +154,6 @@ export const SOUNDSCAPE_OPTIONS: SoundscapeOption[] = [
           ],
         }
       ]
-    }
-  },
-  {
-    id: 'lofiBeatSynth', 
-    nameKey: 'soundscapes.lofiBeatSynth',
-    type: 'patternLoop',
-    params: {
-      bpm: 85,
-      volumeAdjustment: -18,
-      instruments: [
-        {
-          name: 'chords',
-          synthType: 'PolySynth',
-          synthOptions: { oscillator: { type: 'fmsquare' as const }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.3, release: 1 } },
-          sequence: [ 
-            { time: '0:0', notes: ['A#2', 'D3', 'F3', 'G#3'], duration: '1m' }, 
-            { time: '1:0', notes: ['G2', 'C3', 'D#3', 'F3'], duration: '1m' }  
-          ],
-        },
-        {
-          name: 'kick',
-          synthType: 'MembraneSynth', 
-          synthOptions: { octaves: 4, pitchDecay: 0.1, envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.2 } },
-          pattern: ['C1', null, 'C1', null, 'C1', 'C1', null, 'C1'], 
-          subdivision: '8n',
-        },
-        {
-          name: 'snare',
-          synthType: 'NoiseSynth', 
-          synthOptions: { noise: { type: 'pink' as const }, envelope: { attack: 0.005, decay: 0.15, sustain: 0, release: 0.1 } },
-          pattern: [null, null, 'C2', null, null, null, 'C2', null], 
-          subdivision: '8n',
-        },
-        {
-          name: 'hihat',
-          synthType: 'NoiseSynth',
-          synthOptions: { noise: { type: 'white' as const }, envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }, volume: -10 }, 
-          pattern: ['C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3', 'C3'], 
-          subdivision: '8n',
-        }
-      ],
     }
   },
   {
@@ -291,3 +250,5 @@ export const SESSION_TYPE_OPTIONS: { id: SessionType; nameKey: string }[] = [
 ];
 
 export const APP_NAME = "RS";
+
+    
