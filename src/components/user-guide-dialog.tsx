@@ -30,29 +30,48 @@ interface UserGuideDialogProps {
 export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) {
   const { t } = useLanguageContext(); 
 
-  // For full content translation, you'd fetch these from en.json/id.json
   const guideSections = [
     {
-      titleKey: "userGuideDialog.sections.gettingStarted.title",
-      contentKey: "userGuideDialog.sections.gettingStarted.content",
+      titleKey: "userGuideDialog.sections.introduction.title",
+      contentKey: "userGuideDialog.sections.introduction.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.pwa.title",
+      contentKey: "userGuideDialog.sections.pwa.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.authentication.title",
+      contentKey: "userGuideDialog.sections.authentication.content",
     },
     {
       titleKey: "userGuideDialog.sections.timerControls.title",
       contentKey: "userGuideDialog.sections.timerControls.content",
     },
     {
-      titleKey: "userGuideDialog.sections.customization.title",
-      contentKey: "userGuideDialog.sections.customization.content",
+      titleKey: "userGuideDialog.sections.collapsibleCards.title",
+      contentKey: "userGuideDialog.sections.collapsibleCards.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.dailyDataStorage.title",
+      contentKey: "userGuideDialog.sections.dailyDataStorage.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.tasks.title",
+      contentKey: "userGuideDialog.sections.tasks.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.sessionNotesContext.title",
+      contentKey: "userGuideDialog.sections.sessionNotesContext.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.viewingPastNotes.title",
+      contentKey: "userGuideDialog.sections.viewingPastNotes.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.dictionaryCard.title",
+      contentKey: "userGuideDialog.sections.dictionaryCard.content",
     },
      {
-      titleKey: "userGuideDialog.sections.tasksAndNotes.title",
-      contentKey: "userGuideDialog.sections.tasksAndNotes.content",
-    },
-    {
-      titleKey: "userGuideDialog.sections.sessionContext.title",
-      contentKey: "userGuideDialog.sections.sessionContext.content",
-    },
-    {
       titleKey: "userGuideDialog.sections.aiAnalysis.title",
       contentKey: "userGuideDialog.sections.aiAnalysis.content",
     },
@@ -61,12 +80,20 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
       contentKey: "userGuideDialog.sections.chatWidget.content",
     },
     {
-      titleKey: "userGuideDialog.sections.dictionaryCard.title", // Added
-      contentKey: "userGuideDialog.sections.dictionaryCard.content", // Added
-    },
-    {
       titleKey: "userGuideDialog.sections.sessionHistory.title",
       contentKey: "userGuideDialog.sections.sessionHistory.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.viewPastDataPage.title",
+      contentKey: "userGuideDialog.sections.viewPastDataPage.content",
+    },
+    {
+      titleKey: "userGuideDialog.sections.settings.title",
+      contentKey: "userGuideDialog.sections.settings.content",
+    },
+    {
+        titleKey: "userGuideDialog.sections.customSoundscapes.title",
+        contentKey: "userGuideDialog.sections.customSoundscapes.content",
     },
     {
         titleKey: "userGuideDialog.sections.themeAndAppearance.title",
@@ -108,10 +135,10 @@ export function UserGuideDialog({ isOpen, onOpenChange }: UserGuideDialogProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <BookOpen className="mr-2 h-6 w-6 text-primary" />
-            {t('userGuideDialog.title')}
+            {t('userGuideDialog.title', { appName: APP_NAME })}
           </DialogTitle>
           <DialogDescription>
-            {t('userGuideDialog.description')}
+            {t('userGuideDialog.description', { appName: APP_NAME })}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh] p-1 pr-3">

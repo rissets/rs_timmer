@@ -62,6 +62,7 @@ export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryD
   }, [isOpen, userId, fetchHistory]);
 
   const clearTodaysHistory = async () => {
+    console.log("Attempting to trigger clearTodaysHistory"); // <-- Added log here
     console.log("clearTodaysHistory triggered in SessionHistoryDrawer");
     if (!userId) {
       console.warn("clearTodaysHistory: No userId, aborting.");
@@ -69,11 +70,6 @@ export function SessionHistoryDrawer({ currentDateKey, userId }: SessionHistoryD
       return;
     }
     console.log(`clearTodaysHistory: Attempting to clear for userId: ${userId}, dateKey: ${currentDateKey}`);
-
-    if (!confirm(t('sessionHistoryDrawer.confirmClearToday'))) {
-      console.log("clearTodaysHistory: User cancelled confirmation.");
-      return;
-    }
 
     setIsClearingHistory(true); // Indicate clearing operation is in progress
     const previousHistory = [...history]; // Store previous history for potential revert

@@ -83,15 +83,15 @@
   "sessionHistoryDrawer": {
     "title": "Riwayat Sesi",
     "titleToday": "Riwayat Sesi ({{date}})",
-    "description": "Tinjau sesi Pomodoro Anda yang telah selesai.",
+    "description": "Tinjau sesi Pomodoro Anda yang telah selesai untuk hari ini.",
     "noSessions": "Belum ada sesi yang direkam.",
     "noSessionsToday": "Belum ada sesi yang direkam untuk hari ini.",
     "statusCompleted": "Selesai",
     "statusSkipped": "Dilewati/Terinterupsi",
-    "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini? Tindakan ini tidak dapat dibatalkan.",
-    "historyClearedTitle": "Riwayat Dihapus",
+    "confirmClearToday": "Apakah Anda yakin ingin menghapus semua riwayat sesi untuk hari ini dari database? Tindakan ini tidak dapat dibatalkan.",
+    "historyClearedTitle": "Riwayat Hari Ini Dihapus",
     "historyClearedDescription": "Riwayat sesi hari ini telah berhasil dihapus dari database.",
-    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini. Silakan coba lagi.",
+    "clearErrorDescription": "Tidak dapat menghapus riwayat sesi hari ini dari database. Silakan coba lagi.",
     "clearingHistory": "Menghapus riwayat..."
   },
   "settingsDialog": {
@@ -122,7 +122,7 @@
     "myCustomSoundscapes": {
       "title": "Suara Latar Kustom Saya",
       "description": "Unggah file audio Anda sendiri (mis., MP3, WAV, OGG) untuk digunakan sebagai suara latar. File disimpan secara lokal di IndexedDB browser Anda.",
-      "uploadLabel": "Unggah suara latar baru",
+      "uploadLabel": "Unggah suara latar baru (maks 10MB)",
       "uploading": "Mengunggah...",
       "uploadedListTitle": "Suara Unggahan Saya",
       "deleteButtonTooltip": "Hapus {{name}}"
@@ -142,59 +142,75 @@
   },
   "userGuideDialog": {
     "title": "Panduan Pengguna {{appName}}",
-    "description": "Pelajari cara memaksimalkan sesi fokus Anda.",
+    "description": "Pelajari cara memaksimalkan sesi fokus Anda dengan {{appName}}.",
     "sections": {
-      "gettingStarted": {
-        "title": "Memulai dengan Pomodoro",
-        "content": "Teknik Pomodoro adalah metode manajemen waktu yang menggunakan timer untuk membagi pekerjaan menjadi interval, biasanya 25 menit, dipisahkan oleh istirahat pendek.\\n{{appName}} membantu Anda menerapkan teknik ini. Setiap interval kerja adalah \"Pomodoro.\" Setelah sejumlah Pomodoro tertentu (biasanya 4), Anda mengambil istirahat yang lebih panjang.\\nManfaatnya termasuk peningkatan fokus, pengurangan kelelahan, dan perkiraan waktu yang lebih baik."
+      "introduction": {
+        "title": "Pengantar {{appName}} & Pomodoro",
+        "content": "{{appName}} adalah aplikasi timer yang dirancang untuk membantu Anda meningkatkan fokus dan produktivitas menggunakan Teknik Pomodoro, dengan analisis sesi bertenaga AI dan fitur yang dapat disesuaikan.\\nTeknik Pomodoro membagi pekerjaan menjadi interval (Pomodoro), biasanya 25 menit, dipisahkan oleh istirahat pendek. Setelah sejumlah Pomodoro tertentu (biasanya 4), Anda mengambil istirahat yang lebih panjang. Manfaatnya termasuk peningkatan fokus, pengurangan kelelahan, dan manajemen waktu yang lebih baik."
+      },
+      "pwa": {
+        "title": "Progressive Web App (PWA)",
+        "content": "{{appName}} adalah PWA, artinya Anda dapat menginstalnya di perangkat Anda untuk pengalaman seperti aplikasi dan mengakses beberapa fitur secara offline. Cari opsi 'Instal' atau 'Tambahkan ke Layar Utama' di menu browser Anda saat menggunakan {{appName}}."
+      },
+      "authentication": {
+        "title": "Akun Pengguna & Otentikasi",
+        "content": "Buat akun atau masuk untuk menyimpan data sesi Anda (tugas, catatan, kamus, riwayat) ke cloud (Firebase Firestore).\\n* Registrasi: Buat akun baru dengan email dan kata sandi Anda. Nama Anda opsional.\\n* Masuk: Masuk untuk mengakses data Anda yang tersimpan.\\n* Keluar: Gunakan tombol keluar di header untuk keluar.\\n* Lupa Kata Sandi: Jika Anda lupa kata sandi, gunakan tautan 'Lupa Kata Sandi' di halaman masuk untuk menerima tautan pengaturan ulang melalui email."
       },
       "timerControls": {
         "title": "Kontrol Timer",
         "content": "Gunakan kontrol ini untuk mengatur sesi Anda:\\n* Mulai/Jeda: Klik tombol utama untuk memulai atau menjeda timer saat ini (Kerja, Istirahat Pendek, atau Istirahat Panjang).\\n* Lewati: Klik tombol lewati (ikon panah ke kanan) untuk mengakhiri interval saat ini dan pindah ke interval berikutnya.\\n* Atur Ulang: Klik tombol atur ulang (ikon panah melingkar) untuk mengatur ulang interval saat ini ke durasi penuhnya dan menjeda timer.\\n* Bisukan/Suarakan: Aktifkan atau nonaktifkan suara latar menggunakan ikon volume."
       },
-      "customization": {
-        "title": "Kustomisasi (Pengaturan)",
-        "content": "Klik ikon roda gigi di header untuk membuka Pengaturan. Anda dapat menyesuaikan:\\n* Durasi Timer: Atur durasi khusus untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang.\\n* Interval Istirahat Panjang: Tentukan berapa banyak sesi kerja yang terjadi sebelum istirahat panjang.\\n* Mulai Otomatis: Aktifkan/nonaktifkan memulai istirahat dan Pomodoro secara otomatis.\\n* Notifikasi: Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara Latar: Pilih suara sekitar yang berbeda untuk periode kerja/istirahat. Sesuaikan volume utama. Anda juga dapat mengunggah file audio Anda sendiri untuk digunakan sebagai suara latar khusus.\\n* Animasi Latar Belakang & Efek Jejak Mouse: Pilih efek latar belakang visual dan aktifkan/nonaktifkan efek partikel yang mengikuti mouse Anda.\\n* Panduan Awal: Aktifkan/nonaktifkan tur panduan bermanfaat yang muncul pada kunjungan pertama."
-      },
       "collapsibleCards": {
-        "title": "Bagian yang Dapat Dilipat",
-        "content": "Bagian 'Tugas Hari Ini', 'Kamus Sesi', dan 'Catatan & Konteks Sesi' di bawah timer dapat dilipat. Klik judulnya untuk memperluas atau menyembunyikannya, membantu Anda mengatur tampilan ruang kerja Anda."
+        "title": "Bagian yang Dapat Dilipat (Tugas, Kamus, Catatan)",
+        "content": "Bagian 'Tugas Hari Ini', 'Kamus Sesi', dan 'Catatan & Konteks Sesi' di bawah timer dapat dilipat. Klik judulnya (yang menyertakan ikon seperti ListChecks, BookMarked, FileText) untuk memperluas atau menyembunyikannya, membantu Anda mengatur tampilan ruang kerja Anda."
       },
-      "tasksAndNotes": {
-        "title": "Tugas, Catatan & Database",
-        "content": "Di bawah timer, Anda akan menemukan bagian untuk mengelola tugas dan membuat catatan:\\n* Tugas Hari Ini: Tambahkan tugas yang ingin Anda selesaikan. Ini disimpan ke database Firebase Anda untuk hari ini.\\n* Catatan & Konteks Sesi: Gunakan area teks untuk mencatat pemikiran. Pilih 'Konteks Sesi' untuk menyesuaikan umpan balik AI. Catatan dan konteks disimpan ke Firebase untuk hari ini.\\n* Ringkasan AI: Ringkasan yang dihasilkan dapat ditambahkan ke catatan harian Anda dan disimpan."
+      "dailyDataStorage": {
+        "title": "Penyimpanan Data Harian (Firebase Firestore)",
+        "content": "Tugas, catatan sesi, entri kamus, dan riwayat sesi (log Pomodoro) Anda secara otomatis disimpan ke Firebase Firestore berdasarkan harian, terkait dengan akun pengguna Anda.\\nIni berarti ketika hari baru dimulai, bagian-bagian ini akan tampak kosong, siap untuk aktivitas hari baru. Data Anda dari hari-hari sebelumnya tetap tersimpan dan dapat diakses."
       },
-      "sessionContext": {
-        "title": "Konteks Sesi",
-        "content": "Sebelum menganalisis data sesi Anda, Anda dapat menentukan \"Konteks Sesi\" (misalnya, Kerja, Belajar, Umum).\\nIni membantu AI memberikan umpan balik dan saran yang lebih disesuaikan dengan aktivitas Anda saat ini. Konteks ini juga disimpan per hari di database Firebase Anda."
+      "tasks": {
+        "title": "Tugas Hari Ini",
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini.\\n* Tandai tugas sebagai selesai menggunakan kotak centang.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas disimpan ke Firestore untuk hari ini."
       },
-      "aiAnalysis": {
-        "title": "Analisis Sesi AI",
-        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI. Klik ikon kilau di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti untuk perbaikan. Ringkasan ini dapat disimpan ke catatan harian Anda, yang disimpan di Firebase."
+      "sessionNotesContext": {
+        "title": "Catatan & Konteks Sesi",
+        "content": "Di kartu 'Catatan & Konteks Sesi':\\n* Gunakan area teks untuk mencatat pemikiran, ide, atau gangguan selama sesi Anda.\\n* Pilih 'Konteks Sesi' (Umum, Fokus Kerja, Fokus Belajar) dari menu dropdown. Konteks ini membantu AI memberikan umpan balik yang lebih disesuaikan jika Anda menggunakan fitur Analisis AI.\\n* Catatan dan konteks yang Anda pilih disimpan ke Firestore untuk hari ini.\\n* Ringkasan yang dihasilkan AI dapat ditambahkan ke catatan ini menggunakan tombol 'Simpan ke Catatan' di dialog Ringkasan AI."
       },
-      "chatWidget": {
-        "title": "Asisten Chat AI",
-        "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami (didukung oleh Gemini).\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
+      "viewingPastNotes": {
+        "title": "Melihat & Menghapus Catatan Sebelumnya",
+        "content": "Di dalam kartu 'Catatan & Konteks Sesi', Anda dapat memperluas bagian 'Lihat Catatan Sebelumnya'.\\n* Gunakan kalender untuk memilih tanggal sebelumnya.\\n* Catatan (termasuk ringkasan AI yang disimpan pada hari itu) untuk tanggal yang dipilih akan diambil dari Firestore dan ditampilkan di area hanya-baca.\\n* Tombol 'Hapus Catatan untuk [Tanggal]' memungkinkan Anda menghapus catatan untuk hari lampau yang dipilih dari Firestore setelah konfirmasi."
       },
       "dictionaryCard": {
         "title": "Kamus Sesi",
-        "content": "Gunakan Kartu Kamus untuk mendapatkan definisi kata dalam bahasa Inggris dan Indonesia. Definisi ini disimpan per hari di database Firebase Anda dan dapat diekspor ke file Markdown. Anda juga dapat menghapus entri dari kamus hari ini."
+        "content": "Kartu 'Kamus Sesi' memungkinkan Anda mendapatkan definisi kata bertenaga AI:\\n* Masukkan kata dan klik 'Definisikan'. AI (Gemini) akan memberikan definisi dalam bahasa Inggris dan Indonesia.\\n* Kata yang didefinisikan dan definisinya disimpan untuk hari ini di Firestore.\\n* Anda dapat menghapus entri individual dari kamus hari ini menggunakan ikon tong sampah di sebelah setiap entri.\\n* Semua definisi untuk hari ini dapat diekspor ke file Markdown (.md)."
       },
-      "viewPastNotes": {
-        "title": "Melihat Catatan Sebelumnya",
-        "content": "Di dalam kartu 'Catatan & Konteks Sesi', Anda dapat menemukan bagian yang dapat dilipat untuk 'Lihat Catatan Sebelumnya'. Gunakan kalender untuk memilih tanggal sebelumnya dan melihat catatan (termasuk ringkasan AI yang disimpan) dari hari itu, dibaca dari database Firebase Anda. Anda juga dapat menghapus catatan untuk hari lampau yang dipilih."
+      "aiAnalysis": {
+        "title": "Analisis Sesi AI",
+        "content": "{{appName}} memiliki fitur penganalisis sesi bertenaga AI (Genkit dengan Gemini). Klik ikon Kilau (✨) di header atau tombol \"Analisis Data\" di bagian catatan.\\nAI akan meninjau interval Anda yang telah selesai (jika ada), tugas, dan catatan untuk sesi saat ini, beserta Konteks Sesi yang dipilih.\\nIni memberikan ringkasan dan saran yang dapat ditindaklanjuti. Ringkasan ini dapat disimpan ke catatan harian Anda untuk hari ini."
       },
-      "viewPastData": {
-        "title": "Melihat Data Sebelumnya",
-        "content": "Klik ikon kalender di header untuk menavigasi ke halaman khusus tempat Anda dapat memilih tanggal sebelumnya dan melihat semua tugas, catatan, konteks sesi, dan entri kamus yang tersimpan untuk hari itu, semuanya diambil dari database Firebase Anda."
+      "chatWidget": {
+        "title": "Asisten Chat AI",
+        "content": "Butuh bantuan cepat atau kiat produktivitas? Klik ikon chat di sudut kanan bawah untuk berbicara dengan asisten AI kami (didukung oleh Gemini via Genkit).\\nIni dapat menjawab pertanyaan tentang penggunaan {{appName}}, Teknik Pomodoro, atau strategi fokus umum."
       },
       "sessionHistory": {
-        "title": "Riwayat Sesi",
-        "content": "Klik ikon riwayat (jam dengan panah) di header untuk melihat log interval Pomodoro Anda yang telah selesai untuk hari ini dari database Firebase Anda.\\nIni membantu Anda melacak sesi fokus Anda."
+        "title": "Riwayat Sesi Hari Ini (Log Pomodoro)",
+        "content": "Klik ikon riwayat (🕒) di header untuk melihat log interval Pomodoro Anda yang telah selesai (Kerja, Istirahat Pendek, Istirahat Panjang) untuk hari ini. Data ini diambil dari Firestore.\\nAnda juga dapat menghapus riwayat hari ini dari laci ini."
+      },
+      "viewPastDataPage": {
+        "title": "Melihat Semua Data Sebelumnya",
+        "content": "Klik ikon kalender (🗓️) di header untuk menavigasi ke halaman 'Lihat Data Sesi Sebelumnya'.\\nDi sini, Anda dapat memilih tanggal sebelumnya dan melihat ringkasan komprehensif dari semua data Anda yang direkam untuk hari itu, termasuk tugas, catatan, konteks sesi, dan entri kamus, semuanya diambil dari Firestore."
+      },
+      "settings": {
+        "title": "Pengaturan (Kustomisasi)",
+        "content": "Klik ikon roda gigi (⚙️) di header untuk membuka Pengaturan. Pengaturan diatur ke dalam tab:\\n* Timer: Sesuaikan durasi untuk interval Kerja, Istirahat Pendek, dan Istirahat Panjang. Atur Interval Istirahat Panjang (jumlah sesi kerja sebelum istirahat panjang). Aktifkan/nonaktifkan mulai otomatis untuk istirahat dan Pomodoro. Aktifkan/nonaktifkan notifikasi browser untuk akhir interval.\\n* Suara: Pilih suara latar untuk periode kerja dan istirahat. Sesuaikan volume utama.\\n* Tampilan: Pilih animasi latar belakang visual. Aktifkan/nonaktifkan efek partikel yang mengikuti mouse Anda. Aktifkan/nonaktifkan tur panduan awal."
+      },
+      "customSoundscapes": {
+        "title": "Suara Latar Kustom (Pengaturan - Tab Suara)",
+        "content": "Di tab 'Suara' pada Pengaturan, Anda dapat mengunggah file audio Anda sendiri (misalnya, MP3, WAV, OGG, maks 10MB) untuk digunakan sebagai suara latar khusus.\\nFile-file ini disimpan secara lokal di IndexedDB browser Anda, bukan di server. Anda dapat memilihnya di menu dropdown 'Suara Latar Kerja' dan 'Suara Latar Istirahat' dan menghapusnya jika tidak lagi diperlukan (asalkan tidak sedang dipilih)."
       },
       "themeAndAppearance": {
-        "title": "Tema & Tampilan",
-        "content": "* Mode Gelap/Terang: Beralih antara tema gelap dan terang menggunakan ikon matahari/bulan di header.\\n* Efek Latar Belakang: Pilih berbagai latar belakang animasi atau gradien sederhana di menu Pengaturan untuk mempersonalisasi lingkungan fokus Anda."
+        "title": "Tema & Visual",
+        "content": "* Mode Gelap/Terang: Beralih antara tema gelap dan terang menggunakan ikon matahari/bulan di header.\\n* Efek Latar Belakang: Pilih berbagai latar belakang animasi atau gradien sederhana di menu Pengaturan (tab Tampilan) untuk mempersonalisasi lingkungan fokus Anda."
       }
     }
   },
@@ -227,7 +243,7 @@
     "headerToolsTitle": "Alat Header",
     "headerToolsContent": "Akses Ringkasan AI (✨), Riwayat Sesi Hari Ini (🕒), Panduan Pengguna (📖), Pengaturan (⚙️), Ganti Tema (☀️/🌙), Ganti Bahasa (🌐), dan Lihat Data Sebelumnya (🗓️) dari header.",
     "settingsTitle": "Pengaturan (Ikon Roda Gigi ⚙️)",
-    "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara (termasuk mengunggah milik Anda sendiri!), animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda.",
+    "settingsContent": "Sesuaikan durasi timer, perilaku mulai otomatis, suara (termasuk mengunggah milik Anda sendiri!), animasi latar belakang, dan lainnya agar sesuai dengan alur kerja Anda. Pengaturan diatur ke dalam tab.",
     "allSetTitle": "Anda Sudah Siap!",
     "allSetContent": "Anda telah mempelajari dasar-dasar {{appName}}. Saatnya memulai sesi fokus pertama Anda!"
   },
@@ -305,7 +321,7 @@
     "exportSuccessfulTitle": "Ekspor Berhasil",
     "exportSuccessfulDescription": "Sesi kamus Anda telah diunduh sebagai file Markdown.",
     "deleteEntryTooltip": "Hapus entri untuk '{{word}}'",
-    "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus definisi untuk '{{word}}'?",
+    "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus definisi untuk '{{word}}' dari kamus hari ini?",
     "entryDeletedTitle": "Entri Dihapus",
     "entryDeletedDesc": "Definisi untuk '{{word}}' telah dihapus dari kamus sesi ini.",
     "entryDeletedDescLocal": "Definisi untuk '{{word}}' telah dihapus dari daftar. Perubahan akan disimpan ke database jika memungkinkan.",
@@ -324,7 +340,7 @@
     "noAccountPrompt": "Belum punya akun?",
     "registerLink": "Daftar",
     "loggingInPlaceholder": "Mencoba untuk masuk...",
-    "registerTitle": "Buat Akun",
+    "registerTitle": "Buat Akun untuk {{appName}}",
     "registerDescription": "Bergabunglah dengan {{appName}} untuk meningkatkan produktivitas Anda.",
     "nameLabel": "Nama",
     "namePlaceholder": "Nama Anda",

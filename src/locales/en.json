@@ -83,15 +83,15 @@
   "sessionHistoryDrawer": {
     "title": "Session History",
     "titleToday": "Session History ({{date}})",
-    "description": "Review your completed Pomodoro sessions.",
+    "description": "Review your completed Pomodoro sessions for today.",
     "noSessions": "No sessions recorded yet.",
     "noSessionsToday": "No sessions recorded for today yet.",
     "statusCompleted": "Completed",
     "statusSkipped": "Skipped/Interrupted",
-    "confirmClearToday": "Are you sure you want to clear all session history for today? This action cannot be undone.",
-    "historyClearedTitle": "History Cleared",
+    "confirmClearToday": "Are you sure you want to clear all session history for today from the database? This action cannot be undone.",
+    "historyClearedTitle": "Today's History Cleared",
     "historyClearedDescription": "Today's session history has been successfully cleared from the database.",
-    "clearErrorDescription": "Could not clear today's session history. Please try again.",
+    "clearErrorDescription": "Could not clear today's session history from the database. Please try again.",
     "clearingHistory": "Clearing history..."
   },
   "settingsDialog": {
@@ -122,7 +122,7 @@
     "myCustomSoundscapes": {
       "title": "My Custom Soundscapes",
       "description": "Upload your own audio files (e.g., MP3, WAV, OGG) to use as soundscapes. Files are stored locally in your browser's IndexedDB.",
-      "uploadLabel": "Upload new soundscape",
+      "uploadLabel": "Upload new soundscape (max 10MB)",
       "uploading": "Uploading...",
       "uploadedListTitle": "My Uploaded Sounds",
       "deleteButtonTooltip": "Delete {{name}}"
@@ -141,60 +141,76 @@
     }
   },
   "userGuideDialog": {
-    "title": "RS Timer User Guide",
-    "description": "Learn how to make the most of your focus sessions.",
+    "title": "{{appName}} User Guide",
+    "description": "Learn how to make the most of your focus sessions with {{appName}}.",
     "sections": {
-      "gettingStarted": {
-        "title": "Getting Started with Pomodoro",
-        "content": "The Pomodoro Technique is a time management method that uses a timer to break work into intervals, traditionally 25 minutes in length, separated by short breaks.\\n{{appName}} helps you implement this technique. Each work interval is a \"Pomodoro.\" After a set number of Pomodoros (usually 4), you take a longer break.\\nBenefits include improved focus, reduced burnout, and better time estimation."
+      "introduction": {
+        "title": "Introduction to {{appName}} & Pomodoro",
+        "content": "{{appName}} is a timer app designed to help you enhance focus and productivity using the Pomodoro Technique, with AI-powered session analysis and customizable features.\\nThe Pomodoro Technique breaks work into intervals (Pomodoros), typically 25 minutes, separated by short breaks. After a set number of Pomodoros (usually 4), you take a longer break. Benefits include improved focus, reduced burnout, and better time management."
+      },
+      "pwa": {
+        "title": "Progressive Web App (PWA)",
+        "content": "{{appName}} is a PWA, meaning you can install it on your device for an app-like experience and access some features offline. Look for an 'Install' or 'Add to Home Screen' option in your browser's menu when using {{appName}}."
+      },
+      "authentication": {
+        "title": "User Accounts & Authentication",
+        "content": "Create an account or log in to save your session data (tasks, notes, dictionary, history) to the cloud (Firebase Firestore).\\n* Registration: Create a new account with your email and password. Your name is optional.\\n* Login: Sign in to access your saved data.\\n* Logout: Use the logout button in the header to sign out.\\n* Forgot Password: If you forget your password, use the 'Forgot Password' link on the login page to receive a reset link via email."
       },
       "timerControls": {
         "title": "Timer Controls",
         "content": "Use these controls to manage your session:\\n* Start/Pause: Click the main button to start or pause the current timer (Work, Short Break, or Long Break).\\n* Skip: Click the skip button (icon with arrow pointing right) to end the current interval and move to the next one.\\n* Reset: Click the reset button (circular arrow icon) to reset the current interval to its full duration and pause the timer.\\n* Mute/Unmute: Toggle soundscapes on or off using the volume icon."
       },
-      "customization": {
-        "title": "Customization (Settings)",
-        "content": "Click the gear icon in the header to open Settings. You can customize:\\n* Timer Durations: Set custom lengths for Work, Short Break, and Long Break intervals.\\n* Long Break Interval: Define how many work sessions occur before a long break.\\n* Auto-start: Enable/disable automatic starting of breaks and Pomodoros.\\n* Notifications: Toggle browser notifications for interval ends.\\n* Soundscapes: Choose different ambient sounds for work/break periods. Adjust master volume. You can also upload your own audio files to use as custom soundscapes.\\n* Background Animations & Mouse Trail: Select visual background effects and enable/disable a particle effect that follows your mouse.\\n* Initial Guide: Toggle the helpful guided tour that appears on first visit."
-      },
       "collapsibleCards": {
-        "title": "Collapsible Sections",
-        "content": "The 'Today's Tasks', 'Session Dictionary', and 'Session Notes & Context' sections below the timer are collapsible. Click on their titles to expand or hide them, helping you manage your workspace view."
+        "title": "Collapsible Sections (Tasks, Dictionary, Notes)",
+        "content": "The 'Today's Tasks', 'Session Dictionary', and 'Session Notes & Context' sections below the timer are collapsible. Click on their titles (which include icons like ListChecks, BookMarked, FileText) to expand or hide them, helping you manage your workspace view."
       },
-      "tasksAndNotes": {
-        "title": "Tasks, Notes & Database",
-        "content": "Below the timer, you'll find sections for managing tasks and taking notes:\\n* Today's Tasks: Add tasks you want to accomplish. These are saved to your Firebase database for the current day.\\n* Session Notes & Context: Use the textarea to jot down thoughts. Select a 'Session Context' to tailor AI feedback. Notes and context are saved to Firebase for the current day.\\n* AI Summary: Generated summaries can be appended to your daily notes and saved."
+      "dailyDataStorage": {
+        "title": "Daily Data Storage (Firebase Firestore)",
+        "content": "Your tasks, session notes, dictionary entries, and session history (Pomodoro logs) are automatically saved to Firebase Firestore on a per-day basis, associated with your user account.\\nThis means when a new day begins, these sections will appear empty, ready for the new day's activities. Your data from previous days remains stored and accessible."
       },
-      "sessionContext": {
-        "title": "Session Context",
-        "content": "Before analyzing your session data, you can specify a \"Session Context\" (e.g., Work, Learning, General).\\nThis helps the AI provide more tailored feedback and suggestions relevant to your current activity. This context is also stored per day in your Firebase database."
+      "tasks": {
+        "title": "Today's Tasks",
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day.\\n* Mark tasks as complete using the checkboxes.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks are saved to Firestore for the current day."
       },
-      "aiAnalysis": {
-        "title": "AI Session Analysis",
-        "content": "{{appName}} features an AI-powered session analyzer. Click the sparkles icon in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions for improvement. This summary can be saved to your daily notes, which are stored in Firebase."
+      "sessionNotesContext": {
+        "title": "Session Notes & Context",
+        "content": "In the 'Session Notes & Context' card:\\n* Use the textarea to jot down thoughts, ideas, or distractions during your session.\\n* Select a 'Session Context' (General, Work Focus, Learning Focus) from the dropdown. This context helps the AI provide more tailored feedback if you use the AI Analysis feature.\\n* Your notes and selected context are saved to Firestore for the current day.\\n* AI-generated summaries can be appended to these notes using the 'Save to Notes' button in the AI Summary dialog."
       },
-      "chatWidget": {
-        "title": "AI Chat Assistant",
-        "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
+       "viewingPastNotes": {
+        "title": "Viewing & Deleting Past Notes",
+        "content": "Within the 'Session Notes & Context' card, you can expand the 'View Past Notes' section.\\n* Use the calendar to select a previous date.\\n* The notes (including any AI summaries saved on that day) for the selected date will be fetched from Firestore and displayed in a read-only area.\\n* A 'Delete Notes for [Date]' button allows you to remove the notes for the selected past day from Firestore after confirmation."
       },
       "dictionaryCard": {
         "title": "Session Dictionary",
-        "content": "Use the Dictionary Card to get definitions for words in English and Indonesian. These definitions are stored per day in your Firebase database and can be exported to a Markdown file. You can also delete entries from the current day's dictionary."
+        "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore.\\n* You can remove individual entries from the current day's dictionary using the trash icon next to each entry.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
       },
-      "viewPastNotes": {
-        "title": "Viewing Past Notes",
-        "content": "Within the 'Session Notes & Context' card, you can find a collapsible section to 'View Past Notes'. Use the calendar to select a previous date and view the notes (including any saved AI summaries) from that day, read from your Firebase database. You can also delete the notes for a selected past day."
+      "aiAnalysis": {
+        "title": "AI Session Analysis",
+        "content": "{{appName}} features an AI-powered session analyzer (Genkit with Gemini). Click the Sparkles icon (✨) in the header or the \"Analyze Data\" button in the notes section.\\nThe AI will review your completed intervals (if any), tasks, and notes for the current session, along with the selected Session Context.\\nIt provides a summary and actionable suggestions. This summary can be saved to your daily notes for the current day."
       },
-      "viewPastData": {
-        "title": "Viewing Past Data",
-        "content": "Click the calendar icon in the header to navigate to a dedicated page where you can select any past date and view all your recorded tasks, notes, session context, and dictionary entries for that day, all retrieved from your Firebase database."
+      "chatWidget": {
+        "title": "AI Chat Assistant",
+        "content": "Need quick help or a productivity tip? Click the chat icon in the bottom right corner to talk to our AI assistant (powered by Gemini via Genkit).\\nIt can answer questions about using {{appName}}, the Pomodoro Technique, or general focus strategies."
       },
       "sessionHistory": {
-        "title": "Session History",
-        "content": "Click the history icon (clock with arrow) in the header to view a log of your completed Pomodoro intervals for the current day from your Firebase database.\\nThis helps you track your focus sessions."
+        "title": "Today's Session History (Pomodoro Log)",
+        "content": "Click the history icon (🕒) in the header to view a log of your completed Pomodoro intervals (Work, Short Break, Long Break) for the current day. This data is fetched from Firestore.\\nYou can also clear today's history from this drawer."
+      },
+      "viewPastDataPage": {
+        "title": "Viewing All Past Data",
+        "content": "Click the calendar icon (🗓️) in the header to navigate to the 'View Past Session Data' page.\\nHere, you can select any past date and view a comprehensive summary of all your recorded data for that day, including tasks, notes, session context, and dictionary entries, all retrieved from Firestore."
+      },
+      "settings": {
+        "title": "Settings (Customization)",
+        "content": "Click the gear icon (⚙️) in the header to open Settings. The settings are organized into tabs:\\n* Timer: Customize lengths for Work, Short Break, and Long Break intervals. Set the Long Break Interval (number of work sessions before a long break). Toggle auto-start for breaks and Pomodoros. Enable/disable browser notifications for interval ends.\\n* Sound: Choose soundscapes for work and break periods. Adjust master volume.\\n* Appearance: Select visual background animations. Enable/disable a particle effect that follows your mouse. Toggle the initial guided tour on/off."
+      },
+      "customSoundscapes": {
+        "title": "Custom Soundscapes (Settings - Sound Tab)",
+        "content": "In the 'Sound' tab of Settings, you can upload your own audio files (e.g., MP3, WAV, OGG, max 10MB) to use as custom soundscapes.\\nThese files are stored locally in your browser's IndexedDB, not on a server. You can select them in the 'Work Soundscape' and 'Break Soundscape' dropdowns and delete them if no longer needed (provided they are not currently selected)."
       },
       "themeAndAppearance": {
-        "title": "Theme & Appearance",
-        "content": "* Dark/Light Mode: Toggle between dark and light themes using the sun/moon icon in the header.\\n* Background Effects: Choose various animated backgrounds or a simple gradient in the Settings menu to personalize your focus environment."
+        "title": "Theme & Visuals",
+        "content": "* Dark/Light Mode: Toggle between dark and light themes using the sun/moon icon in the header.\\n* Background Effects: Choose various animated backgrounds or a simple gradient in the Settings menu (Appearance tab) to personalize your focus environment."
       }
     }
   },
@@ -227,7 +243,7 @@
     "headerToolsTitle": "Header Tools",
     "headerToolsContent": "Access AI Summary (✨), Today's Session History (🕒), User Guide (📖), Settings (⚙️), Theme Toggle (☀️/🌙), Language Switcher (🌐), and View Past Data (🗓️) from the header.",
     "settingsTitle": "Settings (Gear Icon ⚙️)",
-    "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow.",
+    "settingsContent": "Customize timer durations, auto-start behavior, sounds (including uploading your own!), background animations, and more to fit your workflow. Settings are organized into tabs.",
     "allSetTitle": "You're All Set!",
     "allSetContent": "You've learned the basics of {{appName}}. Time to start your first focus session!"
   },
@@ -305,7 +321,7 @@
     "exportSuccessfulTitle": "Export Successful",
     "exportSuccessfulDescription": "Your dictionary session has been downloaded as a Markdown file.",
     "deleteEntryTooltip": "Delete entry for '{{word}}'",
-    "confirmDeleteEntry": "Are you sure you want to delete the definition for '{{word}}'?",
+    "confirmDeleteEntry": "Are you sure you want to delete the definition for '{{word}}' from today's dictionary?",
     "entryDeletedTitle": "Entry Deleted",
     "entryDeletedDesc": "The definition for '{{word}}' has been removed from this session's dictionary.",
     "entryDeletedDescLocal": "The definition for '{{word}}' has been removed from the list. Changes will be saved to the database if possible.",
@@ -324,7 +340,7 @@
     "noAccountPrompt": "Don't have an account?",
     "registerLink": "Register",
     "loggingInPlaceholder": "Attempting to log in...",
-    "registerTitle": "Create an Account",
+    "registerTitle": "Create an Account for {{appName}}",
     "registerDescription": "Join {{appName}} to boost your productivity.",
     "nameLabel": "Name",
     "namePlaceholder": "Your Name",
