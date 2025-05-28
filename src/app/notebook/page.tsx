@@ -8,7 +8,6 @@ import { useSettingsContext } from '@/contexts/settings-context';
 import { useLanguageContext } from '@/contexts/language-context';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -295,7 +294,7 @@ export default function NotebookPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center max-w-5xl"> {/* Header content remains constrained */}
+        <div className="container flex h-14 items-center max-w-5xl">
           <Button variant="outline" size="icon" onClick={() => router.push('/')} className="mr-4">
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">{t('buttons.back')}</span>
@@ -314,41 +313,43 @@ export default function NotebookPage() {
         </div>
       </header>
 
-      {/* Main content area for the notebook, now wider */}
-      <main className="flex-grow py-6 flex flex-col"> {/* Removed horizontal padding */}
+      <main className="flex-grow py-6 flex flex-col"> {/* Removed horizontal padding from main */}
         {isLoading ? (
           <div className="flex items-center justify-center flex-grow">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
         ) : (
-          <Card className="flex-grow flex flex-col shadow-lg"> {/* Card will take available width from main */}
-            <CardHeader className="py-3 px-4 border-b">
-              <div className="flex items-center justify-between">
+          <>
+            {/* Toolbar for Edit/Preview Toggle */}
+            <div className="px-4 sm:px-6 lg:px-8 py-3 border-b bg-background sticky top-14 z-40"> {/* Add padding to toolbar for content centering */}
+              <div className="max-w-5xl mx-auto"> {/* Center toolbar buttons if page gets wider */}
                 <div className="flex items-center space-x-1">
-                  <Button
-                    variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setEditorMode('edit')}
-                    className={cn("px-3", editorMode === 'edit' && "font-semibold")}
-                    aria-pressed={editorMode === 'edit'}
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    {t('notebookPage.editModeButton')}
-                  </Button>
-                  <Button
-                    variant={editorMode === 'preview' ? 'secondary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setEditorMode('preview')}
-                    className={cn("px-3", editorMode === 'preview' && "font-semibold")}
-                    aria-pressed={editorMode === 'preview'}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    {t('notebookPage.previewModeButton')}
-                  </Button>
+                    <Button
+                        variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setEditorMode('edit')}
+                        className={cn("px-3", editorMode === 'edit' && "font-semibold")}
+                        aria-pressed={editorMode === 'edit'}
+                    >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        {t('notebookPage.editModeButton')}
+                    </Button>
+                    <Button
+                        variant={editorMode === 'preview' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setEditorMode('preview')}
+                        className={cn("px-3", editorMode === 'preview' && "font-semibold")}
+                        aria-pressed={editorMode === 'preview'}
+                    >
+                        <Eye className="mr-2 h-4 w-4" />
+                        {t('notebookPage.previewModeButton')}
+                    </Button>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="p-0 flex-grow flex"> {/* Ensures Textarea/ScrollArea take full height */}
+            </div>
+
+            {/* Editor/Preview Area */}
+            <div className="flex-grow flex overflow-hidden"> {/* This container ensures its child fills the space */}
               {editorMode === 'edit' ? (
                 <Textarea
                   ref={textareaRef}
@@ -360,15 +361,15 @@ export default function NotebookPage() {
                   aria-label={t('notebookPage.notesAreaLabel')}
                 />
               ) : (
-                <ScrollArea className="w-full h-full p-6">
+                <ScrollArea className="w-full h-full"> {/* ScrollArea takes full width/height */}
                   <div
-                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview"
+                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview p-6" /* Added p-6 here */
                     dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(notesContent) }}
                   />
                 </ScrollArea>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </>
         )}
       </main>
       <footer className="text-center py-4 text-sm text-muted-foreground border-t">
@@ -449,4 +450,3 @@ export default function NotebookPage() {
 }
 
     
-
