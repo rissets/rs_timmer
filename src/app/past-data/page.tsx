@@ -33,7 +33,7 @@ import {
   loadSessionContextForDay,
 } from '@/lib/firebase/firestore-service';
 import { useToast } from '@/hooks/use-toast';
-import { SESSION_TYPE_OPTIONS } from '@/lib/constants';
+import { SESSION_TYPE_OPTIONS, APP_NAME } from '@/lib/constants';
 
 export default function PastDataPage() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -120,7 +120,7 @@ export default function PastDataPage() {
   return (
     <div className="flex flex-col items-center p-4 min-h-screen bg-background text-foreground">
       <header className="w-full max-w-2xl flex justify-between items-center py-4 mb-4">
-        <Button variant="outline" onClick={() => router.back()} className="mr-auto">
+        <Button variant="outline" onClick={() => router.push('/')} className="mr-auto">
           &larr; {t('buttons.back')}
         </Button>
         <h1 className="text-xl sm:text-2xl font-bold text-center flex-grow">{t('pastDataPage.title')}</h1>
@@ -262,13 +262,8 @@ export default function PastDataPage() {
         )}
       </main>
       <footer className="w-full max-w-2xl text-center py-6 text-sm text-muted-foreground relative z-[1]">
-        <p>{t('footerCopyright', { year: new Date().getFullYear().toString(), appName: t('appName') })}</p>
+        <p>{t('footerCopyright', { year: new Date().getFullYear().toString(), appName: APP_NAME })}</p>
       </footer>
     </div>
   );
 }
-
-          
-        
-      
-    
