@@ -4,10 +4,11 @@
 import type { Settings, TimerMode, SessionRecord } from '@/lib/types';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
-// import * as Tone from 'tone'; // Removed: Tone.start() will be handled by useSoundscapePlayer
+import * as Tone from 'tone';
 
 interface UseTimerCoreProps {
   settings: Settings;
+  currentDateKey: string; // Added currentDateKey
   onTimerStart?: (mode: TimerMode) => void;
   onTimerPause?: (mode: TimerMode) => void;
   onTimerReset?: (mode: TimerMode) => void;
@@ -33,6 +34,7 @@ interface TimerCore {
 
 export function useTimerCore({
   settings,
+  currentDateKey, // Destructure currentDateKey
   onTimerStart,
   onTimerPause,
   onTimerReset,
@@ -96,10 +98,20 @@ export function useTimerCore({
       durationMinutes: actualDurationMinutes,
       completed: completed,
     };
-    setSessionLog(prevLog => [...prevLog, newLogEntry]);
+    setSessionLog(prevLog => [...prevLog, newLogEntry]); 
     return newLogEntry; 
   }, []); 
   
+  const resetTimer = useCallback((switchToWork = false) => {
+    setIsRunning(false);
+    const nextMode = switchToWork ? 'work' : mode;
+    setMode(nextMode);
+    setTimeLeft(getDurationForMode(nextMode));
+    if (switchToWork) setCurrentCyclePomodoros(0); 
+    if (onTimerReset) onTimerReset(nextMode);
+  }, [mode, getDurationForMode, onTimerReset]);
+
+
   const moveToNextMode = useCallback((skipped = false) => {
     const previousMode = mode; 
     const currentDuration = getDurationForMode(previousMode);
@@ -127,8 +139,8 @@ export function useTimerCore({
     setTimeLeft(getDurationForMode(nextMode));
     setCurrentCyclePomodoros(completedPomodorosUpdate);
     
-    setSessionLog(prev => { // Use functional update to ensure access to the latest sessionLog
-      onIntervalEnd(previousMode, completedPomodorosUpdate, prev); // Pass the latest log
+    setSessionLog(prev => { 
+      onIntervalEnd(previousMode, completedPomodorosUpdate, prev); 
       return prev; 
     });
 
@@ -187,11 +199,27 @@ export function useTimerCore({
     if (!isRunning) { 
       setTimeLeft(getDurationForMode(mode));
     }
-  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode]);
+  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode, isRunning]);
+
+
+  // Effect to reset timer state when currentDateKey changes (new day)
+  useEffect(() => {
+    // This effect runs when currentDateKey changes.
+    // We don't want to reset if it's the initial load and currentDateKey is just being set.
+    // A simple way to check if it's not the initial setting is if sessionLog has entries from a "previous day" concept,
+    // but since sessionLog is now cleared here, we just run it.
+    // Or check if this is not the very first call to this effect for this component instance.
+    // For simplicity, we reset state if currentDateKey changes *after* initial setup.
+    console.log("useTimerCore: currentDateKey changed to", currentDateKey, ". Resetting session log and cycle pomodoros.");
+    setSessionLog([]);
+    setCurrentCyclePomodoros(0);
+    // Optionally, reset the timer to work mode and pause it
+    // This assumes a new day starts with a fresh work session.
+    resetTimer(true); 
+  }, [currentDateKey, resetTimer]); // resetTimer is memoized by useCallback
 
 
   const startTimer = () => {
-    // Removed Tone.start() call from here; useSoundscapePlayer will handle it.
     setIsRunning(true);
     if (onTimerStart) onTimerStart(mode);
   };
@@ -201,20 +229,16 @@ export function useTimerCore({
     if (onTimerPause) onTimerPause(mode);
   };
 
-  const resetTimer = (switchToWork = false) => {
-    setIsRunning(false);
-    const nextMode = switchToWork ? 'work' : mode;
-    setMode(nextMode);
-    setTimeLeft(getDurationForMode(nextMode));
-    if (switchToWork) setCurrentCyclePomodoros(0); 
-    if (onTimerReset) onTimerReset(nextMode);
-  };
-
   const skipTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     const previousMode = mode;
     moveToNextMode(true); 
-    if (onTimerSkip) onTimerSkip(previousMode, mode); 
+    if (onTimerSkip) {
+        setSessionLog(prev => {
+          onTimerSkip(previousMode, mode); // mode is now the nextMode
+          return prev;
+        });
+    }
   };
 
   return {

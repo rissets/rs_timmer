@@ -52,7 +52,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2 } from "lucide-react"; // Renamed CalendarIcon to avoid conflict
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2 } from "lucide-react"; 
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -133,7 +133,7 @@ export default function PomodoroPage() {
         setPastDateNotes(null);
         setOpenPastNotesAccordion([]); 
       }
-    }, 60000);
+    }, 60000); // Check every minute
     return () => clearInterval(interval);
   }, [currentDateKey]);
 
@@ -150,9 +150,9 @@ export default function PomodoroPage() {
           loadSessionContextForDay(currentUser.uid, currentDateKey),
         ]);
         setTasks(loadedTasks);
-        setCurrentNotes(loadedNotes || ""); // Ensure notes is at least an empty string
+        setCurrentNotes(loadedNotes || ""); 
         setDefinedWordsList(loadedDict);
-        setCurrentSessionType(loadedContext || 'general'); // Ensure context has a default
+        setCurrentSessionType(loadedContext || 'general'); 
       } catch (error) {
         console.error("Error loading daily data from Firestore:", error);
         toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadDescription"), variant: "destructive" });
@@ -167,19 +167,16 @@ export default function PomodoroPage() {
     loadData();
   }, [currentDateKey, currentUser, isSettingsLoaded, toast, t]);
 
-  // Save Tasks
+  
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    // Only save if tasks have actually changed from what might have been loaded
-    // This check might be complex to implement perfectly without deep comparison or dirty flags
-    // For now, we save if not loading, which is generally fine for small data.
     saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
       console.error("Error saving tasks to Firestore:", error);
       toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
     });
   }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  // Save Notes
+  
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
@@ -188,7 +185,7 @@ export default function PomodoroPage() {
     });
   }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  // Save Dictionary
+  
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
@@ -197,7 +194,7 @@ export default function PomodoroPage() {
     });
   }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  // Save Session Context
+  
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
@@ -321,7 +318,7 @@ export default function PomodoroPage() {
     ).join('\n');
 
     const tasksString = tasks.length > 0
-      ? `${t('cards.tasksTitle')}:\n` + tasks.map(t => `- [${t.completed ? 'x' : ' '}] ${t.text}`).join('\n')
+      ? `${t('cards.tasksTitle')}:\n` + tasks.map(task => `- [${task.completed ? 'x' : ' '}] ${task.text}`).join('\n')
       : t('tasks.noTasks');
 
     const fullDetails = `Session Log:\n${logForSummary.length > 0 ? sessionDetailsString : t('ai.noSessionLog')}\n\n${tasksString}\n\nSession Notes:\n${currentNotes || t('ai.noNotes')}`;
@@ -348,6 +345,7 @@ export default function PomodoroPage() {
 
   const timer = useTimerCore({
     settings,
+    currentDateKey, // Pass currentDateKey to the hook
     onIntervalEnd: handleIntervalEnd,
     onTimerStart: () => {},
     onTimerPause: () => {},
@@ -393,6 +391,9 @@ export default function PomodoroPage() {
     getActiveSoundscapeId,
     playSound,
     stopSound,
+    isMuted, // Added isMuted
+    settings.soundscapeWork, // Added
+    settings.soundscapeBreak // Added
   ]);
 
   const formatTime = (seconds: number) => {
@@ -453,17 +454,20 @@ export default function PomodoroPage() {
   };
 
 const handleRemoveDefinedWord = async (wordId: string) => {
-  if (!currentUser) return;
+  if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
   const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
   setDefinedWordsList(updatedList); 
   
   try {
+    // Explicitly save to Firestore after local update
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
     toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
-    setDefinedWordsList(prev => [...prev, ...definedWordsList.filter(e => e.id === wordId)]); // Revert optimistic update
+    // Optionally revert local state if Firestore save fails, though this can be complex
+    // For now, we rely on the user retrying or the next general save cycle.
+    // setDefinedWordsList(definedWordsList); // This would revert to previous state
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
   }
 };
