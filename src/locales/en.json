@@ -174,7 +174,7 @@
       },
       "tasks": {
         "title": "Today's Tasks & Reminders", 
-        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set, you'll receive an in-app alert dialog when that time arrives (if notifications are enabled for the app). \\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
+        "content": "In the 'Today's Tasks' card:\\n* Add tasks you want to accomplish for the current day. You can optionally set a reminder time (HH:mm) for each task using the time input.\\n* If a reminder time is set and browser notifications are permitted, you'll receive an in-app alert dialog when that time arrives. Ensure you've allowed notifications for this site in your browser settings for this to work effectively.\\n* Mark tasks as complete using the checkboxes. The reminder status (e.g., 'Reminder sent') will also be shown.\\n* Remove individual tasks with the trash icon.\\n* Clear all completed tasks with the button at the bottom (if any are completed).\\nTasks (including reminder times) are saved to Firestore for the current day."
       },
       "sessionNotesContext": {
         "title": "Session Notes & Context",
@@ -186,7 +186,7 @@
       },
       "dictionaryCard": {
         "title": "Session Dictionary",
-        "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore.\\n* You can remove individual entries from the current day's dictionary using the trash icon next to each entry (appears on hover).\\n* All definitions for the current day can be exported to a Markdown (.md) file."
+        "content": "The 'Session Dictionary' card allows you to get AI-powered definitions for words:\\n* Enter a word and click 'Define'. The AI (Gemini) will provide definitions in both English and Indonesian.\\n* Defined words and their definitions are stored for the current day in Firestore.\\n* You can remove individual entries from the current day's dictionary using the trash icon next to each entry (appears on hover). Deletion is confirmed before removing the entry from Firestore.\\n* All definitions for the current day can be exported to a Markdown (.md) file."
       },
        "aiAnalysis": {
         "title": "AI Session Analysis",
@@ -334,6 +334,7 @@
     "deleteEntryTooltip": "Delete entry for '{{word}}'",
     "confirmDeleteEntry": "Are you sure you want to delete the definition for '{{word}}' from today's dictionary?",
     "entryDeletedTitle": "Entry Deleted",
+    "entryDeletedTitleLocal": "Entry Removed Locally",
     "entryDeletedDesc": "The definition for '{{word}}' has been removed from this session's dictionary.",
     "entryDeletedDescLocal": "The definition for '{{word}}' has been removed from the list. Changes will be saved to the database if possible.",
     "theEntry": "the entry"
@@ -423,7 +424,8 @@
     "noDictionaryForDay": "No dictionary entries were saved for this day."
   },
   "alertDialog": {
-    "taskReminderTitle": "Task Reminder!"
+    "taskReminderTitle": "Task Reminder!",
+    "taskReminderDescription": "It's time for your task: **{{taskText}}** (scheduled for {{reminderTime}})."
   }
 }
 

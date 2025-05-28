@@ -68,7 +68,6 @@
     "errorLoadingNotes": "Kesalahan memuat catatan untuk tanggal yang dipilih.",
     "confirmDeletePastNotes": "Anda yakin ingin menghapus semua catatan untuk tanggal {{date}}? Tindakan ini tidak dapat dibatalkan.",
     "deletePastNotesButton": "Hapus Catatan untuk {{date}}",
-    "pastNotesDeleted": "Catatan untuk tanggal yang dipilih telah dihapus.",
     "pastNotesDeleteSuccessTitle": "Catatan Sebelumnya Dihapus",
     "errorNoDateSelectedForDelete": "Silakan pilih tanggal untuk menghapus catatan.",
     "deletingPastNotes": "Menghapus catatan..."
@@ -175,7 +174,7 @@
       },
       "tasks": {
         "title": "Tugas & Pengingat Hari Ini", 
-        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur, Anda akan menerima dialog peringatan di dalam aplikasi ketika waktu tersebut tiba. \\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
+        "content": "Di kartu 'Tugas Hari Ini':\\n* Tambahkan tugas yang ingin Anda selesaikan untuk hari ini. Anda dapat secara opsional mengatur waktu pengingat (JJ:mm) untuk setiap tugas menggunakan input waktu.\\n* Jika waktu pengingat diatur dan notifikasi browser diizinkan, Anda akan menerima dialog peringatan di dalam aplikasi ketika waktu tersebut tiba. Pastikan Anda telah mengizinkan notifikasi untuk situs ini di pengaturan browser Anda agar fitur ini berfungsi efektif.\\n* Tandai tugas sebagai selesai menggunakan kotak centang. Status pengingat (misalnya, 'Pengingat terkirim') juga akan ditampilkan.\\n* Hapus tugas individual dengan ikon tong sampah.\\n* Hapus semua tugas yang telah selesai dengan tombol di bagian bawah (jika ada yang selesai).\\nTugas (termasuk waktu pengingat) disimpan ke Firestore untuk hari ini."
       },
       "sessionNotesContext": {
         "title": "Catatan & Konteks Sesi",
@@ -187,7 +186,7 @@
       },
       "dictionaryCard": {
         "title": "Kamus Sesi",
-        "content": "Kartu 'Kamus Sesi' memungkinkan Anda mendapatkan definisi kata bertenaga AI:\\n* Masukkan kata dan klik 'Definisikan'. AI (Gemini) akan memberikan definisi dalam bahasa Inggris dan Indonesia.\\n* Kata yang didefinisikan dan definisinya disimpan untuk hari ini di Firestore.\\n* Anda dapat menghapus entri individual dari kamus hari ini menggunakan ikon tong sampah di sebelah setiap entri (muncul saat kursor diarahkan).\\n* Semua definisi untuk hari ini dapat diekspor ke file Markdown (.md)."
+        "content": "Kartu 'Kamus Sesi' memungkinkan Anda mendapatkan definisi kata bertenaga AI:\\n* Masukkan kata dan klik 'Definisikan'. AI (Gemini) akan memberikan definisi dalam bahasa Inggris dan Indonesia.\\n* Kata yang didefinisikan dan definisinya disimpan untuk hari ini di Firestore.\\n* Anda dapat menghapus entri individual dari kamus hari ini menggunakan ikon tong sampah di sebelah setiap entri (muncul saat kursor diarahkan). Penghapusan dikonfirmasi sebelum menghapus entri dari Firestore.\\n* Semua definisi untuk hari ini dapat diekspor ke file Markdown (.md)."
       },
        "aiAnalysis": {
         "title": "Analisis Sesi AI",
@@ -335,6 +334,7 @@
     "deleteEntryTooltip": "Hapus entri untuk '{{word}}'",
     "confirmDeleteEntry": "Apakah Anda yakin ingin menghapus definisi untuk '{{word}}' dari kamus hari ini?",
     "entryDeletedTitle": "Entri Dihapus",
+    "entryDeletedTitleLocal": "Entri Dihapus (Lokal)",
     "entryDeletedDesc": "Definisi untuk '{{word}}' telah dihapus dari kamus sesi ini.",
     "entryDeletedDescLocal": "Definisi untuk '{{word}}' telah dihapus dari daftar. Perubahan akan disimpan ke database jika memungkinkan.",
     "theEntry": "entri tersebut"
@@ -424,7 +424,8 @@
     "noDictionaryForDay": "Tidak ada entri kamus yang disimpan untuk hari ini."
   },
   "alertDialog": {
-    "taskReminderTitle": "Pengingat Tugas!"
+    "taskReminderTitle": "Pengingat Tugas!",
+    "taskReminderDescription": "Saatnya untuk tugas Anda: **{{taskText}}** (dijadwalkan untuk {{reminderTime}})."
   }
 }
 

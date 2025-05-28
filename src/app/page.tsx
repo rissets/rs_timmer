@@ -61,7 +61,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2, Menu as MenuIcon, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -130,8 +130,8 @@ export default function PomodoroPage() {
 
   const handleTimerStartCb = useCallback(() => {}, []);
   const handleTimerPauseCb = useCallback(() => {}, []);
-  const handleTimerResetCb = useCallback(() => {}, []);
-  const handleTimerSkipCb = useCallback(() => {}, []);
+  const handleTimerResetCb = useCallback((_mode: TimerMode) => {}, []);
+  const handleTimerSkipCb = useCallback((_skippedMode: TimerMode, _nextMode: TimerMode) => {}, []);
 
 
   const getModeDisplayName = useCallback((mode: TimerMode) => {
@@ -251,8 +251,8 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    if (tasks.length > 0 || (tasks.length === 0 && tasks !== undefined)) {
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || tasks === undefined) return;
+    if (tasks.length > 0 || (tasks.length === 0 && JSON.stringify(tasks) !== JSON.stringify([]))) { // Check if tasks is not initial undefined or truly empty
         saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
         console.error("Error saving tasks to Firestore:", error);
         toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveTasksDescription"), variant: "destructive" });
@@ -262,7 +262,7 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || currentNotes === undefined) return;
     if (currentNotes || (!currentNotes && currentNotes !== undefined)) { 
         saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
             console.error("Error saving notes to Firestore:", error);
@@ -273,8 +273,8 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    if(definedWordsList.length > 0 || (definedWordsList.length === 0 && definedWordsList !== undefined)) {
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || definedWordsList === undefined) return;
+    if(definedWordsList.length > 0 || (definedWordsList.length === 0 && JSON.stringify(definedWordsList) !== JSON.stringify([]))) {
         saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
         console.error("Error saving dictionary to Firestore:", error);
         toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
@@ -284,7 +284,7 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || currentSessionType === undefined) return;
     saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
       console.error("Error saving session context to Firestore:", error);
       toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveContextDescription"), variant: "destructive" });
@@ -362,7 +362,7 @@ export default function PomodoroPage() {
       title: t('interactiveTourDialog.allSetTitle'),
       content: <p>{t('interactiveTourDialog.allSetContent', { appName: APP_NAME })}</p>,
     }
-  ], [t, APP_NAME]);
+  ], [t]);
 
   useEffect(() => {
     if (isSettingsLoaded && currentUser) {
@@ -372,7 +372,7 @@ export default function PomodoroPage() {
         setCurrentTourStep(0);
       }
     }
-  }, [isSettingsLoaded, settings.showCoachMarks, currentUser]);
+  }, [isSettingsLoaded, settings.showCoachMarks, currentUser, t]);
 
   const handleNextTourStep = () => {
     if (currentTourStep < tourSteps.length - 1) {
@@ -389,8 +389,8 @@ export default function PomodoroPage() {
 
 
   useEffect(() => {
-    if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    if (timer.sessionLog.length > 0 || (timer.sessionLog.length === 0 && timer.sessionLog !== undefined)) {
+    if (!currentUser || isLoadingDailyData || !isSettingsLoaded || timer.sessionLog === undefined ) return;
+    if (timer.sessionLog.length > 0 || (timer.sessionLog.length === 0 && JSON.stringify(timer.sessionLog) !== JSON.stringify([]))) {
         saveSessionLogForDay(currentUser.uid, currentDateKey, timer.sessionLog).catch(error => {
             console.error("Error saving session log to Firestore:", error);
             toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveLogDescription"), variant: "destructive" });
@@ -431,7 +431,6 @@ export default function PomodoroPage() {
     timer.mode,
     timer.isRunning,
     isSettingsLoaded,
-    // playSound, stopSound, isSoundPlayerReady, getActiveSoundscapeId are now stable via refs
   ]);
 
   const formatTime = (seconds: number) => {
@@ -466,6 +465,42 @@ export default function PomodoroPage() {
   
   const handleClearCompletedTasks = () => setTasks(prev => prev.filter(task => !task.completed));
 
+  const sendTaskNotification = useCallback((title: string, body: string) => {
+    if (!settings.notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) {
+        console.log("Browser notifications not enabled in settings or not supported.");
+        return;
+    }
+
+    const showNotification = () => {
+        const notification = new Notification(title, { body, icon: '/icons/icon-192x192.png' });
+        notification.onclick = () => {
+            window.focus();
+        };
+    };
+
+    if (Notification.permission === 'granted') {
+        showNotification();
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                showNotification();
+            } else {
+                toast({
+                    title: t('notifications.permissionDeniedTitle'),
+                    description: t('notifications.permissionDeniedDescription'),
+                    variant: 'destructive'
+                });
+            }
+        });
+    } else { // permission === 'denied'
+         toast({
+            title: t('notifications.permissionDeniedTitle'),
+            description: t('notifications.permissionDeniedDescription'),
+            variant: 'destructive'
+        });
+    }
+  }, [settings.notificationsEnabled, t, toast]);
+
 
   useEffect(() => {
     if (!isSettingsLoaded || tasks.length === 0 || !settings.notificationsEnabled) return;
@@ -490,7 +525,7 @@ export default function PomodoroPage() {
     const intervalId = setInterval(checkReminders, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [tasks, isSettingsLoaded, settings.notificationsEnabled]); 
+  }, [tasks, isSettingsLoaded, settings.notificationsEnabled, sendTaskNotification]); 
 
 
   const handleSendChatMessage = async () => {
@@ -527,9 +562,15 @@ export default function PomodoroPage() {
       console.error("Error defining word:", error);
       let errorMessage = t('dictionaryCard.errorDefiningDescription');
       if (error instanceof Error) {
-          if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
+          if (typeof error.message === 'string' && 
+              (
+                  error.message.includes('SERVICE_DISABLED') ||
+                  error.message.includes('API has not been used') ||
+                  error.message.includes('forbidden')
+              )
+          ) {
               errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
-          } else if (error.message) {
+          } else if (typeof error.message === 'string') {
               errorMessage = error.message;
           }
       }
@@ -538,6 +579,7 @@ export default function PomodoroPage() {
       setIsDefiningWord(false);
     }
   };
+
 
 const handleRemoveDefinedWord = async (wordId: string) => {
   if (!currentUser || isLoadingDailyData || !isSettingsLoaded) {
@@ -551,7 +593,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
   setDefinedWordsList(updatedList); 
-  toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
+  toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
 
 
   try {
@@ -634,7 +676,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   };
 
   const handleLogout = async () => {
-    stopSoundRef.current(); // Use the ref
+    stopSoundRef.current(); 
     await logoutUser();
     router.push('/auth/login');
   };
@@ -688,10 +730,10 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             )}
           </div>
 
-          <div className="flex-1 flex justify-center items-center px-1 overflow-hidden"> {/* Centered actions container */}
+          <div className="flex-1 flex justify-center items-center px-1 overflow-hidden">
             <div className={cn(
-                "flex items-center space-x-1 py-1", // Added py-1 for scrollbar clearance
-                isMobile && "overflow-x-auto" // Enable horizontal scroll only on mobile
+                "flex items-center space-x-1 py-1", 
+                isMobile && "overflow-x-auto" 
             )}>
                 <LanguageSwitcher />
                 <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
@@ -710,7 +752,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
           </div>
           
 
-          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center"> {/* Logout button container */}
+          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
             {currentUser && (
               <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
                 <LogOut className="h-5 w-5" />
@@ -931,12 +973,16 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             }}
           >
             <AlertDialogContent>
-              <AlertDialogHeader>
+              <AlertDialogHeader className="flex-row items-center">
+                <Clock className="h-6 w-6 text-primary mr-2" />
                 <AlertDialogTitle>{t('alertDialog.taskReminderTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {taskForAlert.text}
-                </AlertDialogDescription>
               </AlertDialogHeader>
+              <AlertDialogDescription>
+                {t('alertDialog.taskReminderDescription', { 
+                  taskText: taskForAlert.text, 
+                  reminderTime: taskForAlert.reminderTime || '' 
+                })}
+              </AlertDialogDescription>
               <AlertDialogFooter>
                 <AlertDialogAction onClick={() => setTaskForAlert(null)}>
                   {t('buttons.ok')}
@@ -965,4 +1011,3 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     </>
   );
 }
-
