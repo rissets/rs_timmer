@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 interface UseTimerCoreProps {
   settings: Settings;
   currentDateKey: string;
+  appName: string; // Added appName prop
   onTimerStart?: (mode: TimerMode) => void;
   onTimerPause?: (mode: TimerMode) => void;
   onTimerReset?: (mode: TimerMode) => void;
@@ -34,6 +35,7 @@ interface TimerCore {
 export function useTimerCore({
   settings,
   currentDateKey,
+  appName, // Destructure appName
   onTimerStart,
   onTimerPause,
   onTimerReset,
@@ -59,11 +61,11 @@ export function useTimerCore({
       if (permission !== 'granted') {
         toast({
             title: getTranslatedText('notifications.disabled'),
-            description: getTranslatedText('notifications.disabledDescription')
+            description: getTranslatedText('notifications.disabledDescription', { appName }) // Pass appName here
         });
       }
     }
-  }, [settings.notificationsEnabled, toast, getTranslatedText]);
+  }, [settings.notificationsEnabled, toast, getTranslatedText, appName]);
 
   useEffect(() => {
     requestNotificationPermission();
@@ -200,23 +202,23 @@ export function useTimerCore({
     if (!isRunning) {
       setTimeLeft(getDurationForMode(mode));
     }
-  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode]); // Removed isRunning from dependencies
+  }, [settings.workMinutes, settings.shortBreakMinutes, settings.longBreakMinutes, mode, getDurationForMode]);
 
   // Effect to reset timer state when currentDateKey changes (new day)
   useEffect(() => {
     console.log("useTimerCore: currentDateKey changed to", currentDateKey, ". Resetting timer for new day.");
     setSessionLog([]);
     setCurrentCyclePomodoros(0);
-
+    
     // Directly set states instead of calling resetTimer to avoid loop
     setIsRunning(false);
     setMode('work');
     setTimeLeft(getDurationForMode('work'));
-
     if (onTimerReset) {
       onTimerReset('work'); // Call the onTimerReset callback
     }
-  }, [currentDateKey, getDurationForMode, onTimerReset]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDateKey, getDurationForMode]); // onTimerReset is memoized in parent, safe to include if it doesn't change often
 
 
   const startTimer = () => {

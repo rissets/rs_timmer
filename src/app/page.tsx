@@ -188,6 +188,7 @@ export default function PomodoroPage() {
   const timer = useTimerCore({
     settings,
     currentDateKey,
+    appName: APP_NAME, // Pass APP_NAME
     onIntervalEnd: handleIntervalEnd,
     onTimerStart: handleTimerStartCb,
     onTimerPause: handleTimerPauseCb,
@@ -213,6 +214,7 @@ export default function PomodoroPage() {
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
         setOpenPastNotesAccordion([]);
+        // Reset reminderSent status for tasks on a new day
         setTasks(prevTasks => prevTasks.map(task => ({ ...task, reminderSent: false })));
       }
     }, 60000);
@@ -343,8 +345,8 @@ export default function PomodoroPage() {
       content: <p>{t('interactiveTourDialog.dictionaryCardContent')}</p>,
     },
     {
-      title: t('interactiveTourDialog.viewPastNotesTitle'),
-      content: <p>{t('interactiveTourDialog.viewPastNotesContent')}</p>,
+      title: t('interactiveTourDialog.viewingPastNotesTitle'),
+      content: <p>{t('interactiveTourDialog.viewingPastNotesContent')}</p>,
     },
      {
       title: t('interactiveTourDialog.viewPastDataTitle'),
@@ -520,16 +522,10 @@ export default function PomodoroPage() {
     } catch (error: any) {
       console.error("Error defining word:", error);
       let errorMessage = t('dictionaryCard.errorDefiningDescription');
-      if (error instanceof Error) {
-          if (typeof error.message === 'string' && 
-              (
-                  error.message.includes('SERVICE_DISABLED') ||
-                  error.message.includes('API has not been used') ||
-                  error.message.includes('forbidden')
-              )
-          ) {
+      if (error instanceof Error && typeof error.message === 'string') {
+          if (error.message.includes('SERVICE_DISABLED') || error.message.includes('API has not been used') || error.message.includes('forbidden')) {
               errorMessage = t('errors.googleAIAPIServiceDisabled', { serviceName: "Generative Language API" });
-          } else if (typeof error.message === 'string') {
+          } else {
               errorMessage = error.message;
           }
       }
@@ -555,6 +551,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   toast({ title: t("dictionaryCard.entryDeletedTitleLocal"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordEntryToRemove?.word || t('dictionaryCard.theEntry') }) });
 
   try {
+    // Ensure saveDictionaryForDay is called here to persist deletion
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
@@ -647,6 +644,8 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     );
   }
   if (!currentUser) {
+      // This should ideally not be reached if the outer useEffect for redirection works,
+      // but it's a fallback.
       return (
           <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
             <div className="h-16 w-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -678,7 +677,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
         {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />}
 
         <header className="w-full max-w-2xl flex items-center py-4 relative z-[1]">
-          <div className="flex-shrink-0">
+           <div className="flex-shrink-0 w-20"> {/* Increased width to prevent squishing of logo */}
              {isMobile ? (
               <h1 className="text-xl font-semibold animate-title-reveal">RS</h1>
             ) : (
@@ -709,7 +708,6 @@ const handleRemoveDefinedWord = async (wordId: string) => {
             </div>
           </div>
           
-
           <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
             {currentUser && (
               <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
@@ -969,4 +967,3 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     </>
   );
 }
-
