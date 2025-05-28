@@ -52,7 +52,7 @@ import type { TimerMode, AiSessionSummary, SessionRecord, Task, SessionType, Cha
 import type { ChatInput as GenkitChatInput } from "@/ai/flows/chat-flow";
 import { APP_NAME, SESSION_TYPE_OPTIONS, DEFAULT_SETTINGS } from "@/lib/constants";
 import { LogoIcon } from "@/components/icons";
-import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2 } from "lucide-react"; 
+import { Play, Pause, SkipForward, RotateCcw, Sparkles as SparklesIcon, Volume2, VolumeX, BookOpen, LogOut, ListChecks, FileText, CalendarIcon as CalendarIconLucide, Loader2, Save, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn, getCurrentDateString, formatDateToKey } from '@/lib/utils';
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -65,7 +65,7 @@ import {
   saveNotesForDay, loadNotesForDay,
   saveDictionaryForDay, loadDictionaryForDay,
   saveSessionContextForDay, loadSessionContextForDay,
-  saveSessionLogForDay, deleteNotesForDay 
+  saveSessionLogForDay, deleteNotesForDay
 } from '@/lib/firebase/firestore-service';
 import { format } from 'date-fns';
 
@@ -130,7 +130,7 @@ export default function PomodoroPage() {
         setCurrentDateKey(newDateKey);
         setSelectedPastDateForNotes(undefined);
         setPastDateNotes(null);
-        setOpenPastNotesAccordion([]); 
+        setOpenPastNotesAccordion([]);
       }
     }, 60000); // Check every minute
     return () => clearInterval(interval);
@@ -149,9 +149,9 @@ export default function PomodoroPage() {
           loadSessionContextForDay(currentUser.uid, currentDateKey),
         ]);
         setTasks(loadedTasks);
-        setCurrentNotes(loadedNotes || ""); 
+        setCurrentNotes(loadedNotes || "");
         setDefinedWordsList(loadedDict);
-        setCurrentSessionType(loadedContext || 'general'); 
+        setCurrentSessionType(loadedContext || 'general');
       } catch (error) {
         console.error("Error loading daily data from Firestore:", error);
         toast({ title: t("errors.firestoreLoadTitle"), description: t("errors.firestoreLoadDescription"), variant: "destructive" });
@@ -166,7 +166,7 @@ export default function PomodoroPage() {
     loadData();
   }, [currentDateKey, currentUser, isSettingsLoaded, toast, t]);
 
-  
+
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveTasksForDay(currentUser.uid, currentDateKey, tasks).catch(error => {
@@ -175,13 +175,10 @@ export default function PomodoroPage() {
     });
   }, [tasks, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  
+
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
-    // Only save if notes have actually changed to avoid unnecessary writes if just context changes
-    // This check might need to be smarter if notes are frequently set to empty string programmatically
-    // For now, this avoids saving an empty string just because the component re-rendered.
-    if (currentNotes || (!currentNotes && currentNotes !== undefined)) { // Check if currentNotes is explicitly set (even to empty)
+    if (currentNotes || (!currentNotes && currentNotes !== undefined)) { 
         saveNotesForDay(currentUser.uid, currentDateKey, currentNotes).catch(error => {
             console.error("Error saving notes to Firestore:", error);
             toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveNotesDescription"), variant: "destructive" });
@@ -189,7 +186,7 @@ export default function PomodoroPage() {
     }
   }, [currentNotes, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  
+
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveDictionaryForDay(currentUser.uid, currentDateKey, definedWordsList).catch(error => {
@@ -198,7 +195,7 @@ export default function PomodoroPage() {
     });
   }, [definedWordsList, currentDateKey, currentUser, isLoadingDailyData, isSettingsLoaded, toast, t]);
 
-  
+
   useEffect(() => {
     if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
     saveSessionContextForDay(currentUser.uid, currentDateKey, currentSessionType).catch(error => {
@@ -272,7 +269,7 @@ export default function PomodoroPage() {
     },
     {
       title: t('interactiveTourDialog.allSetTitle'),
-      content: <p>{t('interactiveTourDialog.allSetContent')}</p>,
+      content: <p>{t('interactiveTourDialog.allSetContent', { appName: APP_NAME })}</p>,
     }
   ], [t]);
 
@@ -340,7 +337,7 @@ export default function PomodoroPage() {
   }, [currentNotes, tasks, toast, currentSessionType, t, getModeDisplayName]);
 
   const handleIntervalEnd = useCallback((endedMode: TimerMode, completedPomodoros: number, sessionLogFromHook: SessionRecord[]) => {
-    if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) { // Added notificationsEnabled check
+    if ((sessionLogFromHook.length > 0 || tasks.length > 0 || currentNotes) && settings.notificationsEnabled) {
        if (endedMode === 'longBreak' || (endedMode === 'shortBreak' && completedPomodoros % settings.longBreakInterval === 0)) {
         setTimeout(() => {
           triggerAiSummary(sessionLogFromHook, currentSessionType);
@@ -348,26 +345,12 @@ export default function PomodoroPage() {
        }
     }
   }, [settings.longBreakInterval, settings.notificationsEnabled, triggerAiSummary, tasks, currentNotes, currentSessionType]);
-  
-  const handleTimerStart = useCallback((mode: TimerMode) => {
-    // Placeholder for specific logic when timer starts, if needed
-    // console.log('Timer started in mode:', mode);
-  }, []);
 
-  const handleTimerPause = useCallback((mode: TimerMode) => {
-    // Placeholder for specific logic when timer pauses, if needed
-    // console.log('Timer paused in mode:', mode);
-  }, []);
+  const handleTimerStart = useCallback(() => {}, []);
+  const handleTimerPause = useCallback(() => {}, []);
+  const handleTimerReset = useCallback(() => {}, []);
+  const handleTimerSkip = useCallback(() => {}, []);
 
-  const handleTimerReset = useCallback((mode: TimerMode) => {
-    // Placeholder for specific logic when timer resets, if needed
-    // console.log('Timer reset to mode:', mode);
-  }, []);
-
-  const handleTimerSkip = useCallback((skippedMode: TimerMode, nextMode: TimerMode) => {
-    // Placeholder for specific logic when timer skips, if needed
-    // console.log('Timer skipped from mode:', skippedMode, 'to mode:', nextMode);
-  }, []);
 
   const timer = useTimerCore({
     settings,
@@ -397,7 +380,7 @@ export default function PomodoroPage() {
   }, [isMuted, settings.soundscapeWork, settings.soundscapeBreak]);
 
   const { playSound, stopSound, isReady: isSoundPlayerReady } = soundscapePlayer;
-  
+
   useEffect(() => {
     if (!isSettingsLoaded || !isSoundPlayerReady) {
       stopSound();
@@ -414,12 +397,12 @@ export default function PomodoroPage() {
     timer.isRunning,
     isSettingsLoaded,
     isSoundPlayerReady,
-    getActiveSoundscapeId, 
-    playSound, 
-    stopSound, 
-    isMuted, 
-    settings.soundscapeWork, 
-    settings.soundscapeBreak 
+    getActiveSoundscapeId,
+    playSound,
+    stopSound,
+    isMuted,
+    settings.soundscapeWork,
+    settings.soundscapeBreak
   ]);
 
   const formatTime = (seconds: number) => {
@@ -483,17 +466,14 @@ const handleRemoveDefinedWord = async (wordId: string) => {
   if (!currentUser || isLoadingDailyData || !isSettingsLoaded) return;
   const wordToRemove = definedWordsList.find(entry => entry.id === wordId)?.word || t('dictionaryCard.theEntry');
   const updatedList = definedWordsList.filter(entry => entry.id !== wordId);
-  setDefinedWordsList(updatedList); 
-  
+  setDefinedWordsList(updatedList);
+
   try {
-    // Explicitly save to Firestore after updating local state
     await saveDictionaryForDay(currentUser.uid, currentDateKey, updatedList);
-    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDesc", { word: wordToRemove }) });
+    toast({ title: t("dictionaryCard.entryDeletedTitle"), description: t("dictionaryCard.entryDeletedDescLocal", { word: wordToRemove }) });
   } catch (error: any) {
     console.error("Error saving dictionary after deletion:", error);
     toast({ title: t("errors.firestoreSaveTitle"), description: t("errors.firestoreSaveDictionaryDescription"), variant: "destructive" });
-    // Optionally, revert local state if Firestore save fails, though this can be complex
-    // For now, we assume the local state change is what user wants and Firestore will eventually catch up or error is shown.
   }
 };
 
@@ -526,14 +506,14 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     try {
       const dateKey = formatDateToKey(date);
       const notes = await loadNotesForDay(currentUser.uid, dateKey);
-      setPastDateNotes(notes || t('notes.noNotesForDate')); 
+      setPastDateNotes(notes || t('notes.noNotesForDate'));
     } catch (error: any) {
       console.error("Error fetching past notes:", error);
       toast({ title: t("errors.firestoreLoadTitle"), description: error.message || t("errors.firestoreLoadPastNotesDescription"), variant: "destructive" });
       setPastDateNotes(t('notes.errorLoadingNotes'));
     } finally {
       setIsLoadingPastNotes(false);
-      setIsPastNotesPopoverOpen(false); 
+      setIsPastNotesPopoverOpen(false);
     }
   };
 
@@ -545,13 +525,13 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     if (!confirm(t('notes.confirmDeletePastNotes', { date: format(selectedPastDateForNotes, "PPP") }))) {
         return;
     }
-    
+
     setIsDeletingPastNotes(true);
     const dateKeyToDelete = formatDateToKey(selectedPastDateForNotes);
 
     try {
       await deleteNotesForDay(currentUser.uid, dateKeyToDelete);
-      setPastDateNotes(t('notes.noNotesForDate')); 
+      setPastDateNotes(t('notes.noNotesForDate'));
       toast({ title: t('notes.pastNotesDeleteSuccessTitle') });
     } catch (error: any) {
       console.error("Error deleting past notes:", error);
@@ -565,7 +545,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     const formattedSummary = `\n\n--- ${t('aiSummaryDialog.savedSummaryHeader', { dateTime: new Date().toLocaleString() })} ---\n${t('aiSummaryDialog.summaryTitle')}:\n${summary}\n\n${t('aiSummaryDialog.improvementsTitle')}:\n${improvements}\n--- ${t('aiSummaryDialog.savedSummaryFooter')} ---`;
     setCurrentNotes(prevNotes => prevNotes + formattedSummary);
     toast({ title: t('aiSummaryDialog.saveSuccessTitle'), description: t('aiSummaryDialog.saveSuccessDescription') });
-    setIsAiSummaryOpen(false); 
+    setIsAiSummaryOpen(false);
   };
 
   const handleLogout = async () => {
@@ -581,7 +561,7 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     );
   }
   if (!currentUser) {
-      if (typeof window !== 'undefined') { 
+      if (typeof window !== 'undefined') {
           router.push('/auth/login');
       }
       return (
@@ -614,33 +594,44 @@ const handleRemoveDefinedWord = async (wordId: string) => {
         {settings.backgroundAnimation === 'bubbles' && <FloatingBubblesEffect />}
         {settings.backgroundAnimation === 'fireflies' && <FirefliesEffect />}
 
-        <header className="w-full max-w-2xl flex justify-between items-center py-4 relative z-[1]">
-          {isMobile ? (
-             <h1 className="text-xl font-semibold animate-title-reveal">RS</h1>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <LogoIcon className="h-8 w-8 text-primary" />
+        <header className="w-full max-w-2xl flex items-center py-4 relative z-[1]">
+          {/* Left: Logo */}
+          <div className="flex-shrink-0">
+            {isMobile ? (
+              <h1 className="text-xl font-semibold animate-title-reveal">RS</h1>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <LogoIcon className="h-8 w-8 text-primary" />
+              </div>
+            )}
+          </div>
+
+          {/* Center: Group of main action buttons */}
+          <div className="flex-1 flex justify-center items-center space-x-1 px-2">
+            <div className="flex items-center space-x-1">
+              <LanguageSwitcher />
+              <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
+                <SparklesIcon className="h-5 w-5" />
+              </Button>
+              <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
+              <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
+                  <BookOpen className="h-5 w-5" />
+              </Button>
+              <SettingsDialog />
+              <ThemeToggleButton />
+              <Button variant="ghost" size="icon" onClick={() => router.push('/past-data')} title={t('tooltips.viewPastData')}>
+                <CalendarIconLucide className="h-5 w-5" />
+              </Button>
             </div>
-          )}
-          <div className="flex items-center space-x-1">
-            <LanguageSwitcher />
-            <Button variant="ghost" size="icon" onClick={() => triggerAiSummary(timer.sessionLog, currentSessionType)} title={t('tooltips.aiSummary')}>
-              <SparklesIcon className="h-5 w-5" />
-            </Button>
-            <SessionHistoryDrawer currentDateKey={currentDateKey} userId={currentUser.uid} />
-            <Button variant="ghost" size="icon" onClick={() => setIsUserGuideOpen(true)} title={t('tooltips.userGuide')}>
-                <BookOpen className="h-5 w-5" />
-            </Button>
-            <SettingsDialog />
-            <ThemeToggleButton />
+          </div>
+
+          {/* Right: Logout button */}
+          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center"> {/* Ensures consistent spacing */}
             {currentUser && (
               <Button variant="ghost" size="icon" onClick={handleLogout} title={t('auth.logoutButtonLabel')}>
                 <LogOut className="h-5 w-5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={() => router.push('/past-data')} title={t('tooltips.viewPastData')}>
-              <CalendarIconLucide className="h-5 w-5" /> 
-            </Button>
           </div>
         </header>
 
@@ -739,8 +730,8 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                   <span className="text-lg font-semibold">{t('cards.notesTitle')}</span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-0"> 
-                 <CardContent className="space-y-4 pt-6"> 
+              <AccordionContent className="px-0">
+                 <CardContent className="space-y-4 pt-6">
                     <div>
                         <Label htmlFor="session-type-select" className="text-sm font-medium">{t('cards.sessionContextLabel')}</Label>
                         <Select
@@ -802,12 +793,12 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                                   mode="single"
                                   selected={selectedPastDateForNotes}
                                   onSelect={handleFetchPastNotes}
-                                  disabled={(date) => date > new Date() || date < new Date("2000-01-01")} 
+                                  disabled={(date) => date > new Date() || date < new Date("2000-01-01")}
                                   initialFocus
                                 />
                               </PopoverContent>
                             </Popover>
-                            
+
                             {isLoadingPastNotes && (
                               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -820,10 +811,10 @@ const handleRemoveDefinedWord = async (wordId: string) => {
                               </div>
                             )}
                             {selectedPastDateForNotes && pastDateNotes && pastDateNotes !== t('notes.noNotesForDate') && pastDateNotes !== t('notes.errorLoadingNotes') && !isLoadingPastNotes && (
-                               <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={handleDeletePastNotes} 
+                               <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleDeletePastNotes}
                                 className="mt-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50"
                                 disabled={isDeletingPastNotes}
                               >
@@ -846,10 +837,10 @@ const handleRemoveDefinedWord = async (wordId: string) => {
           </Accordion>
         </main>
 
-        <AiSummaryDialog 
-          summaryData={aiSummary} 
-          isOpen={isAiSummaryOpen} 
-          onOpenChange={setIsAiSummaryOpen} 
+        <AiSummaryDialog
+          summaryData={aiSummary}
+          isOpen={isAiSummaryOpen}
+          onOpenChange={setIsAiSummaryOpen}
           isLoading={isAiLoading}
           onSaveSummary={handleSaveAiSummaryToNotes}
         />
@@ -865,5 +856,3 @@ const handleRemoveDefinedWord = async (wordId: string) => {
     </>
   );
 }
-
-    
