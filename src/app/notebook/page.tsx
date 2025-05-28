@@ -60,23 +60,19 @@ const parseMarkdownToHtml = (markdown: string): string => {
   });
 
   // Lists (unordered and ordered)
-  // This is a simplified approach and might not handle complex nested lists perfectly.
-  // Unordered lists
   html = html.replace(/^(?:-|\*|\+) (.*$)/gim, '<li>$1</li>');
-  // Ordered lists
   html = html.replace(/^\d+\. (.*$)/gim, '<li>$1</li>');
   
-  // Wrap consecutive <li> items in <ul> or <ol>
-  // This regex is a heuristic and might need refinement for complex cases.
   html = html.replace(/(<li>.*?<\/li>\s*)+(?=\s*[^<li]|$)/gs, (match) => {
-    if (match.match(/^\s*<li>\d+\./)) { 
-        return `<ol>${match.replace(/<li>(\d+\.)? /g, '<li>')}</ul>`; // Attempt to strip numbers for OL
+    // Basic heuristic: if any li starts with a number, assume ordered list
+    // This is very simplified. A proper parser would build a tree.
+    if (match.trim().startsWith('<li>1.') || match.trim().startsWith('<li>0.') || match.trim().startsWith('<li>2.') || match.trim().startsWith('<li>3.') || match.trim().startsWith('<li>4.') || match.trim().startsWith('<li>5.') || match.trim().startsWith('<li>6.') || match.trim().startsWith('<li>7.') || match.trim().startsWith('<li>8.') || match.trim().startsWith('<li>9.')) {
+        return `<ol>${match}</ol>`;
     }
     return `<ul>${match}</ul>`;
   });
 
   // Paragraphs: Wrap lines that are not part of other block elements.
-  // Process after other block elements to avoid wrapping them in <p>.
   html = html.split(/\n\s*\n/).map(paragraph => {
     const trimmedParagraph = paragraph.trim();
     if (trimmedParagraph === "") return "";
@@ -292,9 +288,9 @@ export default function NotebookPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col h-screen min-h-screen bg-background"> {/* Use h-screen for full viewport height */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center max-w-5xl">
+        <div className="container flex h-14 items-center max-w-5xl"> {/* Max-width for header content */}
           <Button variant="outline" size="icon" onClick={() => router.push('/')} className="mr-4">
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">{t('buttons.back')}</span>
@@ -313,16 +309,17 @@ export default function NotebookPage() {
         </div>
       </header>
 
-      <main className="flex-grow py-6 flex flex-col"> {/* Removed horizontal padding from main */}
+      {/* Main content area: flex-1 to grow, flex flex-col for vertical layout */}
+      <main className="flex-1 flex flex-col overflow-hidden"> {/* overflow-hidden to contain children */}
         {isLoading ? (
-          <div className="flex items-center justify-center flex-grow">
+          <div className="flex-1 flex items-center justify-center">
              <Loader2 className="h-12 w-12 text-primary animate-spin" />
           </div>
         ) : (
           <>
-            {/* Toolbar for Edit/Preview Toggle */}
-            <div className="px-4 sm:px-6 lg:px-8 py-3 border-b bg-background sticky top-14 z-40"> {/* Add padding to toolbar for content centering */}
-              <div className="max-w-5xl mx-auto"> {/* Center toolbar buttons if page gets wider */}
+            {/* Toolbar for Edit/Preview Toggle: No horizontal padding, sticky to top of main */}
+            <div className="py-3 border-b bg-background sticky top-0 z-30"> {/* Stick to top of 'main' scrollport */}
+              <div className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto"> {/* Inner container for max-width and padding */}
                 <div className="flex items-center space-x-1">
                     <Button
                         variant={editorMode === 'edit' ? 'secondary' : 'ghost'}
@@ -348,8 +345,8 @@ export default function NotebookPage() {
               </div>
             </div>
 
-            {/* Editor/Preview Area */}
-            <div className="flex-grow flex overflow-hidden"> {/* This container ensures its child fills the space */}
+            {/* Editor/Preview Area: Use flex-1 and min-h-0 to take remaining space */}
+            <div className="flex-1 flex flex-col min-h-0">
               {editorMode === 'edit' ? (
                 <Textarea
                   ref={textareaRef}
@@ -357,13 +354,13 @@ export default function NotebookPage() {
                   value={notesContent}
                   onChange={(e) => setNotesContent(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="w-full h-full resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
+                  className="w-full flex-1 resize-none border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
                   aria-label={t('notebookPage.notesAreaLabel')}
                 />
               ) : (
-                <ScrollArea className="w-full h-full"> {/* ScrollArea takes full width/height */}
+                <ScrollArea className="w-full flex-1 min-h-0">
                   <div
-                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview p-6" /* Added p-6 here */
+                    className="prose prose-sm sm:prose-base dark:prose-invert max-w-none notebook-preview p-6"
                     dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(notesContent) }}
                   />
                 </ScrollArea>
